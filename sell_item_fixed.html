@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell Item — BookLoop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Satoshi:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
+    <style>
+        :root {
+            --ink: #0D1117;
+            --ink-2: #1C2333;
+            --ink-3: #2D3748;
+            --muted: #64748B;
+            --muted-2: #94A3B8;
+            --border: #E2E8F0;
+            --surface: #FFFFFF;
+            --surface-2: #F8FAFC;
+            --surface-3: #F1F5F9;
+            --lime: #84CC16;
+            --lime-dark: #65A30D;
+            --lime-light: #F7FEE7;
+            --lime-glow: rgba(132,204,22,0.15);
+            --red: #EF4444;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+            --r-sm: 10px;
+            --r-md: 16px;
+            --r-lg: 24px;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Satoshi', system-ui, sans-serif;
+            background: var(--surface-2);
+            min-height: 100vh;
+            color: var(--ink);
+        }
+
+        /* ─── TOPBAR ─── */
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 32px;
+            gap: 20px;
+        }
+
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--ink);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 900;
+            font-size: 1.35rem;
+            color: var(--ink);
+        }
+
+        .logo-text span { color: var(--lime-dark); }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .breadcrumb a { color: var(--muted); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--ink); }
+
+        .back-btn {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover { color: var(--ink); border-color: var(--ink); }
+
+        /* ─── PAGE LAYOUT ─── */
+        .page {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 28px;
+            align-items: start;
+        }
+
+        /* ─── FORM CARD ─── */
+        .form-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+        }
+
+        .form-card-header {
+            padding: 28px 32px 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+        }
+
+        .form-card-header h1 {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 900;
+            font-size: 1.6rem;
+            color: var(--ink);
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .form-card-header p {
+            font-size: 0.88rem;
+            color: var(--muted);
+        }
+
+        .form-body { padding: 28px 32px; }
+
+        /* ─── FORM ELEMENTS ─── */
+        .field { margin-bottom: 20px; }
+
+        .field label {
+            display: block;
+            font-size: 0.83rem;
+            font-weight: 700;
+            color: var(--ink-3);
+            margin-bottom: 7px;
+        }
+
+        .field label .req { color: var(--red); }
+
+        .field-hint {
+            font-size: 0.78rem;
+            color: var(--muted);
+            font-weight: 400;
+            margin-left: 4px;
+        }
+
+        input[type="text"], input[type="number"], input[type="email"], select, textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-sm);
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.9rem;
+            color: var(--ink);
+            background: var(--surface-2);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            -webkit-appearance: none;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--lime-dark);
+            background: white;
+            box-shadow: 0 0 0 3px var(--lime-glow);
+        }
+
+        textarea { resize: vertical; min-height: 90px; }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-color: var(--surface-2);
+            padding-right: 32px;
+            cursor: pointer;
+        }
+
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        /* ─── PRICE FIELD ─── */
+        .price-wrap { position: relative; }
+
+        .price-wrap .currency {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: 700;
+            color: var(--muted);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        .price-wrap input { padding-left: 28px; }
+
+        .price-hint {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            padding: 8px 12px;
+            background: var(--lime-light);
+            border-radius: 7px;
+            font-size: 0.78rem;
+            color: var(--lime-dark);
+            font-weight: 600;
+        }
+
+        /* ─── IMAGE DROP ZONE ─── */
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--r-md);
+            padding: 36px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--surface-2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-zone:hover, .drop-zone.drag { border-color: var(--lime-dark); background: var(--lime-light); }
+
+        .drop-zone .icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+        .drop-zone h3 {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--ink);
+            margin-bottom: 5px;
+        }
+
+        .drop-zone p { font-size: 0.8rem; color: var(--muted); }
+
+        .drop-zone.has-img { padding: 0; border-style: solid; border-color: var(--lime-dark); }
+
+        .drop-zone.has-img .img-preview {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .drop-zone .remove-img {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            background: rgba(0,0,0,0.6);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        input[type="file"] { display: none; }
+
+        /* ─── CONDITION SELECTOR ─── */
+        .condition-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .cond-btn {
+            padding: 10px 8px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            background: var(--surface-2);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+        }
+
+        .cond-btn:hover { border-color: var(--ink-3); }
+
+        .cond-btn.selected { background: var(--ink); border-color: var(--ink); color: white; }
+
+        .cond-btn .cond-emoji { font-size: 1.3rem; display: block; margin-bottom: 4px; }
+
+        .cond-btn .cond-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .cond-btn .cond-desc {
+            font-size: 0.67rem;
+            color: var(--muted);
+            display: block;
+            margin-top: 2px;
+        }
+
+        .cond-btn.selected .cond-desc { color: rgba(255,255,255,0.7); }
+
+        /* ─── SUBMIT BUTTON ─── */
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--ink);
+            color: white;
+            border: none;
+            border-radius: var(--r-sm);
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .submit-btn:hover:not(:disabled) { background: var(--ink-2); transform: translateY(-1px); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-row { display: flex; gap: 10px; margin-top: 24px; }
+
+        .clear-btn {
+            padding: 15px 20px;
+            background: transparent;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-sm);
+            font-family: 'Satoshi', sans-serif;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .clear-btn:hover { color: var(--red); border-color: var(--red); }
+
+        /* ─── STATUS ─── */
+        .status-banner {
+            padding: 14px 18px;
+            border-radius: var(--r-sm);
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-banner.success { background: var(--lime-light); color: var(--lime-dark); border: 1px solid rgba(132,204,22,0.3); display: flex; }
+        .status-banner.error { background: #FEF2F2; color: var(--red); border: 1px solid rgba(239,68,68,0.3); display: flex; }
+
+        /* ─── SIDEBAR CARD ─── */
+        .sidebar-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+            position: sticky;
+            top: 88px;
+        }
+
+        .sidebar-card-header {
+            background: var(--ink);
+            color: white;
+            padding: 20px 24px;
+        }
+
+        .sidebar-card-header h3 {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 900;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-card-header p { font-size: 0.82rem; color: rgba(255,255,255,0.6); }
+
+        .tip-list { padding: 20px 24px; }
+
+        .tip {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .tip-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--lime-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .tip-text h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 3px;
+        }
+
+        .tip-text p { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+
+        .pricing-guide {
+            margin: 0 24px 20px;
+            background: var(--surface-3);
+            border-radius: var(--r-sm);
+            overflow: hidden;
+        }
+
+        .pricing-guide table { width: 100%; border-collapse: collapse; }
+
+        .pricing-guide th {
+            background: var(--surface-3);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--muted);
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .pricing-guide td {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            color: var(--ink-3);
+            border-top: 1px solid var(--border);
+        }
+
+        .pricing-guide td:last-child { color: var(--lime-dark); font-weight: 700; }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 768px) {
+            .topbar { padding: 0 16px; }
+            .page { grid-template-columns: 1fr; padding: 20px 16px; }
+            .form-body { padding: 20px; }
+            .form-card-header { padding: 20px 20px 16px; }
+            .sidebar-card { position: static; }
+            .field-row { grid-template-columns: 1fr; }
+            .condition-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOPBAR -->
+    <nav class="topbar">
+        <a class="logo-wrap" href="bookloop_with_sell.html">
+            <div class="logo-icon">📚</div>
+            <span class="logo-text">Book<span>Loop</span></span>
+        </a>
+        <div class="breadcrumb">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M9 5l7 7-7 7"/>
+            </svg>
+            <span>Sell Item</span>
+        </div>
+        <a href="bookloop_with_sell.html" class="back-btn">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 5l-7 7 7 7"/>
+            </svg>
+            Back to Marketplace
+        </a>
+    </nav>
+
+    <!-- PAGE -->
+    <div class="page">
+
+        <!-- FORM -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <h1>List an Item for Sale</h1>
+                <p>Fill in the details below. Your item will appear on the marketplace immediately.</p>
+            </div>
+            <div class="form-body">
+
+                <div class="status-banner" id="statusBanner"></div>
+
+                <form id="sellForm">
+
+                    <!-- TITLE -->
+                    <div class="field">
+                        <label>Item Title <span class="req">*</span></label>
+                        <input type="text" id="title" placeholder="e.g. Engineering Mathematics Vol.2 by RD Sharma" required maxlength="100">
+                    </div>
+
+                    <!-- CATEGORY & SEMESTER -->
+                    <div class="field-row">
+                        <div class="field" style="margin-bottom:0">
+                            <label>Category <span class="req">*</span></label>
+                            <select id="category" required>
+                                <option value="">Select category…</option>
+                                <option value="Books">📖 Textbook</option>
+                                <option value="Notes">📝 Notes / Printouts</option>
+                                <option value="Supplies">✏️ Stationery / Supplies</option>
+                                <option value="Lab Equipment">🔬 Lab Equipment</option>
+                                <option value="Other">📦 Other Academic Item</option>
+                            </select>
+                        </div>
+                        <div class="field" style="margin-bottom:0">
+                            <label>Semester <span class="field-hint">(optional)</span></label>
+                            <select id="semester">
+                                <option value="">Any / General</option>
+                                <option value="1">Semester 1</option>
+                                <option value="2">Semester 2</option>
+                                <option value="3">Semester 3</option>
+                                <option value="4">Semester 4</option>
+                                <option value="5">Semester 5</option>
+                                <option value="6">Semester 6</option>
+                                <option value="7">Semester 7</option>
+                                <option value="8">Semester 8</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- PRICE -->
+                    <div class="field" style="margin-top:20px">
+                        <label>Selling Price <span class="req">*</span></label>
+                        <div class="price-wrap">
+                            <span class="currency">₹</span>
+                            <input type="number" id="price" placeholder="0" min="1" required oninput="updatePriceHint(this.value)">
+                        </div>
+                        <div class="price-hint" id="priceHint" style="display:none">
+                            💡 <span id="priceHintText"></span>
+                        </div>
+                    </div>
+
+                    <!-- CONDITION -->
+                    <div class="field">
+                        <label>Condition <span class="req">*</span></label>
+                        <div class="condition-grid">
+                            <div class="cond-btn selected" data-val="Excellent" onclick="setCondition(this)">
+                                <span class="cond-emoji">✨</span>
+                                <span class="cond-label">Excellent</span>
+                                <span class="cond-desc">Like new</span>
+                            </div>
+                            <div class="cond-btn" data-val="Good" onclick="setCondition(this)">
+                                <span class="cond-emoji">👍</span>
+                                <span class="cond-label">Good</span>
+                                <span class="cond-desc">Minor wear</span>
+                            </div>
+                            <div class="cond-btn" data-val="Fair" onclick="setCondition(this)">
+                                <span class="cond-emoji">📖</span>
+                                <span class="cond-label">Fair</span>
+                                <span class="cond-desc">Used but ok</span>
+                            </div>
+                            <div class="cond-btn" data-val="Poor" onclick="setCondition(this)">
+                                <span class="cond-emoji">🔧</span>
+                                <span class="cond-label">Poor</span>
+                                <span class="cond-desc">Heavy wear</span>
+                            </div>
+                        </div>
+                        <input type="hidden" id="condition" value="Excellent">
+                    </div>
+
+                    <!-- IMAGE -->
+                    <div class="field">
+                        <label>Photo <span class="req">*</span> <span class="field-hint">— Drag & drop, click or paste (Ctrl+V)</span></label>
+                        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                            <div class="drop-content">
+                                <div class="icon">📷</div>
+                                <h3>Add a photo</h3>
+                                <p>Good photos sell faster. Show the cover and condition clearly.</p>
+                            </div>
+                            <img class="img-preview" id="imgPreview" src="" alt="" style="display:none">
+                            <button type="button" class="remove-img" id="removeImg" style="display:none" onclick="event.stopPropagation();clearImage()">×</button>
+                        </div>
+                        <input type="file" id="fileInput" accept="image/*">
+                    </div>
+
+                    <!-- DESCRIPTION -->
+                    <div class="field">
+                        <label>Description <span class="field-hint">— optional but helpful</span></label>
+                        <textarea id="description" placeholder="Describe the item: edition, what's included, any markings, pages missing, etc."></textarea>
+                    </div>
+
+                    <!-- SELLER INFO -->
+                    <div class="field-row">
+                        <div class="field" style="margin-bottom:0">
+                            <label>Your Name <span class="req">*</span></label>
+                            <input type="text" id="seller" placeholder="How you want to appear" required>
+                        </div>
+                        <div class="field" style="margin-bottom:0">
+                            <label>Contact Email <span class="field-hint">— optional</span></label>
+                            <input type="email" id="sellerEmail" placeholder="Buyers can reach you directly">
+                        </div>
+                    </div>
+
+                    <!-- BUTTONS -->
+                    <div class="btn-row">
+                        <button type="button" class="clear-btn" onclick="resetForm()">Clear Form</button>
+                        <button type="submit" class="submit-btn" id="submitBtn" style="flex:1">
+                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            List Item for Sale
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div>
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <h3>Pricing Guide</h3>
+                    <p>Recommend 50% off retail for good condition</p>
+                </div>
+                <div class="pricing-guide">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Condition</th>
+                                <th>% of Retail</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>✨ Excellent</td><td>50 – 60%</td></tr>
+                            <tr><td>👍 Good</td><td>35 – 50%</td></tr>
+                            <tr><td>📖 Fair</td><td>20 – 35%</td></tr>
+                            <tr><td>🔧 Poor</td><td>10 – 20%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tip-list">
+                    <div class="tip">
+                        <div class="tip-icon">📸</div>
+                        <div class="tip-text">
+                            <h4>Good photo = faster sale</h4>
+                            <p>Show the cover, spine, and any highlights or damage clearly.</p>
+                        </div>
+                    </div>
+                    <div class="tip">
+                        <div class="tip-icon">💬</div>
+                        <div class="tip-text">
+                            <h4>Add your contact</h4>
+                            <p>Listing your email makes it easier for buyers to reach you quickly.</p>
+                        </div>
+                    </div>
+                    <div class="tip">
+                        <div class="tip-icon">📋</div>
+                        <div class="tip-text">
+                            <h4>Be specific</h4>
+                            <p>Mention the edition, subject, university, and semester in your description.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://geqvoshwilllvjuepbfg.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlcXZvc2h3aWxsbHZqdWVwYmZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDc3MzUsImV4cCI6MjA4NTY4MzczNX0.AGYzSZYxViV8tuiPQCMmVU4LnfLRqlwY3eHoJ5lM4Ow';
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ── AUTH CHECK ──────────────────────────────────────────────────────
+        let ME = null;
+        let currentUser = null;
+
+        (async () => {
+            const { data: { session } } = await db.auth.getSession();
+            if (!session) {
+                window.location.href = 'auth.html';
+                return;
+            }
+            currentUser = session.user;
+            ME = currentUser.id;
+
+            // Pre-fill seller name from Google profile if empty
+            const nameField = document.getElementById('seller');
+            if (!nameField.value) {
+                nameField.value = currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || '';
+            }
+            const emailField = document.getElementById('sellerEmail');
+            if (!emailField.value && currentUser.email) {
+                emailField.value = currentUser.email;
+            }
+        })();
+
+        let selectedImage = null;
+
+        // ── IMAGE HANDLING ──────────────────────────────────────────────────
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const imgPreview = document.getElementById('imgPreview');
+        const removeImg = document.getElementById('removeImg');
+
+        fileInput.onchange = e => { if (e.target.files[0]) handleFile(e.target.files[0]); };
+
+        dropZone.ondragover = e => { e.preventDefault(); dropZone.classList.add('drag'); };
+        dropZone.ondragleave = () => dropZone.classList.remove('drag');
+        dropZone.ondrop = e => {
+            e.preventDefault();
+            dropZone.classList.remove('drag');
+            if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+        };
+
+        window.addEventListener('paste', e => {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (const item of items) {
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    handleFile(item.getAsFile());
+                    break;
+                }
+            }
+        });
+
+        async function handleFile(file) {
+            if (!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = async e => {
+                selectedImage = await compressImage(e.target.result);
+                imgPreview.src = selectedImage;
+                imgPreview.style.display = 'block';
+                dropZone.querySelector('.drop-content').style.display = 'none';
+                removeImg.style.display = 'flex';
+                dropZone.classList.add('has-img');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearImage() {
+            selectedImage = null;
+            imgPreview.src = '';
+            imgPreview.style.display = 'none';
+            dropZone.querySelector('.drop-content').style.display = 'block';
+            removeImg.style.display = 'none';
+            dropZone.classList.remove('has-img');
+            fileInput.value = '';
+        }
+
+        async function compressImage(base64, maxW = 800, maxH = 800) {
+            return new Promise(res => {
+                const img = new Image();
+                img.src = base64;
+                img.onload = () => {
+                    let w = img.width, h = img.height;
+                    if (w > h) { if (w > maxW) { h = h * maxW / w; w = maxW; } }
+                    else { if (h > maxH) { w = w * maxH / h; h = maxH; } }
+                    const c = document.createElement('canvas');
+                    c.width = w; c.height = h;
+                    c.getContext('2d').drawImage(img, 0, 0, w, h);
+                    res(c.toDataURL('image/jpeg', 0.72));
+                };
+            });
+        }
+
+        // ── CONDITION ───────────────────────────────────────────────────────
+        function setCondition(el) {
+            document.querySelectorAll('.cond-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('condition').value = el.dataset.val;
+        }
+
+        // ── PRICE HINT ──────────────────────────────────────────────────────
+        function updatePriceHint(val) {
+            const price = parseFloat(val);
+            const hint = document.getElementById('priceHint');
+            const text = document.getElementById('priceHintText');
+            if (price > 0) {
+                const retail = (price / 0.5).toFixed(0);
+                text.textContent = `If the original retail price is ≈ ₹${retail}, this is about 50% off — a fair deal!`;
+                hint.style.display = 'flex';
+            } else {
+                hint.style.display = 'none';
+            }
+        }
+
+        // ── FORM SUBMIT ─────────────────────────────────────────────────────
+        document.getElementById('sellForm').addEventListener('submit', async e => {
+            e.preventDefault();
+
+            if (!selectedImage) {
+                showStatus('Please add a photo of the item.', 'error');
+                document.getElementById('dropZone').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span style="display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite"></span> Listing…`;
+            hideStatus();
+
+            const item = {
+                title:        document.getElementById('title').value.trim(),
+                price:        parseInt(document.getElementById('price').value),
+                category:     document.getElementById('category').value,
+                semester:     document.getElementById('semester').value || null,
+                condition:    document.getElementById('condition').value,
+                seller:       document.getElementById('seller').value.trim(),
+                seller_id:    ME,
+                seller_email: document.getElementById('sellerEmail').value.trim() || null,
+                description:  document.getElementById('description').value.trim() || null,
+                image:        selectedImage,
+            };
+
+            try {
+                const { data, error } = await db.from('books').insert([item]).select();
+                if (error) throw error;
+
+                showStatus('🎉 Item listed successfully! Redirecting to marketplace…', 'success');
+                document.getElementById('sellForm').reset();
+                clearImage();
+
+                setTimeout(() => { window.location.href = 'bookloop_with_sell.html'; }, 2000);
+            } catch (err) {
+                let msg = err.message;
+                if (err.code === '413' || msg.includes('too large')) msg = 'Image too large. Please try a smaller photo.';
+                showStatus('⚠️ ' + msg, 'error');
+                btn.disabled = false;
+                btn.innerHTML = `<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> List Item for Sale`;
+            }
+        });
+
+        // ── STATUS ──────────────────────────────────────────────────────────
+        function showStatus(msg, type) {
+            const b = document.getElementById('statusBanner');
+            b.textContent = msg;
+            b.className = 'status-banner ' + type;
+            b.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function hideStatus() {
+            document.getElementById('statusBanner').className = 'status-banner';
+        }
+
+        function resetForm() {
+            document.getElementById('sellForm').reset();
+            clearImage();
+            hideStatus();
+            document.getElementById('condition').value = 'Excellent';
+            document.querySelectorAll('.cond-btn').forEach((b, i) => b.classList.toggle('selected', i === 0));
+        }
+    </script>
+</body>
+</html>

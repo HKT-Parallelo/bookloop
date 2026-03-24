@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — BookLoop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Satoshi:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
+    <style>
+        :root {
+            --ink: #0D1117;
+            --ink-2: #1C2333;
+            --ink-3: #2D3748;
+            --muted: #64748B;
+            --muted-2: #94A3B8;
+            --border: #E2E8F0;
+            --surface: #FFFFFF;
+            --surface-2: #F8FAFC;
+            --surface-3: #F1F5F9;
+            --lime: #84CC16;
+            --lime-dark: #65A30D;
+            --lime-light: #F7FEE7;
+            --lime-glow: rgba(132,204,22,0.15);
+            --red: #EF4444;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+            --shadow-lg: 0 20px 48px rgba(0,0,0,0.12);
+            --r-sm: 10px;
+            --r-md: 16px;
+            --r-lg: 24px;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Satoshi', system-ui, sans-serif;
+            background: var(--ink);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background pattern */
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle at 20% 50%, rgba(132,204,22,0.08) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 20%, rgba(132,204,22,0.05) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .grid-bg {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+        }
+
+        /* Card */
+        .auth-card {
+            background: var(--surface);
+            border-radius: 28px;
+            width: 100%;
+            max-width: 440px;
+            padding: 48px 44px;
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.05);
+            position: relative;
+            z-index: 1;
+            animation: cardIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Logo */
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 36px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--ink);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: var(--ink);
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span { color: var(--lime-dark); }
+
+        /* Heading */
+        .auth-heading {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 900;
+            font-size: 1.8rem;
+            color: var(--ink);
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+            line-height: 1.15;
+        }
+
+        .auth-sub {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        /* Google Button */
+        .btn-google {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 14px 20px;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-md);
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--ink);
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
+            text-decoration: none;
+        }
+
+        .btn-google:hover {
+            border-color: #4285F4;
+            box-shadow: 0 0 0 3px rgba(66,133,244,0.12), var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+
+        .btn-google:active { transform: translateY(0); }
+
+        .btn-google svg { flex-shrink: 0; }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 28px 0;
+            color: var(--muted-2);
+            font-size: 0.8rem;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Form fields */
+        .field { margin-bottom: 18px; }
+
+        .field label {
+            display: block;
+            font-size: 0.83rem;
+            font-weight: 700;
+            color: var(--ink-3);
+            margin-bottom: 7px;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-sm);
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.92rem;
+            color: var(--ink);
+            background: var(--surface-2);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+
+        .field input:focus {
+            border-color: var(--lime-dark);
+            background: white;
+            box-shadow: 0 0 0 3px var(--lime-glow);
+        }
+
+        .field input::placeholder { color: var(--muted-2); }
+
+        /* Submit button */
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--ink);
+            color: white;
+            border: none;
+            border-radius: var(--r-md);
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover { background: var(--ink-2); transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Toggle */
+        .auth-toggle {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 0.87rem;
+            color: var(--muted);
+        }
+
+        .auth-toggle a {
+            color: var(--lime-dark);
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .auth-toggle a:hover { text-decoration: underline; }
+
+        /* Error / success message */
+        .msg-banner {
+            padding: 12px 16px;
+            border-radius: var(--r-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            display: none;
+        }
+
+        .msg-banner.error { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+        .msg-banner.success { background: var(--lime-light); color: var(--lime-dark); border: 1px solid rgba(132,204,22,0.3); }
+        .msg-banner.show { display: block; }
+
+        /* Spinner */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner-sm {
+            width: 16px; height: 16px;
+            border: 2.5px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Redirect notice */
+        .redirect-note {
+            font-size: 0.75rem;
+            color: var(--muted-2);
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Hide email form by default (can toggle) */
+        #emailForm { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="grid-bg"></div>
+
+    <div class="auth-card">
+
+        <div class="logo-wrap">
+            <div class="logo-icon">📚</div>
+            <span class="logo-text">Book<span>Loop</span></span>
+        </div>
+
+        <h1 class="auth-heading" id="authTitle">Welcome back 👋</h1>
+        <p class="auth-sub" id="authSub">Sign in to buy or sell academic materials with your college community.</p>
+
+        <div class="msg-banner" id="msgBanner"></div>
+
+        <!-- Google Sign In -->
+        <button class="btn-google" onclick="loginWithGoogle()" id="googleBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Continue with Google
+        </button>
+
+        <div class="divider">or continue with email</div>
+
+        <!-- Email/Password Form -->
+        <div id="emailForm">
+            <div class="field">
+                <label>Email address</label>
+                <input type="email" id="emailInput" placeholder="you@college.edu" autocomplete="email">
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password"
+                    onkeypress="if(event.key==='Enter') submitEmail()">
+            </div>
+            <button class="btn-submit" id="submitBtn" onclick="submitEmail()">
+                Sign In
+            </button>
+            <div class="auth-toggle">
+                <span id="toggleText">Don't have an account?</span>
+                <a onclick="toggleMode()" id="toggleLink"> Sign up</a>
+            </div>
+        </div>
+
+        <!-- Email toggle (collapsed by default, show on click) -->
+        <div id="emailToggleWrap" style="text-align:center">
+            <a onclick="showEmailForm()" style="font-size:0.87rem;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">
+                Use email & password instead
+            </a>
+        </div>
+
+        <p class="redirect-note">By signing in, you agree to use this platform responsibly for academic purposes.</p>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://geqvoshwilllvjuepbfg.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlcXZvc2h3aWxsbHZqdWVwYmZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDc3MzUsImV4cCI6MjA4NTY4MzczNX0.AGYzSZYxViV8tuiPQCMmVU4LnfLRqlwY3eHoJ5lM4Ow';
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let isSignup = false;
+
+        // If already logged in, redirect to main page
+        (async () => {
+            const { data: { session } } = await db.auth.getSession();
+            if (session) window.location.href = 'bookloop_with_sell.html';
+        })();
+
+        async function loginWithGoogle() {
+            const btn = document.getElementById('googleBtn');
+            btn.textContent = 'Redirecting to Google…';
+            btn.disabled = true;
+
+            const { error } = await db.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/bookloop_with_sell.html'
+                }
+            });
+
+            if (error) {
+                showMsg(error.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Continue with Google`;
+            }
+        }
+
+        function showEmailForm() {
+            document.getElementById('emailForm').style.display = 'block';
+            document.getElementById('emailToggleWrap').style.display = 'none';
+        }
+
+        function toggleMode() {
+            isSignup = !isSignup;
+            document.getElementById('authTitle').textContent = isSignup ? 'Create account 🎓' : 'Welcome back 👋';
+            document.getElementById('authSub').textContent = isSignup
+                ? 'Join your college marketplace and start buying or selling.'
+                : 'Sign in to buy or sell academic materials with your college community.';
+            document.getElementById('submitBtn').textContent = isSignup ? 'Create Account' : 'Sign In';
+            document.getElementById('toggleText').textContent = isSignup ? 'Already have an account?' : "Don't have an account?";
+            document.getElementById('toggleLink').textContent = isSignup ? ' Sign in' : ' Sign up';
+            clearMsg();
+        }
+
+        async function submitEmail() {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            if (!email || !password) { showMsg('Please fill in all fields.', 'error'); return; }
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-sm"></span> ${isSignup ? 'Creating account…' : 'Signing in…'}`;
+
+            try {
+                let result;
+                if (isSignup) {
+                    result = await db.auth.signUp({ email, password });
+                    if (result.error) throw result.error;
+                    showMsg('✅ Account created! Check your email to confirm, then sign in.', 'success');
+                } else {
+                    result = await db.auth.signInWithPassword({ email, password });
+                    if (result.error) throw result.error;
+                    window.location.href = 'bookloop_with_sell.html';
+                }
+            } catch (err) {
+                showMsg(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = isSignup ? 'Create Account' : 'Sign In';
+            }
+        }
+
+        function showMsg(text, type) {
+            const b = document.getElementById('msgBanner');
+            b.textContent = text;
+            b.className = `msg-banner ${type} show`;
+        }
+
+        function clearMsg() {
+            document.getElementById('msgBanner').className = 'msg-banner';
+        }
+    </script>
+</body>
+</html>
