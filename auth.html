@@ -353,7 +353,7 @@
         // If already logged in, redirect to main page
         (async () => {
             const { data: { session } } = await db.auth.getSession();
-            if (session) window.location.href = 'bookloop_with_sell.html';
+            if (session) window.location.href = 'index.html';
         })();
 
         async function loginWithGoogle() {
@@ -364,7 +364,7 @@
             const { error } = await db.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: window.location.origin + '/bookloop_with_sell.html'
+                    redirectTo: window.location.origin + '/index.html'
                 }
             });
 
@@ -410,7 +410,7 @@
                 } else {
                     result = await db.auth.signInWithPassword({ email, password });
                     if (result.error) throw result.error;
-                    window.location.href = 'bookloop_with_sell.html';
+                    window.location.href = 'index.html';
                 }
             } catch (err) {
                 showMsg(err.message, 'error');
