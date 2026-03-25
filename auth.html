@@ -20,11 +20,11 @@
             --lime: #84CC16;
             --lime-dark: #65A30D;
             --lime-light: #F7FEE7;
-            --lime-glow: rgba(132,204,22,0.15);
+            --lime-glow: rgba(132,204,22,0.18);
             --red: #EF4444;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
             --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
-            --shadow-lg: 0 20px 48px rgba(0,0,0,0.12);
+            --shadow-lg: 0 20px 60px rgba(0,0,0,0.18);
             --r-sm: 10px;
             --r-md: 16px;
             --r-lg: 24px;
@@ -34,7 +34,6 @@
 
         body {
             font-family: 'Satoshi', system-ui, sans-serif;
-            background: var(--ink);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -42,79 +41,200 @@
             color: var(--ink);
             position: relative;
             overflow: hidden;
+            /* Rich gradient background */
+            background: linear-gradient(135deg, #0a0f1a 0%, #0f1f0a 40%, #1a1f0a 70%, #0a1218 100%);
         }
 
-        /* Background pattern */
-        body::before {
+        /* Animated blobs */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.35;
+            animation: blobFloat 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .blob-1 {
+            width: 520px; height: 520px;
+            background: radial-gradient(circle, #84CC16 0%, #22c55e 60%, transparent 100%);
+            top: -160px; left: -160px;
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, #3b82f6 0%, #6366f1 60%, transparent 100%);
+            bottom: -120px; right: -120px;
+            animation-delay: -3s;
+        }
+
+        .blob-3 {
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, #f59e0b 0%, #84CC16 80%, transparent 100%);
+            top: 55%; left: 60%;
+            animation-delay: -5s;
+            opacity: 0.18;
+        }
+
+        @keyframes blobFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33%       { transform: translate(30px, -40px) scale(1.04); }
+            66%       { transform: translate(-20px, 20px) scale(0.97); }
+        }
+
+        /* Subtle dot-grid overlay */
+        .dot-grid {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+        }
+
+        /* Glass noise texture */
+        body::after {
             content: '';
             position: absolute;
             inset: 0;
-            background-image: radial-gradient(circle at 20% 50%, rgba(132,204,22,0.08) 0%, transparent 50%),
-                              radial-gradient(circle at 80% 20%, rgba(132,204,22,0.05) 0%, transparent 40%);
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
             pointer-events: none;
+            opacity: 0.5;
         }
 
-        .grid-bg {
-            position: absolute;
-            inset: 0;
-            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 48px 48px;
-            pointer-events: none;
-        }
-
-        /* Card */
-        .auth-card {
-            background: var(--surface);
-            border-radius: 28px;
+        /* ── SPLIT LAYOUT ── */
+        .auth-wrapper {
+            display: flex;
             width: 100%;
-            max-width: 440px;
-            padding: 48px 44px;
-            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.05);
+            max-width: 900px;
+            min-height: 540px;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.07);
             position: relative;
             z-index: 1;
-            animation: cardIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            animation: cardIn 0.45s cubic-bezier(0.34,1.56,0.64,1);
         }
 
         @keyframes cardIn {
-            from { opacity: 0; transform: translateY(20px) scale(0.97); }
+            from { opacity: 0; transform: translateY(24px) scale(0.96); }
             to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* Logo */
+        /* Left decorative panel */
+        .auth-panel {
+            flex: 0 0 42%;
+            background: linear-gradient(160deg, #1a2e0d 0%, #0f1f08 50%, #112a14 100%);
+            padding: 44px 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 30% 30%, rgba(132,204,22,0.22) 0%, transparent 65%),
+                        radial-gradient(ellipse at 80% 80%, rgba(16,185,129,0.12) 0%, transparent 55%);
+        }
+
+        .panel-top { position: relative; z-index: 1; }
+
+        .panel-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+
+        .panel-logo img {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .panel-tagline {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 900;
+            font-size: 2rem;
+            color: white;
+            line-height: 1.15;
+            letter-spacing: -0.5px;
+        }
+
+        .panel-tagline em {
+            font-style: normal;
+            color: var(--lime);
+        }
+
+        .panel-sub {
+            font-size: 0.88rem;
+            color: rgba(255,255,255,0.55);
+            margin-top: 12px;
+            line-height: 1.6;
+        }
+
+        .panel-features {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .panel-feat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.83rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .panel-feat-dot {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: rgba(132,204,22,0.2);
+            border: 1px solid rgba(132,204,22,0.35);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        /* Right card */
+        .auth-card {
+            flex: 1;
+            background: var(--surface);
+            padding: 48px 44px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow-y: auto;
+        }
+
+        /* Logo row at top of card (img only – no text logo) */
         .logo-wrap {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 36px;
+            margin-bottom: 32px;
         }
 
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--ink);
+        .logo-wrap img {
+            width: 44px;
+            height: 44px;
             border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
+            object-fit: cover;
         }
-
-        .logo-text {
-            font-family: 'Cabinet Grotesk', sans-serif;
-            font-weight: 900;
-            font-size: 1.5rem;
-            color: var(--ink);
-            letter-spacing: -0.5px;
-        }
-
-        .logo-text span { color: var(--lime-dark); }
 
         /* Heading */
         .auth-heading {
             font-family: 'Cabinet Grotesk', sans-serif;
             font-weight: 900;
-            font-size: 1.8rem;
+            font-size: 1.75rem;
             color: var(--ink);
             letter-spacing: -0.5px;
             margin-bottom: 6px;
@@ -122,9 +242,9 @@
         }
 
         .auth-sub {
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             color: var(--muted);
-            margin-bottom: 32px;
+            margin-bottom: 30px;
             line-height: 1.5;
         }
 
@@ -135,7 +255,7 @@
             align-items: center;
             justify-content: center;
             gap: 12px;
-            padding: 14px 20px;
+            padding: 13px 20px;
             background: var(--surface);
             border: 1.5px solid var(--border);
             border-radius: var(--r-md);
@@ -156,7 +276,6 @@
         }
 
         .btn-google:active { transform: translateY(0); }
-
         .btn-google svg { flex-shrink: 0; }
 
         /* Divider */
@@ -164,7 +283,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            margin: 28px 0;
+            margin: 24px 0;
             color: var(--muted-2);
             font-size: 0.8rem;
         }
@@ -177,7 +296,7 @@
         }
 
         /* Form fields */
-        .field { margin-bottom: 18px; }
+        .field { margin-bottom: 16px; }
 
         .field label {
             display: block;
@@ -211,7 +330,7 @@
         /* Submit button */
         .btn-submit {
             width: 100%;
-            padding: 14px;
+            padding: 13px;
             background: var(--ink);
             color: white;
             border: none;
@@ -234,7 +353,7 @@
         /* Toggle */
         .auth-toggle {
             text-align: center;
-            margin-top: 22px;
+            margin-top: 20px;
             font-size: 0.87rem;
             color: var(--muted);
         }
@@ -254,7 +373,7 @@
             border-radius: var(--r-sm);
             font-size: 0.85rem;
             font-weight: 600;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
             display: none;
         }
 
@@ -272,75 +391,109 @@
             animation: spin 0.8s linear infinite;
         }
 
-        /* Redirect notice */
+        /* Redirect note */
         .redirect-note {
-            font-size: 0.75rem;
+            font-size: 0.74rem;
             color: var(--muted-2);
             text-align: center;
-            margin-top: 20px;
+            margin-top: 18px;
         }
 
-        /* Hide email form by default (can toggle) */
+        /* Hide email form by default */
         #emailForm { display: none; }
+
+        /* Responsive: stack on small screens */
+        @media (max-width: 680px) {
+            .auth-wrapper { flex-direction: column; border-radius: 20px; max-width: 440px; }
+            .auth-panel { flex: none; padding: 32px 28px 28px; min-height: 180px; }
+            .panel-features { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+            .panel-tagline { font-size: 1.5rem; }
+            .auth-card { padding: 32px 28px; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="grid-bg"></div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="dot-grid"></div>
 
-    <div class="auth-card">
+    <div class="auth-wrapper">
 
-        <div class="logo-wrap">
-            <div class="logo-icon">📚</div>
-            <span class="logo-text">Book<span>Loop</span></span>
+        <!-- LEFT DECORATIVE PANEL -->
+        <div class="auth-panel">
+            <div class="panel-top">
+                <div class="panel-logo">
+                    <!-- BookLoop logo image — replace src with your own -->
+                    <img src="" alt="BookLoop Logo" onerror="this.style.display='none'">
+                </div>
+                <div class="panel-tagline">Your Campus<br><em>Marketplace</em></div>
+                <p class="panel-sub">Buy & sell used academic materials with students from your college community.</p>
+            </div>
+            <div class="panel-features">
+                <div class="panel-feat"><div class="panel-feat-dot">📚</div> Books & Notes</div>
+                <div class="panel-feat"><div class="panel-feat-dot">💸</div> Save up to 50%</div>
+                <div class="panel-feat"><div class="panel-feat-dot">🤝</div> Student-to-Student</div>
+                <div class="panel-feat"><div class="panel-feat-dot">0₹</div> Zero Platform Fee</div>
+            </div>
         </div>
 
-        <h1 class="auth-heading" id="authTitle">Welcome back 👋</h1>
-        <p class="auth-sub" id="authSub">Sign in to buy or sell academic materials with your college community.</p>
+        <!-- RIGHT FORM CARD -->
+        <div class="auth-card">
 
-        <div class="msg-banner" id="msgBanner"></div>
-
-        <!-- Google Sign In -->
-        <button class="btn-google" onclick="loginWithGoogle()" id="googleBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-            </svg>
-            Continue with Google
-        </button>
-
-        <div class="divider">or continue with email</div>
-
-        <!-- Email/Password Form -->
-        <div id="emailForm">
-            <div class="field">
-                <label>Email address</label>
-                <input type="email" id="emailInput" placeholder="you@college.edu" autocomplete="email">
+            <div class="logo-wrap">
+                <!-- BookLoop logo image — replace src with your own -->
+                <img src="" alt="BookLoop" onerror="this.style.display='none'">
             </div>
-            <div class="field">
-                <label>Password</label>
-                <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password"
-                    onkeypress="if(event.key==='Enter') submitEmail()">
-            </div>
-            <button class="btn-submit" id="submitBtn" onclick="submitEmail()">
-                Sign In
+
+            <h1 class="auth-heading" id="authTitle">Welcome back 👋</h1>
+            <p class="auth-sub" id="authSub">Sign in to buy or sell academic materials with your college community.</p>
+
+            <div class="msg-banner" id="msgBanner"></div>
+
+            <!-- Google Sign In -->
+            <button class="btn-google" onclick="loginWithGoogle()" id="googleBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Continue with Google
             </button>
-            <div class="auth-toggle">
-                <span id="toggleText">Don't have an account?</span>
-                <a onclick="toggleMode()" id="toggleLink"> Sign up</a>
+
+            <div class="divider">or continue with email</div>
+
+            <!-- Email/Password Form -->
+            <div id="emailForm">
+                <div class="field">
+                    <label>Email address</label>
+                    <input type="email" id="emailInput" placeholder="you@college.edu" autocomplete="email">
+                </div>
+                <div class="field">
+                    <label>Password</label>
+                    <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password"
+                        onkeypress="if(event.key==='Enter') submitEmail()">
+                </div>
+                <button class="btn-submit" id="submitBtn" onclick="submitEmail()">
+                    Sign In
+                </button>
+                <div class="auth-toggle">
+                    <span id="toggleText">Don't have an account?</span>
+                    <a onclick="toggleMode()" id="toggleLink"> Sign up</a>
+                </div>
             </div>
-        </div>
 
-        <!-- Email toggle (collapsed by default, show on click) -->
-        <div id="emailToggleWrap" style="text-align:center">
-            <a onclick="showEmailForm()" style="font-size:0.87rem;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">
-                Use email & password instead
-            </a>
-        </div>
+            <!-- Email toggle (collapsed by default) -->
+            <div id="emailToggleWrap" style="text-align:center">
+                <a onclick="showEmailForm()" style="font-size:0.87rem;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">
+                    Use email & password instead
+                </a>
+            </div>
 
-        <p class="redirect-note">By signing in, you agree to use this platform responsibly for academic purposes.</p>
+            <p class="redirect-note">By signing in, you agree to use this platform responsibly for academic purposes.</p>
+        </div>
     </div>
 
     <script>

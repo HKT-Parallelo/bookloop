@@ -603,6 +603,156 @@
             color: var(--muted);
         }
 
+        /* ─── AVAILABILITY BADGE ─────────────────── */
+        .availability-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 20px;
+            margin-top: 6px;
+        }
+
+        .availability-badge.available {
+            background: #D1FAE5;
+            color: #065F46;
+            border: 1px solid #A7F3D0;
+        }
+
+        .availability-badge.sold {
+            background: #FEE2E2;
+            color: #991B1B;
+            border: 1px solid #FECACA;
+        }
+
+        .availability-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .availability-badge.available .availability-dot { background: #10B981; }
+        .availability-badge.sold .availability-dot { background: #EF4444; }
+
+        /* Sold overlay on card image */
+        .card-sold-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(13,17,23,0.42);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sold-stamp {
+            background: #EF4444;
+            color: white;
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 900;
+            font-size: 1rem;
+            padding: 6px 18px;
+            border-radius: 6px;
+            letter-spacing: 2px;
+            transform: rotate(-15deg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* ─── VENUE SECTION IN MODAL ─────────────── */
+        .venue-section {
+            background: var(--surface-2);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-md);
+            padding: 18px 20px;
+            margin-bottom: 20px;
+        }
+
+        .venue-section-title {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 800;
+            font-size: 0.88rem;
+            color: var(--ink);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .venue-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .venue-option {
+            padding: 10px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-sm);
+            background: white;
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--ink-3);
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+
+        .venue-option:hover { border-color: var(--lime-dark); color: var(--lime-dark); background: var(--lime-light); }
+        .venue-option.selected { border-color: var(--lime-dark); background: var(--lime-light); color: var(--lime-dark); }
+
+        .venue-custom-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-sm);
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.85rem;
+            color: var(--ink);
+            background: white;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            margin-top: 4px;
+        }
+
+        .venue-custom-input:focus {
+            border-color: var(--lime-dark);
+            box-shadow: 0 0 0 3px var(--lime-glow);
+        }
+
+        .venue-confirm-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--lime-dark);
+            color: white;
+            border: none;
+            border-radius: var(--r-sm);
+            font-family: 'Satoshi', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+        }
+
+        .venue-confirm-btn:hover { background: var(--lime); transform: translateY(-1px); }
+
+        .venue-confirmed {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: #D1FAE5;
+            border: 1px solid #A7F3D0;
+            border-radius: var(--r-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #065F46;
+            margin-top: 8px;
+        }
+
         /* ─── EMPTY / LOADING ────────────────────── */
         .state-placeholder {
             grid-column: 1 / -1;
@@ -980,8 +1130,8 @@
     <nav class="topbar">
         <div class="topbar-inner">
             <a class="logo-wrap" href="#">
-                <div class="logo-icon">📚</div>
-                <span class="logo-text">Book<span>Loop</span></span>
+                <!-- Replace src with your BookLoop image -->
+                <img src="" alt="BookLoop" style="height:40px;border-radius:10px;object-fit:contain;" onerror="this.style.display='none'">
             </a>
 
             <div class="search-wrap">
@@ -1276,12 +1426,18 @@
             const isMine = ME === (b.seller_id || b.seller);
             const condClass = { Excellent:'cond-excellent', Good:'cond-good', Fair:'cond-fair', Poor:'cond-poor' }[b.condition] || '';
 
-            return `<div class="product-card" onclick="openModal(${b.id})">
+            const isSold = b.deal_completed === true || b.available === false;
+            const availBadge = isSold
+                ? `<span class="availability-badge sold"><span class="availability-dot"></span>Sold</span>`
+                : `<span class="availability-badge available"><span class="availability-dot"></span>Available</span>`;
+
+            return `<div class="product-card" onclick="openModal(${b.id})" style="${isSold ? 'opacity:0.72' : ''}">
                 <div class="card-img">
                     <img src="${b.image || 'https://placehold.co/240x190/F1F5F9/94A3B8?text=No+Image'}"
                          alt="${b.title}" loading="lazy"
                          onerror="this.src='https://placehold.co/240x190/F1F5F9/94A3B8?text=No+Image'">
                     ${b.condition ? `<span class="card-condition ${condClass}">${b.condition}</span>` : ''}
+                    ${isSold ? `<div class="card-sold-overlay"><span class="sold-stamp">SOLD</span></div>` : ''}
                     ${isMine ? `<button class="card-delete" onclick="event.stopPropagation();deleteBook(${b.id})" title="Delete listing">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
@@ -1291,6 +1447,7 @@
                 <div class="card-body">
                     ${b.category ? `<div class="card-category">${b.category}</div>` : ''}
                     <div class="card-title">${b.title}</div>
+                    ${availBadge}
                     <div class="card-footer">
                         <div>
                             <div class="card-price">₹${b.price} <span>/ used</span></div>
@@ -1309,13 +1466,39 @@
             </div>`;
         }
 
-        // ── MODAL ───────────────────────────────────────────────────────────
         async function openModal(id) {
             const book = allBooks.find(b => b.id === id || b.id === String(id));
             if (!book) return;
 
             const isMine = ME === (book.seller_id || book.seller);
             const initials = (book.seller || 'S').charAt(0).toUpperCase();
+            const isSold = book.deal_completed === true || book.available === false;
+
+            const availStatusHtml = isSold
+                ? `<span style="display:inline-flex;align-items:center;gap:6px;background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;padding:4px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;margin-bottom:12px">
+                       <span style="width:7px;height:7px;border-radius:50%;background:#EF4444;flex-shrink:0"></span>Item Sold
+                   </span>`
+                : `<span style="display:inline-flex;align-items:center;gap:6px;background:#D1FAE5;color:#065F46;border:1px solid #A7F3D0;padding:4px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;margin-bottom:12px">
+                       <span style="width:7px;height:7px;border-radius:50%;background:#10B981;flex-shrink:0"></span>Available Now
+                   </span>`;
+
+            const venueSectionHtml = !isMine && !isSold ? `
+                <div class="venue-section" id="venueSection">
+                    <div class="venue-section-title">
+                        📍 Suggest Exchange Venue
+                    </div>
+                    <div class="venue-options">
+                        <div class="venue-option" onclick="selectVenue(this, 'Library Entrance')">📚 Library Entrance</div>
+                        <div class="venue-option" onclick="selectVenue(this, 'Canteen')">🍽️ Canteen</div>
+                        <div class="venue-option" onclick="selectVenue(this, 'Main Gate')">🚪 Main Gate</div>
+                        <div class="venue-option" onclick="selectVenue(this, 'Department Block')">🏫 Dept. Block</div>
+                    </div>
+                    <input class="venue-custom-input" id="venueCustomInput" placeholder="Or type a custom venue…" oninput="clearVenueSelection()">
+                    <button class="venue-confirm-btn" onclick="confirmVenue(${book.id})">✅ Confirm Venue & Contact Seller</button>
+                    <div id="venueConfirmed" style="display:none" class="venue-confirmed">
+                        ✅ <span id="venueConfirmedText">Venue confirmed!</span>
+                    </div>
+                </div>` : '';
 
             document.getElementById('modalContent').innerHTML = `
                 <div class="modal-grid">
@@ -1327,6 +1510,7 @@
                     <div class="modal-info">
                         ${book.category ? `<div class="modal-category">${book.category}</div>` : ''}
                         <h2 class="modal-title">${book.title}</h2>
+                        ${availStatusHtml}
                         <div class="modal-price-row">
                             <span class="modal-price">₹${book.price}</span>
                             <span class="modal-price-sub">used price</span>
@@ -1345,6 +1529,7 @@
                                 <div class="seller-meta">${book.seller_email || 'Contact via chat below'}</div>
                             </div>
                         </div>
+                        ${venueSectionHtml}
                         <div class="modal-actions">
                             ${book.seller_email ? `
                                 <a href="mailto:${book.seller_email}?subject=Interested in: ${encodeURIComponent(book.title)}" class="btn-contact" style="text-decoration:none;">
@@ -1370,6 +1555,45 @@
             if (hasMessages) {
                 await loadChat(id);
                 chatInterval = setInterval(() => loadChat(id), 4000);
+            }
+        }
+
+        // ── VENUE HELPERS ────────────────────────────────────────────────────
+        let selectedVenue = '';
+
+        function selectVenue(el, venue) {
+            document.querySelectorAll('.venue-option').forEach(v => v.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedVenue = venue;
+            document.getElementById('venueCustomInput').value = '';
+        }
+
+        function clearVenueSelection() {
+            document.querySelectorAll('.venue-option').forEach(v => v.classList.remove('selected'));
+            selectedVenue = '';
+        }
+
+        function confirmVenue(bookId) {
+            const book = allBooks.find(b => b.id === bookId || b.id === String(bookId));
+            const customVal = document.getElementById('venueCustomInput')?.value.trim();
+            const venue = customVal || selectedVenue;
+
+            if (!venue) {
+                showToast('Please select or type a venue first', 'error');
+                return;
+            }
+
+            const confirmed = document.getElementById('venueConfirmed');
+            document.getElementById('venueConfirmedText').textContent = `Meet at: ${venue}`;
+            confirmed.style.display = 'flex';
+
+            // If seller email known, pre-fill an email with the venue
+            if (book?.seller_email) {
+                const subject = encodeURIComponent(`Exchange venue for: ${book.title}`);
+                const body = encodeURIComponent(`Hi,\n\nI'm interested in "${book.title}" (₹${book.price}).\n\nCan we meet at: ${venue}?\n\nLet me know a convenient time!\n\nThanks`);
+                window.open(`mailto:${book.seller_email}?subject=${subject}&body=${body}`, '_blank');
+            } else {
+                showToast(`📍 Venue set: ${venue}`, 'success');
             }
         }
 
