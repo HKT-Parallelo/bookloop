@@ -1990,8 +1990,26 @@
         }
 
         async function openModal(id) {
-            const book = allBooks.find(b => b.id === id || b.id === String(id));
-            if (!book) return;
+            let book = allBooks.find(b => b.id === id || b.id === String(id));
+
+            // Book might be sold and filtered out of allBooks — fetch it directly
+            if (!book) {
+                try {
+                    const { data } = await db.from('books').select('*').eq('id', id).single();
+                    book = data;
+                } catch {}
+            }
+            if (!book) {
+                // Book may be sold/filtered out of allBooks — fetch directly from DB
+                try {
+                    const { data, error } = await db.from('books').select('*').eq('id', id).single();
+                    if (error || !data) { showToast('Could not load item details', 'error'); return; }
+                    book = data;
+                } catch {
+                    showToast('Could not load item details', 'error');
+                    return;
+                }
+            }
 
             const isMine = ME === (book.seller_id || book.seller);
             const initials = (book.seller || 'S').charAt(0).toUpperCase();
