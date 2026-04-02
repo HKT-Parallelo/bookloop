@@ -2220,7 +2220,7 @@
                             <button class="req-btn req-btn-decline" onclick="respondRequest(${r.id}, 'declined')">❌ Decline</button>
                         </div>` : r.status === 'approved' ? `
                         <div class="req-actions">
-                            <button class="req-btn req-btn-chat" onclick="closeSellerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
+                            <button class="req-btn req-btn-chat" onclick="closeSellerNotifs();setTimeout(()=>openModal(${r.book_id}),150)">💬 Open Chat</button>
                             <button class="req-btn req-btn-decline" onclick="respondRequest(${r.id}, 'declined')">Revoke</button>
                         </div>` : '';
 
@@ -2331,7 +2331,7 @@
                     }[r.status] || '';
 
                     const chatBtn = r.status === 'approved'
-                        ? `<div class="req-actions"><button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button></div>`
+                        ? `<div class="req-actions"><button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();setTimeout(()=>openModal(${r.book_id}),150)">💬 Open Chat</button></div>`
                         : '';
 
                     return `<div class="req-card">
