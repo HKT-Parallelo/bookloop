@@ -1117,10 +1117,266 @@
             .chat-panel { padding: 16px; }
         }
 
+        /* ─── MY LISTINGS PANEL ──────────────────── */
+        .my-listings-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(13,17,23,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 400;
+        }
+
+        .my-listings-overlay.open { display: block; }
+
+        .my-listings-panel {
+            position: fixed;
+            top: 0;
+            right: -480px;
+            width: 460px;
+            max-width: 100vw;
+            height: 100vh;
+            background: var(--surface);
+            box-shadow: -8px 0 40px rgba(0,0,0,0.15);
+            z-index: 401;
+            display: flex;
+            flex-direction: column;
+            transition: right 0.35s cubic-bezier(0.34,1.2,0.64,1);
+            overflow: hidden;
+        }
+
+        .my-listings-panel.open { right: 0; }
+
+        .panel-header {
+            padding: 24px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .panel-header-left h2 {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 900;
+            font-size: 1.3rem;
+            color: var(--ink);
+            letter-spacing: -0.3px;
+        }
+
+        .panel-header-left p {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .panel-close {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: var(--surface-2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--muted);
+            transition: all 0.15s;
+        }
+
+        .panel-close:hover { background: var(--red); border-color: var(--red); color: white; }
+
+        .panel-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .panel-stat {
+            background: var(--surface-2);
+            padding: 14px;
+            text-align: center;
+        }
+
+        .panel-stat-num {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: var(--ink);
+        }
+
+        .panel-stat-label {
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .my-listing-card {
+            display: flex;
+            gap: 12px;
+            padding: 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-md);
+            margin-bottom: 10px;
+            background: white;
+            transition: border-color 0.2s, box-shadow 0.15s;
+            position: relative;
+        }
+
+        .my-listing-card:hover { border-color: var(--lime-dark); box-shadow: var(--shadow-sm); }
+
+        .my-listing-card.is-sold { opacity: 0.65; }
+
+        .my-listing-img {
+            width: 72px;
+            height: 72px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: var(--surface-3);
+        }
+
+        .my-listing-info { flex: 1; min-width: 0; }
+
+        .my-listing-title {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 800;
+            font-size: 0.92rem;
+            color: var(--ink);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .my-listing-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .my-listing-price {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 900;
+            font-size: 1rem;
+            color: var(--ink);
+        }
+
+        .my-listing-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .my-listing-badge.available { background: #D1FAE5; color: #065F46; }
+        .my-listing-badge.sold { background: #FEE2E2; color: #991B1B; }
+
+        .my-listing-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .ml-btn {
+            flex: 1;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1.5px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .ml-btn-sold {
+            background: var(--lime-light);
+            color: var(--lime-dark);
+            border-color: rgba(132,204,22,0.4);
+        }
+
+        .ml-btn-sold:hover { background: var(--lime); color: white; border-color: var(--lime); }
+
+        .ml-btn-sold.already-sold {
+            background: #FEE2E2;
+            color: #991B1B;
+            border-color: #FECACA;
+        }
+
+        .ml-btn-sold.already-sold:hover { background: #EF4444; color: white; border-color: #EF4444; }
+
+        .ml-btn-delete {
+            background: var(--surface-2);
+            color: var(--muted);
+            border-color: var(--border);
+        }
+
+        .ml-btn-delete:hover { background: #FEE2E2; color: var(--red); border-color: #FECACA; }
+
+        .panel-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+
+        .panel-empty .icon { font-size: 3rem; margin-bottom: 12px; }
+        .panel-empty h3 { font-family: 'Cabinet Grotesk', sans-serif; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
+        .panel-empty p { font-size: 0.85rem; }
+
+        .panel-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .panel-sell-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 13px;
+            background: var(--ink);
+            color: white;
+            border: none;
+            border-radius: var(--r-sm);
+            font-family: 'Satoshi', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .panel-sell-btn:hover { background: var(--ink-2); }
+
+        .panel-loader {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
         @media (max-width: 480px) {
-            .sidebar { grid-template-columns: 1fr; }
-            .badge-count { display: none; }
-            .hero-text h1 { font-size: 1.6rem; }
+            .my-listings-panel { width: 100vw; }
         }
     </style>
 </head>
@@ -1165,6 +1421,13 @@
                             <div class="dropdown-name" id="dropdownName">Loading…</div>
                             <div class="dropdown-email" id="dropdownEmail"></div>
                         </div>
+                        <button class="dropdown-item" onclick="openMyListings()">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            My Listings
+                            <span id="myListingsBadge" style="display:none;margin-left:auto;background:var(--lime-dark);color:white;font-size:0.7rem;font-weight:800;padding:1px 7px;border-radius:20px;"></span>
+                        </button>
                         <button class="dropdown-item danger" onclick="logout()">
                             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
@@ -1282,6 +1545,43 @@
         </section>
     </div>
 
+    <!-- MY LISTINGS PANEL -->
+    <div class="my-listings-overlay" id="myListingsOverlay" onclick="closeMyListings()"></div>
+    <div class="my-listings-panel" id="myListingsPanel">
+        <div class="panel-header">
+            <div class="panel-header-left">
+                <h2>📋 My Listings</h2>
+                <p id="panelSubtitle">Your items on the marketplace</p>
+            </div>
+            <button class="panel-close" onclick="closeMyListings()">×</button>
+        </div>
+        <div class="panel-stats">
+            <div class="panel-stat">
+                <div class="panel-stat-num" id="statTotal">—</div>
+                <div class="panel-stat-label">Total</div>
+            </div>
+            <div class="panel-stat">
+                <div class="panel-stat-num" id="statActive">—</div>
+                <div class="panel-stat-label">Active</div>
+            </div>
+            <div class="panel-stat">
+                <div class="panel-stat-num" id="statSold">—</div>
+                <div class="panel-stat-label">Sold</div>
+            </div>
+        </div>
+        <div class="panel-body" id="myListingsBody">
+            <div class="panel-loader">Loading your listings…</div>
+        </div>
+        <div class="panel-footer">
+            <a href="sell_item_fixed.html" class="panel-sell-btn">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                List a New Item
+            </a>
+        </div>
+    </div>
+
     <!-- PRODUCT MODAL -->
     <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
         <div class="modal-box" id="modalBox">
@@ -1358,6 +1658,7 @@
             if (!authed) return;
             await checkSchema();
             await loadBooks();
+            await loadMyListingsBadge();
         });
 
         async function checkSchema() {
@@ -1671,6 +1972,147 @@
             } catch (e) {
                 showToast('Could not remove listing: ' + e.message, 'error');
             }
+        }
+
+        // ── MY LISTINGS PANEL ────────────────────────────────────────────────
+        let myListings = [];
+
+        async function openMyListings() {
+            // Close dropdown
+            document.getElementById('userDropdown').classList.remove('open');
+            // Open panel
+            document.getElementById('myListingsOverlay').classList.add('open');
+            document.getElementById('myListingsPanel').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            await loadMyListings();
+        }
+
+        function closeMyListings() {
+            document.getElementById('myListingsOverlay').classList.remove('open');
+            document.getElementById('myListingsPanel').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        async function loadMyListings() {
+            const body = document.getElementById('myListingsBody');
+            body.innerHTML = `<div class="panel-loader">⏳ Loading your listings…</div>`;
+
+            try {
+                const { data, error } = await db
+                    .from('books')
+                    .select('*')
+                    .eq('seller_id', ME)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                myListings = data || [];
+
+                // Update stats
+                const total  = myListings.length;
+                const sold   = myListings.filter(b => b.deal_completed === true || b.available === false).length;
+                const active = total - sold;
+
+                document.getElementById('statTotal').textContent  = total;
+                document.getElementById('statActive').textContent = active;
+                document.getElementById('statSold').textContent   = sold;
+                document.getElementById('panelSubtitle').textContent = `${total} item${total !== 1 ? 's' : ''} listed by you`;
+
+                // Update badge in dropdown
+                const badge = document.getElementById('myListingsBadge');
+                if (active > 0) { badge.textContent = active; badge.style.display = 'inline'; }
+                else { badge.style.display = 'none'; }
+
+                if (!myListings.length) {
+                    body.innerHTML = `
+                        <div class="panel-empty">
+                            <div class="icon">📭</div>
+                            <h3>No listings yet</h3>
+                            <p>You haven't listed anything for sale. Click "List a New Item" below to get started!</p>
+                        </div>`;
+                    return;
+                }
+
+                body.innerHTML = myListings.map(b => buildMyListingCard(b)).join('');
+
+            } catch (e) {
+                body.innerHTML = `<div class="panel-empty"><div class="icon">⚠️</div><h3>Could not load</h3><p>${e.message}</p></div>`;
+            }
+        }
+
+        function buildMyListingCard(b) {
+            const isSold = b.deal_completed === true || b.available === false;
+            const condColors = { Excellent:'#065F46', Good:'#1E40AF', Fair:'#92400E', Poor:'#991B1B' };
+            const date = b.created_at ? new Date(b.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short' }) : '';
+
+            return `<div class="my-listing-card ${isSold ? 'is-sold' : ''}" id="mlcard-${b.id}">
+                <img class="my-listing-img"
+                     src="${b.image || 'https://placehold.co/72x72/F1F5F9/94A3B8?text=📚'}"
+                     onerror="this.src='https://placehold.co/72x72/F1F5F9/94A3B8?text=📚'"
+                     alt="${b.title}">
+                <div class="my-listing-info">
+                    <div class="my-listing-title" title="${b.title}">${b.title}</div>
+                    <div class="my-listing-meta">
+                        <span class="my-listing-price">₹${b.price}</span>
+                        <span class="my-listing-badge ${isSold ? 'sold' : 'available'}">
+                            ${isSold ? '🔴 Sold' : '🟢 Active'}
+                        </span>
+                        ${b.category ? `<span style="font-size:0.72rem;color:var(--muted)">${b.category}</span>` : ''}
+                        ${date ? `<span style="font-size:0.72rem;color:var(--muted-2);margin-left:auto">${date}</span>` : ''}
+                    </div>
+                    <div class="my-listing-actions">
+                        <button class="ml-btn ml-btn-sold ${isSold ? 'already-sold' : ''}"
+                                onclick="toggleSoldStatus(${b.id}, ${isSold})">
+                            ${isSold ? '↩️ Mark Available' : '✅ Mark as Sold'}
+                        </button>
+                        <button class="ml-btn ml-btn-delete"
+                                onclick="deleteMyListing(${b.id})">
+                            🗑️ Remove
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        async function toggleSoldStatus(id, currentlySold) {
+            try {
+                const newStatus = !currentlySold;
+                const { error } = await db
+                    .from('books')
+                    .update({ deal_completed: newStatus })
+                    .eq('id', id);
+                if (error) throw error;
+                showToast(newStatus ? '✅ Marked as Sold' : '✅ Marked as Available', 'success');
+                await loadMyListings(); // refresh panel
+                await loadBooks();      // refresh main grid
+            } catch (e) {
+                showToast('Could not update: ' + e.message, 'error');
+            }
+        }
+
+        async function deleteMyListing(id) {
+            if (!confirm('Permanently remove this listing from the marketplace?')) return;
+            try {
+                const { error } = await db.from('books').delete().eq('id', id);
+                if (error) throw error;
+                showToast('✅ Listing removed', 'success');
+                await loadMyListings(); // refresh panel
+                await loadBooks();      // refresh main grid
+            } catch (e) {
+                showToast('Could not remove: ' + e.message, 'error');
+            }
+        }
+
+        // Load badge count on init (after auth)
+        async function loadMyListingsBadge() {
+            try {
+                const { data } = await db
+                    .from('books')
+                    .select('id, deal_completed, available')
+                    .eq('seller_id', ME);
+                const active = (data || []).filter(b => !b.deal_completed && b.available !== false).length;
+                const badge = document.getElementById('myListingsBadge');
+                if (active > 0) { badge.textContent = active; badge.style.display = 'inline'; }
+            } catch {}
         }
 
         // ── TOAST ───────────────────────────────────────────────────────────
