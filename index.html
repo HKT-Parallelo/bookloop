@@ -1378,6 +1378,140 @@
         @media (max-width: 480px) {
             .my-listings-panel { width: 100vw; }
         }
+
+        /* ─── NOTIFICATION BELL ──────────────────── */
+        .notif-btn {
+            position: relative;
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--muted);
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .notif-btn:hover { border-color: var(--ink); color: var(--ink); }
+        .notif-dot {
+            position: absolute;
+            top: -3px; right: -3px;
+            min-width: 18px; height: 18px;
+            background: var(--red);
+            color: white;
+            font-size: 0.65rem; font-weight: 800;
+            border-radius: 20px;
+            display: none; align-items: center; justify-content: center;
+            padding: 0 4px;
+            border: 2px solid white;
+        }
+        .notif-dot.show { display: flex; }
+
+        /* ─── NOTIFICATION PANEL ─────────────────── */
+        .notif-panel-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(13,17,23,0.45);
+            backdrop-filter: blur(4px);
+            z-index: 500;
+        }
+        .notif-panel-overlay.open { display: block; }
+        .notif-panel {
+            position: fixed;
+            top: 0; right: -500px;
+            width: 460px; max-width: 100vw;
+            height: 100vh;
+            background: var(--surface);
+            box-shadow: -8px 0 40px rgba(0,0,0,0.15);
+            z-index: 501;
+            display: flex; flex-direction: column;
+            transition: right 0.35s cubic-bezier(0.34,1.2,0.64,1);
+            overflow: hidden;
+        }
+        .notif-panel.open { right: 0; }
+        .notif-panel-header {
+            padding: 22px 24px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .notif-panel-header h2 { font-family:'Cabinet Grotesk',sans-serif; font-weight:900; font-size:1.2rem; color:var(--ink); }
+        .notif-panel-header p  { font-size:0.8rem; color:var(--muted); margin-top:2px; }
+        .notif-panel-close {
+            width:32px; height:32px; border-radius:50%;
+            border:1.5px solid var(--border); background:var(--surface-2);
+            cursor:pointer; display:flex; align-items:center; justify-content:center;
+            font-size:1rem; color:var(--muted); transition:all 0.15s;
+        }
+        .notif-panel-close:hover { background:var(--red); border-color:var(--red); color:white; }
+        .notif-panel-body { flex:1; overflow-y:auto; padding:12px; }
+
+        /* ─── REQUEST CARD ───────────────────────── */
+        .req-card {
+            border:1.5px solid var(--border); border-radius:var(--r-md);
+            padding:14px 16px; margin-bottom:10px; background:white;
+            transition:border-color 0.15s;
+        }
+        .req-card:hover { border-color:var(--lime-dark); }
+        .req-card-top { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+        .req-avatar {
+            width:36px; height:36px; border-radius:50%;
+            background:var(--ink); color:white;
+            display:flex; align-items:center; justify-content:center;
+            font-weight:800; font-size:0.85rem; flex-shrink:0;
+        }
+        .req-info { flex:1; min-width:0; }
+        .req-name  { font-weight:700; font-size:0.88rem; color:var(--ink); }
+        .req-item  { font-size:0.78rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .req-time  { font-size:0.72rem; color:var(--muted-2); flex-shrink:0; }
+        .req-price { font-family:'Cabinet Grotesk',sans-serif; font-weight:900; font-size:0.95rem; color:var(--ink); margin-bottom:8px; }
+        .req-status-badge {
+            display:inline-flex; align-items:center; gap:5px;
+            font-size:0.75rem; font-weight:700;
+            padding:3px 10px; border-radius:20px; margin-bottom:10px;
+        }
+        .req-status-badge.pending  { background:#FEF3C7; color:#92400E; border:1px solid #FDE68A; }
+        .req-status-badge.approved { background:#D1FAE5; color:#065F46; border:1px solid #A7F3D0; }
+        .req-status-badge.declined { background:#FEE2E2; color:#991B1B; border:1px solid #FECACA; }
+        .req-actions { display:flex; gap:8px; }
+        .req-btn {
+            flex:1; padding:8px 12px; border-radius:8px;
+            font-family:'Satoshi',sans-serif; font-size:0.82rem; font-weight:700;
+            cursor:pointer; transition:all 0.15s; border:1.5px solid transparent;
+            display:flex; align-items:center; justify-content:center; gap:5px;
+        }
+        .req-btn-approve { background:var(--lime-light); color:var(--lime-dark); border-color:rgba(132,204,22,0.4); }
+        .req-btn-approve:hover { background:var(--lime); color:white; border-color:var(--lime); }
+        .req-btn-decline { background:var(--surface-2); color:var(--muted); border-color:var(--border); }
+        .req-btn-decline:hover { background:#FEE2E2; color:var(--red); border-color:#FECACA; }
+        .req-btn-chat   { background:var(--ink); color:white; border-color:var(--ink); }
+        .req-btn-chat:hover { background:var(--ink-2); }
+        .notif-empty { text-align:center; padding:60px 20px; }
+        .notif-empty .icon { font-size:3rem; margin-bottom:12px; }
+        .notif-empty h3 { font-family:'Cabinet Grotesk',sans-serif; font-weight:800; color:var(--ink); margin-bottom:6px; }
+        .notif-empty p  { font-size:0.85rem; color:var(--muted); }
+
+        /* ─── REQUEST BUTTON IN MODAL ────────────── */
+        .btn-request {
+            flex:1; padding:13px;
+            background:var(--lime-dark); color:white;
+            border:none; border-radius:var(--r-sm);
+            font-family:'Satoshi',sans-serif; font-weight:700; font-size:0.9rem;
+            cursor:pointer; transition:background 0.2s, transform 0.15s;
+            display:flex; align-items:center; justify-content:center; gap:7px;
+        }
+        .btn-request:hover { background:var(--lime); transform:translateY(-1px); }
+        .btn-request:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+        .req-note {
+            padding:10px 14px; border-radius:var(--r-sm);
+            font-size:0.83rem; font-weight:600;
+            display:flex; align-items:center; gap:7px;
+        }
+        .req-note.pending  { background:var(--lime-light); color:var(--lime-dark); border:1px solid rgba(132,204,22,0.3); }
+        .req-note.approved { background:#D1FAE5; color:#065F46; border:1px solid #A7F3D0; }
+        .req-note.declined { background:#FEE2E2; color:#991B1B; border:1px solid #FECACA; }
+
+        @media (max-width:480px) { .notif-panel { width:100vw; } }
     </style>
 </head>
 <body>
@@ -1411,6 +1545,22 @@
                     </svg>
                     Sell Item
                 </a>
+
+                <!-- Seller Bell — purchase requests -->
+                <button class="notif-btn" id="sellerBellBtn" onclick="openSellerNotifs()" title="Purchase Requests" style="display:none">
+                    <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                    </svg>
+                    <span class="notif-dot" id="sellerBellDot"></span>
+                </button>
+
+                <!-- Buyer Bell — request status updates -->
+                <button class="notif-btn" id="buyerBellBtn" onclick="openBuyerNotifs()" title="My Requests">
+                    <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    <span class="notif-dot" id="buyerBellDot"></span>
+                </button>
                 <!-- User Avatar + Dropdown -->
                 <div class="user-menu-wrap">
                     <button class="user-avatar-btn" id="avatarBtn" onclick="toggleDropdown()" title="Account">
@@ -1582,6 +1732,36 @@
         </div>
     </div>
 
+    <!-- SELLER NOTIFICATIONS PANEL -->
+    <div class="notif-panel-overlay" id="sellerNotifOverlay" onclick="closeSellerNotifs()"></div>
+    <div class="notif-panel" id="sellerNotifPanel">
+        <div class="notif-panel-header">
+            <div>
+                <h2>🔔 Purchase Requests</h2>
+                <p id="sellerNotifSubtitle">Students interested in your items</p>
+            </div>
+            <button class="notif-panel-close" onclick="closeSellerNotifs()">×</button>
+        </div>
+        <div class="notif-panel-body" id="sellerNotifBody">
+            <div class="notif-empty"><div class="icon">⏳</div><p>Loading…</p></div>
+        </div>
+    </div>
+
+    <!-- BUYER NOTIFICATIONS PANEL -->
+    <div class="notif-panel-overlay" id="buyerNotifOverlay" onclick="closeBuyerNotifs()"></div>
+    <div class="notif-panel" id="buyerNotifPanel">
+        <div class="notif-panel-header">
+            <div>
+                <h2>🛒 My Requests</h2>
+                <p id="buyerNotifSubtitle">Status of items you requested</p>
+            </div>
+            <button class="notif-panel-close" onclick="closeBuyerNotifs()">×</button>
+        </div>
+        <div class="notif-panel-body" id="buyerNotifBody">
+            <div class="notif-empty"><div class="icon">⏳</div><p>Loading…</p></div>
+        </div>
+    </div>
+
     <!-- PRODUCT MODAL -->
     <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
         <div class="modal-box" id="modalBox">
@@ -1659,6 +1839,9 @@
             await checkSchema();
             await loadBooks();
             await loadMyListingsBadge();
+            await refreshNotifBadges();
+            // Auto-refresh notification badges every 30 seconds
+            setInterval(refreshNotifBadges, 30000);
         });
 
         async function checkSchema() {
@@ -1783,23 +1966,37 @@
                        <span style="width:7px;height:7px;border-radius:50%;background:#10B981;flex-shrink:0"></span>Available Now
                    </span>`;
 
-            const venueSectionHtml = !isMine && !isSold ? `
-                <div class="venue-section" id="venueSection">
-                    <div class="venue-section-title">
-                        📍 Suggest Exchange Venue
-                    </div>
-                    <div class="venue-options">
-                        <div class="venue-option" onclick="selectVenue(this, 'Library Entrance')">📚 Library Entrance</div>
-                        <div class="venue-option" onclick="selectVenue(this, 'Canteen')">🍽️ Canteen</div>
-                        <div class="venue-option" onclick="selectVenue(this, 'Main Gate')">🚪 Main Gate</div>
-                        <div class="venue-option" onclick="selectVenue(this, 'Department Block')">🏫 Dept. Block</div>
-                    </div>
-                    <input class="venue-custom-input" id="venueCustomInput" placeholder="Or type a custom venue…" oninput="clearVenueSelection()">
-                    <button class="venue-confirm-btn" onclick="confirmVenue(${book.id})">✅ Confirm Venue & Contact Seller</button>
-                    <div id="venueConfirmed" style="display:none" class="venue-confirmed">
-                        ✅ <span id="venueConfirmedText">Venue confirmed!</span>
-                    </div>
-                </div>` : '';
+            // Check if buyer already sent a request for this item
+            let existingReq = null;
+            if (!isMine && !isSold) {
+                try {
+                    const { data } = await db.from('requests')
+                        .select('*')
+                        .eq('book_id', book.id)
+                        .eq('buyer_id', ME)
+                        .single();
+                    existingReq = data;
+                } catch {}
+            }
+
+            // Build buyer action section
+            let buyerActionHtml = '';
+            if (!isMine && !isSold) {
+                if (!existingReq) {
+                    buyerActionHtml = `<button class="btn-request" id="reqBtn" onclick="sendRequest(${book.id})">
+                        🛒 Request to Buy
+                    </button>`;
+                } else if (existingReq.status === 'pending') {
+                    buyerActionHtml = `<div class="req-note pending">⏳ Request sent — waiting for seller approval</div>`;
+                } else if (existingReq.status === 'approved') {
+                    buyerActionHtml = `<div class="req-note approved">✅ Seller approved! You can now chat below.</div>`;
+                } else if (existingReq.status === 'declined') {
+                    buyerActionHtml = `<div class="req-note declined">❌ Seller declined your request.</div>`;
+                }
+            }
+
+            // Only show chat if request is approved (or it's the seller's own item)
+            const showChat = hasMessages && (isMine || existingReq?.status === 'approved');
 
             document.getElementById('modalContent').innerHTML = `
                 <div class="modal-grid">
@@ -1827,24 +2024,20 @@
                             <div class="seller-avatar">${initials}</div>
                             <div>
                                 <div class="seller-name">${book.seller || 'Student'}</div>
-                                <div class="seller-meta">${book.seller_email || 'Contact via chat below'}</div>
+                                <div class="seller-meta">BookLoop Member</div>
                             </div>
                         </div>
-                        ${venueSectionHtml}
                         <div class="modal-actions">
-                            ${book.seller_email ? `
-                                <a href="mailto:${book.seller_email}?subject=Interested in: ${encodeURIComponent(book.title)}" class="btn-contact" style="text-decoration:none;">
-                                    ✉️ Email Seller
-                                </a>` : `<button class="btn-contact" onclick="scrollToChat()">💬 Chat Below</button>`}
+                            ${buyerActionHtml}
                             ${isMine ? `<button class="btn-approve" onclick="deleteBook(${book.id})">🗑️ Remove Listing</button>` : ''}
                         </div>
                     </div>
-                    ${hasMessages ? `
+                    ${showChat ? `
                     <div class="chat-panel">
-                        <h4>💬 Chat with Seller</h4>
+                        <h4>💬 Chat</h4>
                         <div class="chat-messages" id="chatMessages"><p style="color:var(--muted);font-size:0.85rem">Loading messages…</p></div>
                         <div class="chat-input-row">
-                            <input class="chat-input" id="chatInput" placeholder="Ask about this item…"
+                            <input class="chat-input" id="chatInput" placeholder="Type a message…"
                                    onkeypress="if(event.key==='Enter')sendMsg(${book.id})">
                             <button class="btn-send" onclick="sendMsg(${book.id})">Send</button>
                         </div>
@@ -1853,49 +2046,258 @@
 
             document.getElementById('modalOverlay').classList.add('open');
 
-            if (hasMessages) {
+            if (showChat) {
                 await loadChat(id);
                 chatInterval = setInterval(() => loadChat(id), 4000);
             }
         }
 
-        // ── VENUE HELPERS ────────────────────────────────────────────────────
-        let selectedVenue = '';
-
-        function selectVenue(el, venue) {
-            document.querySelectorAll('.venue-option').forEach(v => v.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedVenue = venue;
-            document.getElementById('venueCustomInput').value = '';
-        }
-
-        function clearVenueSelection() {
-            document.querySelectorAll('.venue-option').forEach(v => v.classList.remove('selected'));
-            selectedVenue = '';
-        }
-
-        function confirmVenue(bookId) {
+        // ── SEND REQUEST ─────────────────────────────────────────────────────
+        async function sendRequest(bookId) {
             const book = allBooks.find(b => b.id === bookId || b.id === String(bookId));
-            const customVal = document.getElementById('venueCustomInput')?.value.trim();
-            const venue = customVal || selectedVenue;
+            if (!book) return;
 
-            if (!venue) {
-                showToast('Please select or type a venue first', 'error');
-                return;
+            const btn = document.getElementById('reqBtn');
+            if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
+            const buyerName = currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Student';
+
+            try {
+                const { error } = await db.from('requests').insert([{
+                    book_id:     book.id,
+                    buyer_id:    ME,
+                    buyer_name:  buyerName,
+                    buyer_email: currentUser.email,
+                    seller_id:   book.seller_id,
+                    status:      'pending'
+                }]);
+                if (error) throw error;
+
+                // Update button to pending note
+                const actions = document.querySelector('.modal-actions');
+                if (actions) actions.innerHTML = `<div class="req-note pending">⏳ Request sent — waiting for seller approval</div>`;
+
+                showToast('✅ Request sent to seller!', 'success');
+                await refreshNotifBadges();
+            } catch (e) {
+                if (e.message?.includes('duplicate') || e.code === '23505') {
+                    showToast('You already sent a request for this item', 'error');
+                } else {
+                    showToast('Could not send request: ' + e.message, 'error');
+                }
+                if (btn) { btn.disabled = false; btn.innerHTML = '🛒 Request to Buy'; }
             }
+        }
 
-            const confirmed = document.getElementById('venueConfirmed');
-            document.getElementById('venueConfirmedText').textContent = `Meet at: ${venue}`;
-            confirmed.style.display = 'flex';
+        // ── SELLER NOTIFICATIONS ─────────────────────────────────────────────
+        async function openSellerNotifs() {
+            document.getElementById('sellerNotifOverlay').classList.add('open');
+            document.getElementById('sellerNotifPanel').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            await loadSellerNotifs();
+        }
 
-            // If seller email known, pre-fill an email with the venue
-            if (book?.seller_email) {
-                const subject = encodeURIComponent(`Exchange venue for: ${book.title}`);
-                const body = encodeURIComponent(`Hi,\n\nI'm interested in "${book.title}" (₹${book.price}).\n\nCan we meet at: ${venue}?\n\nLet me know a convenient time!\n\nThanks`);
-                window.open(`mailto:${book.seller_email}?subject=${subject}&body=${body}`, '_blank');
-            } else {
-                showToast(`📍 Venue set: ${venue}`, 'success');
+        function closeSellerNotifs() {
+            document.getElementById('sellerNotifOverlay').classList.remove('open');
+            document.getElementById('sellerNotifPanel').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        async function loadSellerNotifs() {
+            const body = document.getElementById('sellerNotifBody');
+            body.innerHTML = `<div class="notif-empty"><div class="icon">⏳</div><p>Loading…</p></div>`;
+            try {
+                const { data, error } = await db
+                    .from('requests')
+                    .select('*, books(title, price, image)')
+                    .eq('seller_id', ME)
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
+
+                const reqs = data || [];
+                const pending = reqs.filter(r => r.status === 'pending').length;
+                document.getElementById('sellerNotifSubtitle').textContent =
+                    pending > 0 ? `${pending} pending request${pending > 1 ? 's' : ''}` : 'All caught up!';
+
+                if (!reqs.length) {
+                    body.innerHTML = `<div class="notif-empty">
+                        <div class="icon">🔔</div>
+                        <h3>No requests yet</h3>
+                        <p>When students request your items, they'll appear here.</p>
+                    </div>`;
+                    return;
+                }
+
+                body.innerHTML = reqs.map(r => {
+                    const title   = r.books?.title || 'Item';
+                    const price   = r.books?.price || '—';
+                    const initial = (r.buyer_name || 'S').charAt(0).toUpperCase();
+                    const time    = timeAgo(r.created_at);
+
+                    const statusBadge = {
+                        pending:  `<span class="req-status-badge pending">⏳ Pending</span>`,
+                        approved: `<span class="req-status-badge approved">✅ Approved</span>`,
+                        declined: `<span class="req-status-badge declined">❌ Declined</span>`
+                    }[r.status] || '';
+
+                    const actions = r.status === 'pending' ? `
+                        <div class="req-actions">
+                            <button class="req-btn req-btn-approve" onclick="respondRequest(${r.id}, 'approved')">✅ Approve</button>
+                            <button class="req-btn req-btn-decline" onclick="respondRequest(${r.id}, 'declined')">❌ Decline</button>
+                        </div>` : r.status === 'approved' ? `
+                        <div class="req-actions">
+                            <button class="req-btn req-btn-chat" onclick="closeSellerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
+                            <button class="req-btn req-btn-decline" onclick="respondRequest(${r.id}, 'declined')">Revoke</button>
+                        </div>` : '';
+
+                    return `<div class="req-card" id="reqcard-${r.id}">
+                        <div class="req-card-top">
+                            <div class="req-avatar">${initial}</div>
+                            <div class="req-info">
+                                <div class="req-name">${r.buyer_name || 'Student'}</div>
+                                <div class="req-item">wants to buy: ${title}</div>
+                            </div>
+                            <div class="req-time">${time}</div>
+                        </div>
+                        <div class="req-price">₹${price}</div>
+                        ${statusBadge}
+                        ${actions}
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                body.innerHTML = `<div class="notif-empty"><div class="icon">⚠️</div><h3>Error</h3><p>${e.message}</p></div>`;
             }
+        }
+
+        async function respondRequest(reqId, status) {
+            try {
+                const { error } = await db.from('requests').update({ status }).eq('id', reqId);
+                if (error) throw error;
+                showToast(status === 'approved' ? '✅ Request approved! Chat is now open.' : '❌ Request declined.', 'success');
+                await loadSellerNotifs();
+                await refreshNotifBadges();
+            } catch (e) {
+                showToast('Error: ' + e.message, 'error');
+            }
+        }
+
+        // ── BUYER NOTIFICATIONS ──────────────────────────────────────────────
+        async function openBuyerNotifs() {
+            document.getElementById('buyerNotifOverlay').classList.add('open');
+            document.getElementById('buyerNotifPanel').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            await loadBuyerNotifs();
+        }
+
+        function closeBuyerNotifs() {
+            document.getElementById('buyerNotifOverlay').classList.remove('open');
+            document.getElementById('buyerNotifPanel').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        async function loadBuyerNotifs() {
+            const body = document.getElementById('buyerNotifBody');
+            body.innerHTML = `<div class="notif-empty"><div class="icon">⏳</div><p>Loading…</p></div>`;
+            try {
+                const { data, error } = await db
+                    .from('requests')
+                    .select('*, books(title, price, image)')
+                    .eq('buyer_id', ME)
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
+
+                const reqs = data || [];
+                const approved = reqs.filter(r => r.status === 'approved').length;
+                document.getElementById('buyerNotifSubtitle').textContent =
+                    approved > 0 ? `${approved} approved — chat is open!` : `${reqs.length} request${reqs.length !== 1 ? 's' : ''} sent`;
+
+                if (!reqs.length) {
+                    body.innerHTML = `<div class="notif-empty">
+                        <div class="icon">🛒</div>
+                        <h3>No requests yet</h3>
+                        <p>Click "Request to Buy" on any item to get started!</p>
+                    </div>`;
+                    return;
+                }
+
+                body.innerHTML = reqs.map(r => {
+                    const title = r.books?.title || 'Item';
+                    const price = r.books?.price || '—';
+                    const time  = timeAgo(r.created_at);
+
+                    const statusBadge = {
+                        pending:  `<span class="req-status-badge pending">⏳ Waiting for seller approval</span>`,
+                        approved: `<span class="req-status-badge approved">✅ Approved — chat is open!</span>`,
+                        declined: `<span class="req-status-badge declined">❌ Seller declined your request</span>`
+                    }[r.status] || '';
+
+                    const chatBtn = r.status === 'approved'
+                        ? `<div class="req-actions"><button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button></div>`
+                        : '';
+
+                    return `<div class="req-card">
+                        <div class="req-card-top">
+                            <div class="req-avatar" style="background:var(--lime-dark)">🛒</div>
+                            <div class="req-info">
+                                <div class="req-name">${title}</div>
+                                <div class="req-item">₹${price}</div>
+                            </div>
+                            <div class="req-time">${time}</div>
+                        </div>
+                        ${statusBadge}
+                        ${chatBtn}
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                body.innerHTML = `<div class="notif-empty"><div class="icon">⚠️</div><h3>Error</h3><p>${e.message}</p></div>`;
+            }
+        }
+
+        // ── REFRESH BELL BADGES ──────────────────────────────────────────────
+        async function refreshNotifBadges() {
+            try {
+                // Seller bell — count pending requests on my items
+                const { data: sellerData } = await db
+                    .from('requests').select('id, status').eq('seller_id', ME).eq('status', 'pending');
+                const sellerCount = (sellerData || []).length;
+                const sellerDot = document.getElementById('sellerBellDot');
+                const sellerBtn = document.getElementById('sellerBellBtn');
+                if (sellerCount > 0) {
+                    sellerDot.textContent = sellerCount;
+                    sellerDot.classList.add('show');
+                    sellerBtn.style.display = 'flex';
+                } else {
+                    sellerDot.classList.remove('show');
+                    // Still show bell if seller has any listings
+                }
+
+                // Show seller bell if user has any listings
+                const { data: myItems } = await db.from('books').select('id').eq('seller_id', ME).limit(1);
+                if ((myItems || []).length > 0) sellerBtn.style.display = 'flex';
+
+                // Buyer bell — count approved requests (new approvals)
+                const { data: buyerData } = await db
+                    .from('requests').select('id, status').eq('buyer_id', ME);
+                const buyerReqs = buyerData || [];
+                const newApprovals = buyerReqs.filter(r => r.status === 'approved').length;
+                const buyerDot = document.getElementById('buyerBellDot');
+                if (newApprovals > 0) {
+                    buyerDot.textContent = newApprovals;
+                    buyerDot.classList.add('show');
+                } else {
+                    buyerDot.classList.remove('show');
+                }
+            } catch {}
+        }
+
+        // ── TIME AGO HELPER ──────────────────────────────────────────────────
+        function timeAgo(dateStr) {
+            if (!dateStr) return '';
+            const diff = (Date.now() - new Date(dateStr)) / 1000;
+            if (diff < 60)   return 'just now';
+            if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+            if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+            return `${Math.floor(diff/86400)}d ago`;
         }
 
         function closeModal() {
