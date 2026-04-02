@@ -2009,7 +2009,7 @@
 
             // Check if buyer already sent a request for this item
             let existingReq = null;
-            if (!isMine && !isSold) {
+            if (!isMine) {
                 try {
                     const { data } = await db.from('requests')
                         .select('*')
@@ -2019,6 +2019,9 @@
                     existingReq = data;
                 } catch {}
             }
+
+            // Only show chat if request is approved (even if sold) — approved buyer can still chat
+            const showChat = hasMessages && (isMine || existingReq?.status === 'approved');
 
             // Build buyer action section
             let buyerActionHtml = '';
@@ -2045,9 +2048,6 @@
                     }
                 }
             }
-
-            // Only show chat if request is approved (or it's the seller's own item)
-            const showChat = hasMessages && (isMine || existingReq?.status === 'approved');
 
             document.getElementById('modalContent').innerHTML = `
                 <div class="modal-grid">
