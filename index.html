@@ -1840,8 +1840,48 @@
             await loadBooks();
             await loadMyListingsBadge();
             await refreshNotifBadges();
-            // Auto-refresh notification badges every 30 seconds
-            setInterval(refreshNotifBadges, 30000);
+
+            // ── SUPABASE REALTIME ─────────────────────────────────────────
+            db.channel('requests-realtime')
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'requests',
+                    filter: `seller_id=eq.${ME}`
+                }, async (payload) => {
+                    // New purchase request came in — notify seller
+                    if (payload.eventType === 'INSERT') {
+                        const buyerName = payload.new.buyer_name || 'A student';
+                        showToast(`🔔 ${buyerName} wants to buy your item!`, 'success');
+                    }
+                    await refreshNotifBadges();
+                    // Reload seller panel if open
+                    if (document.getElementById('sellerNotifPanel').classList.contains('open')) {
+                        await loadSellerNotifs();
+                    }
+                })
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'requests',
+                    filter: `buyer_id=eq.${ME}`
+                }, async (payload) => {
+                    // Notify buyer when their request status changes
+                    if (payload.new.status === 'approved') {
+                        showToast('🎉 Your request was approved! Chat is now open.', 'success');
+                    } else if (payload.new.status === 'declined') {
+                        showToast('❌ Your request was declined by the seller.', 'error');
+                    }
+                    await refreshNotifBadges();
+                    // Reload buyer panel if open
+                    if (document.getElementById('buyerNotifPanel').classList.contains('open')) {
+                        await loadBuyerNotifs();
+                    }
+                })
+                .subscribe();
+
+            // Fallback polling every 60s (in case realtime misses something)
+            setInterval(refreshNotifBadges, 60000);
         });
 
         async function checkSchema() {
@@ -1860,6 +1900,7 @@
             try {
                 let q = db.from('books').select('*').order('created_at', { ascending: false });
                 if (hasEnhanced) q = q.or('deal_completed.is.null,deal_completed.eq.false');
+                q = q.or("status.is.null,status.neq.sold");
                 const { data, error } = await q;
                 if (error) throw error;
                 allBooks = data || [];
@@ -1910,7 +1951,7 @@
             const isMine = ME === (b.seller_id || b.seller);
             const condClass = { Excellent:'cond-excellent', Good:'cond-good', Fair:'cond-fair', Poor:'cond-poor' }[b.condition] || '';
 
-            const isSold = b.deal_completed === true || b.available === false;
+            const isSold = b.deal_completed === true || b.available === false || b.status === 'sold';
             const availBadge = isSold
                 ? `<span class="availability-badge sold"><span class="availability-dot"></span>Sold</span>`
                 : `<span class="availability-badge available"><span class="availability-dot"></span>Available</span>`;
@@ -1956,7 +1997,7 @@
 
             const isMine = ME === (book.seller_id || book.seller);
             const initials = (book.seller || 'S').charAt(0).toUpperCase();
-            const isSold = book.deal_completed === true || book.available === false;
+            const isSold = book.deal_completed === true || book.available === false || book.status === 'sold';
 
             const availStatusHtml = isSold
                 ? `<span style="display:inline-flex;align-items:center;gap:6px;background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;padding:4px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;margin-bottom:12px">
@@ -2171,9 +2212,34 @@
 
         async function respondRequest(reqId, status) {
             try {
+                // Get the request details first
+                const { data: reqData, error: fetchErr } = await db
+                    .from('requests').select('book_id').eq('id', reqId).single();
+                if (fetchErr) throw fetchErr;
+
+                // Update this request status
                 const { error } = await db.from('requests').update({ status }).eq('id', reqId);
                 if (error) throw error;
-                showToast(status === 'approved' ? '✅ Request approved! Chat is now open.' : '❌ Request declined.', 'success');
+
+                if (status === 'approved') {
+                    // Mark the book as sold
+                    await db.from('books').update({ status: 'sold' }).eq('id', reqData.book_id);
+
+                    // Decline all other pending requests for the same book
+                    await db.from('requests')
+                        .update({ status: 'declined' })
+                        .eq('book_id', reqData.book_id)
+                        .eq('status', 'pending')
+                        .neq('id', reqId);
+
+                    showToast('✅ Approved! Book marked as sold & other requests declined.', 'success');
+
+                    // Reload books so sold items disappear from marketplace
+                    await loadBooks();
+                } else {
+                    showToast('❌ Request declined.', 'success');
+                }
+
                 await loadSellerNotifs();
                 await refreshNotifBadges();
             } catch (e) {
@@ -2411,7 +2477,7 @@
 
                 // Update stats
                 const total  = myListings.length;
-                const sold   = myListings.filter(b => b.deal_completed === true || b.available === false).length;
+                const sold   = myListings.filter(b => b.deal_completed === true || b.available === false || b.status === 'sold').length;
                 const active = total - sold;
 
                 document.getElementById('statTotal').textContent  = total;
@@ -2442,7 +2508,7 @@
         }
 
         function buildMyListingCard(b) {
-            const isSold = b.deal_completed === true || b.available === false;
+            const isSold = b.deal_completed === true || b.available === false || b.status === 'sold';
             const condColors = { Excellent:'#065F46', Good:'#1E40AF', Fair:'#92400E', Poor:'#991B1B' };
             const date = b.created_at ? new Date(b.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short' }) : '';
 
