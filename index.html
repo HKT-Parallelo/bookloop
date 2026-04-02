@@ -1885,10 +1885,8 @@
         });
 
         async function checkSchema() {
-            try {
-                await db.from('messages').select('id').limit(1);
-                hasMessages = true;
-            } catch {}
+            const { error: msgErr } = await db.from('messages').select('id').limit(1);
+            hasMessages = !msgErr;
             try {
                 const { error } = await db.from('books').select('meeting_venue,buyer_approved,seller_approved,deal_completed').limit(1).single();
                 hasEnhanced = !error;
@@ -2400,19 +2398,24 @@
         async function loadChat(bookId) {
             if (!hasMessages) return;
             try {
-                const { data } = await db.from('messages').select('*').eq('book_id', bookId).order('created_at', { ascending: true });
+                const { data, error } = await db.from('messages').select('*').eq('book_id', bookId).order('created_at', { ascending: true });
+                if (error) throw error;
                 const c = document.getElementById('chatMessages');
                 if (!c) return;
                 const msgs = data || [];
                 c.innerHTML = msgs.length ? msgs.map(m => {
                     const mine = m.sender_id === ME;
+                    const text = m.content || m.message || '';
                     return `<div class="msg ${mine ? 'mine' : ''}">
                         <div class="msg-name">${mine ? 'You' : (m.sender_name || 'Student')}</div>
-                        <div class="msg-bubble">${m.content}</div>
+                        <div class="msg-bubble">${text}</div>
                     </div>`;
                 }).join('') : `<p style="color:var(--muted);font-size:0.85rem;text-align:center">No messages yet. Start the conversation!</p>`;
                 c.scrollTop = c.scrollHeight;
-            } catch {}
+            } catch (e) {
+                const c = document.getElementById('chatMessages');
+                if (c) c.innerHTML = `<p style="color:var(--red);font-size:0.85rem;text-align:center">Could not load messages: ${e.message}</p>`;
+            }
         }
 
         async function sendMsg(bookId) {
@@ -2421,9 +2424,16 @@
             if (!text || !hasMessages) return;
             input.value = '';
             try {
-                await db.from('messages').insert([{ book_id: bookId, sender_id: ME, content: text }]);
+                const senderName = currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Student';
+                const { error } = await db.from('messages').insert([{
+                    book_id: bookId,
+                    sender_id: ME,
+                    sender_name: senderName,
+                    content: text
+                }]);
+                if (error) throw error;
                 await loadChat(bookId);
-            } catch (e) { showToast('Could not send message', 'error'); }
+            } catch (e) { showToast('Could not send message: ' + e.message, 'error'); }
         }
 
         // ── FILTERS ─────────────────────────────────────────────────────────
