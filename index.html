@@ -1991,14 +1991,6 @@
 
         async function openModal(id) {
             let book = allBooks.find(b => b.id === id || b.id === String(id));
-
-            // Book might be sold and filtered out of allBooks — fetch it directly
-            if (!book) {
-                try {
-                    const { data } = await db.from('books').select('*').eq('id', id).single();
-                    book = data;
-                } catch {}
-            }
             if (!book) {
                 // Book may be sold/filtered out of allBooks — fetch directly from DB
                 try {
@@ -2038,6 +2030,34 @@
 
             // Only show chat if request is approved (even if sold) — approved buyer can still chat
             const showChat = hasMessages && (isMine || existingReq?.status === 'approved');
+
+            // Compute days left for chat (15 days from approval)
+            let chatExpiryHtml = '';
+            if (showChat && existingReq?.approved_at) {
+                const approvedAt = new Date(existingReq.approved_at);
+                const expiresAt = new Date(approvedAt.getTime() + 15 * 24 * 60 * 60 * 1000);
+                const daysLeft = Math.ceil((expiresAt - Date.now()) / (1000 * 60 * 60 * 24));
+                if (daysLeft <= 3) {
+                    chatExpiryHtml = `<div style="background:#FEF3C7;border:1px solid #FDE68A;color:#92400E;padding:6px 12px;border-radius:8px;font-size:0.78rem;font-weight:600;margin-bottom:8px">⚠️ Chat closes in ${daysLeft} day${daysLeft !== 1 ? 's' : ''} — listing will be removed after that</div>`;
+                } else if (daysLeft > 0) {
+                    chatExpiryHtml = `<div style="background:#F0FDF4;border:1px solid #BBF7D0;color:#166534;padding:6px 12px;border-radius:8px;font-size:0.78rem;font-weight:600;margin-bottom:8px">🕐 Chat available for ${daysLeft} more day${daysLeft !== 1 ? 's' : ''}</div>`;
+                }
+            } else if (showChat && isMine) {
+                // seller view — fetch their approved request
+                try {
+                    const { data: sellerReq } = await db.from('requests').select('approved_at').eq('book_id', book.id).eq('status', 'approved').single();
+                    if (sellerReq?.approved_at) {
+                        const approvedAt = new Date(sellerReq.approved_at);
+                        const expiresAt = new Date(approvedAt.getTime() + 15 * 24 * 60 * 60 * 1000);
+                        const daysLeft = Math.ceil((expiresAt - Date.now()) / (1000 * 60 * 60 * 24));
+                        if (daysLeft <= 3) {
+                            chatExpiryHtml = `<div style="background:#FEF3C7;border:1px solid #FDE68A;color:#92400E;padding:6px 12px;border-radius:8px;font-size:0.78rem;font-weight:600;margin-bottom:8px">⚠️ Chat closes in ${daysLeft} day${daysLeft !== 1 ? 's' : ''} — listing will be removed after that</div>`;
+                        } else if (daysLeft > 0) {
+                            chatExpiryHtml = `<div style="background:#F0FDF4;border:1px solid #BBF7D0;color:#166534;padding:6px 12px;border-radius:8px;font-size:0.78rem;font-weight:600;margin-bottom:8px">🕐 Chat available for ${daysLeft} more day${daysLeft !== 1 ? 's' : ''}</div>`;
+                        }
+                    }
+                } catch {}
+            }
 
             // Build buyer action section
             let buyerActionHtml = '';
@@ -2102,6 +2122,7 @@
                     ${showChat ? `
                     <div class="chat-panel">
                         <h4>💬 Chat</h4>
+                        ${chatExpiryHtml}
                         <div class="chat-messages" id="chatMessages"><p style="color:var(--muted);font-size:0.85rem">Loading messages…</p></div>
                         <div class="chat-input-row">
                             <input class="chat-input" id="chatInput" placeholder="Type a message…"
@@ -2220,7 +2241,7 @@
                             <button class="req-btn req-btn-decline" onclick="respondRequest(${r.id}, 'declined')">❌ Decline</button>
                         </div>` : r.status === 'approved' ? `
                         <div class="req-actions">
-                            <button class="req-btn req-btn-chat" onclick="closeSellerNotifs();setTimeout(()=>openModal(${r.book_id}),150)">💬 Open Chat</button>
+                            <button class="req-btn req-btn-chat" onclick="closeSellerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
                             <button class="req-btn req-btn-decline" onclick="respondRequest(${r.id}, 'declined')">Revoke</button>
                         </div>` : '';
 
@@ -2331,7 +2352,7 @@
                     }[r.status] || '';
 
                     const chatBtn = r.status === 'approved'
-                        ? `<div class="req-actions"><button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();setTimeout(()=>openModal(${r.book_id}),150)">💬 Open Chat</button></div>`
+                        ? `<div class="req-actions"><button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button></div>`
                         : '';
 
                     return `<div class="req-card">
