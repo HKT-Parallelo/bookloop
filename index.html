@@ -2314,7 +2314,7 @@
                         </div>` : r.status === 'approved' ? `
                         <div class="req-actions">
                             <button class="req-btn req-btn-chat" onclick="closeSellerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
-                            <button class="req-btn req-btn-decline" onclick="if(confirm('Revoke approval? This will reset the book to available and delete the chat.')) respondRequest(${r.id}, 'declined')">↩️ Revoke</button>
+                            ${!r.item_received ? `<button class="req-btn req-btn-decline" onclick="if(confirm('Revoke approval? This will reset the book to available and delete the chat.')) respondRequest(${r.id}, 'declined')">↩️ Revoke</button>` : `<span style="font-size:0.78rem;color:var(--emerald);font-weight:700;align-self:center">📦 Item Received</span>`}
                         </div>
                         ${canRateBuyer ? `
                         <div class="rate-box" style="margin-top:10px">
