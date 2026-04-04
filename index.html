@@ -1846,6 +1846,7 @@
         let allBooks = [];
         let activeCondition = '';
         let chatInterval = null;
+        let realtimeChatChannel = null;
         let hasMessages = false;
         let hasEnhanced = false;
 
@@ -1859,20 +1860,18 @@
             await refreshNotifBadges();
 
             // ── SUPABASE REALTIME ─────────────────────────────────────────
-            db.channel('requests-realtime')
+
+            // 1. Seller: live incoming requests + request status changes
+            db.channel('seller-requests')
                 .on('postgres_changes', {
-                    event: '*',
+                    event: 'INSERT',
                     schema: 'public',
                     table: 'requests',
                     filter: `seller_id=eq.${ME}`
                 }, async (payload) => {
-                    // New purchase request came in — notify seller
-                    if (payload.eventType === 'INSERT') {
-                        const buyerName = payload.new.buyer_name || 'A student';
-                        showToast(`🔔 ${buyerName} wants to buy your item!`, 'success');
-                    }
+                    const buyerName = payload.new.buyer_name || 'A student';
+                    showToast(`🔔 ${buyerName} wants to buy your item!`, 'success');
                     await refreshNotifBadges();
-                    // Reload seller panel if open
                     if (document.getElementById('sellerNotifPanel').classList.contains('open')) {
                         await loadSellerNotifs();
                     }
@@ -1881,24 +1880,44 @@
                     event: 'UPDATE',
                     schema: 'public',
                     table: 'requests',
+                    filter: `seller_id=eq.${ME}`
+                }, async (payload) => {
+                    // item_received toggled — refresh seller panel live
+                    if (payload.new.item_received && !payload.old.item_received) {
+                        showToast('📦 Buyer marked the item as received!', 'success');
+                    }
+                    await refreshNotifBadges();
+                    if (document.getElementById('sellerNotifPanel').classList.contains('open')) {
+                        await loadSellerNotifs();
+                    }
+                })
+                .subscribe();
+
+            // 2. Buyer: live approval/decline notifications
+            db.channel('buyer-requests')
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'requests',
                     filter: `buyer_id=eq.${ME}`
                 }, async (payload) => {
-                    // Notify buyer when their request status changes
-                    if (payload.new.status === 'approved') {
+                    if (payload.new.status === 'approved' && payload.old.status !== 'approved') {
                         showToast('🎉 Your request was approved! Chat is now open.', 'success');
-                    } else if (payload.new.status === 'declined') {
+                    } else if (payload.new.status === 'declined' && payload.old.status !== 'declined') {
                         showToast('❌ Your request was declined by the seller.', 'error');
                     }
                     await refreshNotifBadges();
-                    // Reload buyer panel if open
                     if (document.getElementById('buyerNotifPanel').classList.contains('open')) {
                         await loadBuyerNotifs();
                     }
                 })
                 .subscribe();
 
-            // Fallback polling every 60s (in case realtime misses something)
-            setInterval(refreshNotifBadges, 60000);
+            // 3. Live chat messages — only active when modal is open
+            // (handled inside openModal via realtimeChatChannel)
+
+            // Fallback polling every 30s (safety net)
+            setInterval(refreshNotifBadges, 30000);
         });
 
         async function checkSchema() {
@@ -2186,7 +2205,27 @@
 
             if (showChat) {
                 await loadChat(id);
-                chatInterval = setInterval(() => loadChat(id), 4000);
+
+                // Cancel old polling interval (legacy fallback)
+                if (chatInterval) { clearInterval(chatInterval); chatInterval = null; }
+
+                // Unsubscribe previous realtime chat channel if any
+                if (realtimeChatChannel) {
+                    await db.removeChannel(realtimeChatChannel);
+                    realtimeChatChannel = null;
+                }
+
+                // Subscribe to live messages for this book
+                realtimeChatChannel = db.channel(`chat-${id}`)
+                    .on('postgres_changes', {
+                        event: 'INSERT',
+                        schema: 'public',
+                        table: 'messages',
+                        filter: `book_id=eq.${id}`
+                    }, async () => {
+                        await loadChat(id);
+                    })
+                    .subscribe();
             }
         }
 
@@ -2556,6 +2595,10 @@
         function closeModal() {
             document.getElementById('modalOverlay').classList.remove('open');
             if (chatInterval) { clearInterval(chatInterval); chatInterval = null; }
+            if (realtimeChatChannel) {
+                db.removeChannel(realtimeChatChannel);
+                realtimeChatChannel = null;
+            }
         }
 
         function handleOverlayClick(e) {
