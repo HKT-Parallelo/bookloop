@@ -2417,7 +2417,7 @@
             try {
                 const { data, error } = await db
                     .from('requests')
-                    .select('*, books(title, price, image)')
+                    .select('*, books(title, price, image, seller)')
                     .eq('buyer_id', ME)
                     .order('created_at', { ascending: false });
                 if (error) throw error;
@@ -2436,6 +2436,18 @@
                     return;
                 }
 
+                // Fetch existing buyer ratings to know if already rated
+                const approvedReqIds = reqs.filter(r => r.status === 'approved').map(r => r.id);
+                let alreadyRatedSet = new Set();
+                if (approvedReqIds.length) {
+                    const { data: myRatings } = await db.from('ratings')
+                        .select('request_id')
+                        .in('request_id', approvedReqIds)
+                        .eq('rater_id', ME)
+                        .eq('role', 'buyer');
+                    alreadyRatedSet = new Set((myRatings || []).map(r => r.request_id));
+                }
+
                 body.innerHTML = reqs.map(r => {
                     const title = r.books?.title || 'Item';
                     const price = r.books?.price || '—';
@@ -2447,11 +2459,36 @@
                         declined: `<span class="req-status-badge declined">❌ Seller declined your request</span>`
                     }[r.status] || '';
 
-                    const chatBtn = r.status === 'approved'
-                        ? `<div class="req-actions"><button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button></div>`
-                        : '';
+                    let actions = '';
+                    if (r.status === 'approved') {
+                        const alreadyRated = alreadyRatedSet.has(r.id);
+                        if (alreadyRated) {
+                            actions = `<div class="req-actions">
+                                <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
+                                <span style="font-size:0.78rem;color:var(--emerald);font-weight:600;align-self:center">✅ Rated</span>
+                            </div>`;
+                        } else if (r.item_received) {
+                            actions = `<div class="req-actions">
+                                <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
+                            </div>
+                            <div class="rate-box">
+                                <h5>⭐ Rate your seller</h5>
+                                <p>How was your experience with <strong>${r.books?.seller || 'the seller'}</strong>?</p>
+                                <div class="stars-row" id="starRow-${r.id}">
+                                    ${[1,2,3,4,5].map(n => `<button class="star-btn" data-val="${n}" onclick="selectBuyerStar('${r.id}',${n})" onmouseover="hoverBuyerStar('${r.id}',${n})" onmouseout="unhoverBuyerStar('${r.id}')">★</button>`).join('')}
+                                </div>
+                                <textarea class="rate-review" id="buyerRateReview-${r.id}" rows="2" placeholder="Leave a short review (optional)…"></textarea>
+                                <button class="btn-received" onclick="submitBuyerRatingFromNotif(${r.id}, '${r.seller_id}', ${r.book_id})">Submit Rating ⭐</button>
+                            </div>`;
+                        } else {
+                            actions = `<div class="req-actions">
+                                <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
+                                <button class="btn-received" style="font-size:0.82rem;padding:8px 14px" onclick="markReceivedFromNotif(${r.id}, ${r.book_id})">📦 Received?</button>
+                            </div>`;
+                        }
+                    }
 
-                    return `<div class="req-card">
+                    return `<div class="req-card" id="buyerreqcard-${r.id}">
                         <div class="req-card-top">
                             <div class="req-avatar" style="background:var(--lime-dark)">🛒</div>
                             <div class="req-info">
@@ -2461,7 +2498,7 @@
                             <div class="req-time">${time}</div>
                         </div>
                         ${statusBadge}
-                        ${chatBtn}
+                        ${actions}
                     </div>`;
                 }).join('');
             } catch (e) {
@@ -2808,6 +2845,54 @@
             document.querySelectorAll(`#sellerStarRow-${reqId} .star-btn`).forEach(b => {
                 b.style.color = parseInt(b.dataset.val) <= sel ? '#F59E0B' : '#E2E8F0';
             });
+        }
+
+        // Star helpers for buyer notif panel
+        const buyerStarSelected = {};
+        function selectBuyerStar(reqId, n) {
+            buyerStarSelected[reqId] = n;
+            document.querySelectorAll(`#starRow-${reqId} .star-btn`).forEach(b => {
+                b.classList.toggle('lit', parseInt(b.dataset.val) <= n);
+            });
+        }
+        function hoverBuyerStar(reqId, n) {
+            document.querySelectorAll(`#starRow-${reqId} .star-btn`).forEach(b => {
+                b.style.color = parseInt(b.dataset.val) <= n ? '#F59E0B' : '#E2E8F0';
+            });
+        }
+        function unhoverBuyerStar(reqId) {
+            const sel = buyerStarSelected[reqId] || 0;
+            document.querySelectorAll(`#starRow-${reqId} .star-btn`).forEach(b => {
+                b.style.color = parseInt(b.dataset.val) <= sel ? '#F59E0B' : '#E2E8F0';
+            });
+        }
+
+        async function markReceivedFromNotif(reqId, bookId) {
+            try {
+                const { error } = await db.from('requests').update({ item_received: true }).eq('id', reqId);
+                if (error) throw error;
+                showToast('📦 Marked as received! Please rate your seller.', 'success');
+                await loadBuyerNotifs();
+            } catch (e) { showToast('Error: ' + e.message, 'error'); }
+        }
+
+        async function submitBuyerRatingFromNotif(reqId, rateeId, bookId) {
+            const stars = buyerStarSelected[reqId] || 0;
+            if (!stars) { showToast('Please select a star rating!', 'error'); return; }
+            const review = document.getElementById(`buyerRateReview-${reqId}`)?.value.trim() || null;
+            const raterName = currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Student';
+            try {
+                const { error } = await db.from('ratings').insert([{
+                    book_id: bookId, request_id: reqId,
+                    rater_id: ME, rater_name: raterName,
+                    ratee_id: rateeId, role: 'buyer', stars, review
+                }]);
+                if (error) throw error;
+                showToast('⭐ Rating submitted! Thank you.', 'success');
+                delete buyerStarSelected[reqId];
+                await loadBuyerNotifs();
+                await loadBooks();
+            } catch (e) { showToast('Could not submit rating: ' + e.message, 'error'); }
         }
 
         async function markReceived(reqId, bookId) {
