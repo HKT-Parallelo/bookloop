@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BookLoop — Student Marketplace</title>
     <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Satoshi:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
     <style>
         :root {
@@ -1503,6 +1505,25 @@
         .btn-received:hover { background:#059669; }
         .buyer-rating-badge { display:inline-flex; align-items:center; gap:4px; background:#FEF3C7; border:1px solid #FDE68A; color:#92400E; border-radius:20px; padding:3px 10px; font-size:0.75rem; font-weight:700; }
 
+        /* ── QR SYSTEM ── */
+        .qr-box { background:var(--surface-3); border:1px solid var(--border); border-radius:var(--r-md); padding:16px; margin-top:10px; text-align:center; }
+        .qr-box h5 { font-size:0.88rem; font-weight:700; margin-bottom:4px; color:var(--ink); }
+        .qr-box p  { font-size:0.78rem; color:var(--muted); margin-bottom:12px; }
+        .qr-canvas-wrap { display:inline-block; padding:12px; background:white; border-radius:12px; border:2px solid var(--border); margin-bottom:10px; }
+        .qr-timer { font-size:0.75rem; color:var(--red); font-weight:700; margin-top:6px; }
+        .qr-timer.ok { color:var(--emerald); }
+        .btn-scan { background:var(--lime-dark); color:white; border:none; border-radius:10px; padding:10px 20px; font-family:'Satoshi',sans-serif; font-weight:700; font-size:0.9rem; cursor:pointer; transition:background 0.2s; width:100%; margin-top:6px; }
+        .btn-scan:hover { background:#4d7c0f; }
+        .scan-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
+        .scan-overlay h3 { color:white; font-size:1.1rem; font-weight:700; font-family:'Cabinet Grotesk',sans-serif; }
+        .scan-overlay p  { color:rgba(255,255,255,0.6); font-size:0.82rem; text-align:center; max-width:280px; }
+        .scan-box { width:280px; height:280px; border-radius:16px; overflow:hidden; position:relative; border:3px solid var(--lime-dark); }
+        .scan-box video { width:100%; height:100%; object-fit:cover; }
+        .scan-corners { position:absolute; inset:0; pointer-events:none; }
+        .scan-line { position:absolute; left:10%; right:10%; height:2px; background:var(--lime-dark); animation:scanMove 2s linear infinite; box-shadow:0 0 8px var(--lime); }
+        @keyframes scanMove { 0%{top:10%} 100%{top:90%} }
+        .btn-cancel-scan { background:rgba(255,255,255,0.15); color:white; border:1px solid rgba(255,255,255,0.3); border-radius:10px; padding:10px 28px; font-family:'Satoshi',sans-serif; font-weight:700; font-size:0.9rem; cursor:pointer; }
+
         /* ── FLOATING CHAT POPUP ── */
         .chat-popup {
             position:fixed; bottom:24px; right:24px; z-index:9999;
@@ -2175,7 +2196,7 @@
                     } else {
                         buyerActionHtml = `
                             <div class="req-note approved" style="margin-bottom:8px">✅ Seller approved! You can now chat below.</div>
-                            <button class="btn-received" onclick="markReceived(${existingReq.id}, ${book.id})">📦 Mark as Received</button>`;
+                            <button class="btn-scan" onclick="openQRScanner(${existingReq.id}, ${book.id})">📷 Scan Seller's QR to Confirm Receipt</button>`;
                     }
                 } else if (existingReq.status === 'declined') {
                     // Check if 30 mins have passed since decline — allow re-request
@@ -2409,7 +2430,10 @@
                         </div>` : r.status === 'approved' ? `
                         <div class="req-actions">
                             <button class="req-btn req-btn-chat" onclick="closeSellerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
-                            ${!r.item_received ? `<button class="req-btn req-btn-decline" onclick="if(confirm('Revoke approval? This will reset the book to available and delete the chat.')) respondRequest(${r.id}, 'declined')">↩️ Revoke</button>` : `<span style="font-size:0.78rem;color:var(--emerald);font-weight:700;align-self:center">📦 Item Received</span>`}
+                            ${!r.item_received
+    ? `<button class="req-btn req-btn-decline" onclick="if(confirm('Revoke approval? This will reset the book to available and delete the chat.')) respondRequest(${r.id}, 'declined')">↩️ Revoke</button>`
+    : `<span style="font-size:0.78rem;color:var(--emerald);font-weight:700;align-self:center">✅ Item Received</span>`}
+${!r.item_received ? `<button class="req-btn req-btn-chat" style="background:var(--lime-dark);border-color:var(--lime-dark)" onclick="generateQR(${r.id}, '${r.book_id}')">🔲 Generate QR</button>` : ''}
                         </div>
                         ${canRateBuyer ? `
                         <div class="rate-box" style="margin-top:10px">
@@ -2579,7 +2603,7 @@
                         } else {
                             actions = `<div class="req-actions">
                                 <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
-                                <button class="btn-received" style="font-size:0.82rem;padding:8px 14px" onclick="markReceivedFromNotif(${r.id}, ${r.book_id})">📦 Received?</button>
+                                <button class="btn-scan" style="width:auto;font-size:0.82rem;padding:8px 14px;margin-top:0" onclick="openQRScanner(${r.id}, ${r.book_id})">📷 Scan QR</button>
                             </div>`;
                         }
                     }
@@ -3054,6 +3078,199 @@
             document.querySelectorAll(`#starRow-${reqId} .star-btn`).forEach(b => {
                 b.style.color = parseInt(b.dataset.val) <= sel ? '#F59E0B' : '#E2E8F0';
             });
+        }
+
+        // ── QR SYSTEM ────────────────────────────────────────────────────────────
+        let qrTimerInterval = null;
+        let scanAnimFrame   = null;
+        let scanStream      = null;
+
+        // SELLER: Generate a unique QR code for this deal
+        async function generateQR(reqId, bookId) {
+            // Generate a unique token
+            const token = crypto.randomUUID();
+            const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 min
+
+            try {
+                const { error } = await db.from('requests')
+                    .update({ qr_token: token, qr_expires_at: expiresAt })
+                    .eq('id', reqId);
+                if (error) throw error;
+
+                showQRModal(token, expiresAt, reqId, bookId);
+            } catch (e) {
+                showToast('Could not generate QR: ' + e.message, 'error');
+            }
+        }
+
+        function showQRModal(token, expiresAt, reqId, bookId) {
+            // Remove any existing QR modal
+            document.getElementById('qrDisplayModal')?.remove();
+            clearInterval(qrTimerInterval);
+
+            const overlay = document.createElement('div');
+            overlay.id = 'qrDisplayModal';
+            overlay.className = 'scan-overlay';
+            overlay.innerHTML = `
+                <h3>🔲 Show this QR to the Buyer</h3>
+                <p>Ask the buyer to scan this code when they receive the item. Valid for 15 minutes.</p>
+                <div class="qr-canvas-wrap">
+                    <div id="qrCodeCanvas"></div>
+                </div>
+                <div class="qr-timer" id="qrTimerLabel">⏳ Calculating...</div>
+                <button class="btn-cancel-scan" onclick="closeQRModal()">Close</button>`;
+            document.body.appendChild(overlay);
+
+            // Generate QR code
+            new QRCode(document.getElementById('qrCodeCanvas'), {
+                text: token,
+                width: 220, height: 220,
+                colorDark: '#000000', colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Countdown timer
+            function updateTimer() {
+                const remaining = Math.max(0, new Date(expiresAt) - Date.now());
+                const mins = Math.floor(remaining / 60000);
+                const secs = Math.floor((remaining % 60000) / 1000);
+                const label = document.getElementById('qrTimerLabel');
+                if (!label) { clearInterval(qrTimerInterval); return; }
+                if (remaining === 0) {
+                    label.textContent = '❌ QR Expired — please generate a new one';
+                    label.className = 'qr-timer';
+                    clearInterval(qrTimerInterval);
+                } else {
+                    label.textContent = `⏳ Expires in ${mins}:${String(secs).padStart(2,'0')}`;
+                    label.className = remaining < 60000 ? 'qr-timer' : 'qr-timer ok';
+                }
+            }
+            updateTimer();
+            qrTimerInterval = setInterval(updateTimer, 1000);
+
+            // Listen for real-time confirmation (when buyer scans)
+            const ch = db.channel(`qr-confirm-${reqId}`)
+                .on('postgres_changes', {
+                    event: 'UPDATE', schema: 'public',
+                    table: 'requests', filter: `id=eq.${reqId}`
+                }, async (payload) => {
+                    if (payload.new.item_received) {
+                        clearInterval(qrTimerInterval);
+                        closeQRModal();
+                        await db.removeChannel(ch);
+                        showToast('✅ Buyer scanned the QR! Item marked as received.', 'success');
+                        await loadSellerNotifs();
+                    }
+                }).subscribe();
+        }
+
+        function closeQRModal() {
+            document.getElementById('qrDisplayModal')?.remove();
+            clearInterval(qrTimerInterval);
+        }
+
+        // BUYER: Open camera to scan QR
+        async function openQRScanner(reqId, bookId) {
+            // Close buyer notifs panel so overlay is visible
+            document.getElementById('buyerNotifPanel')?.classList.remove('open');
+
+            const overlay = document.createElement('div');
+            overlay.id = 'qrScanOverlay';
+            overlay.className = 'scan-overlay';
+            overlay.innerHTML = `
+                <h3>📷 Scan Seller's QR Code</h3>
+                <p>Point your camera at the QR code the seller is showing you.</p>
+                <div class="scan-box">
+                    <video id="scanVideo" autoplay playsinline muted></video>
+                    <div class="scan-corners">
+                        <div class="scan-line"></div>
+                    </div>
+                </div>
+                <p id="scanStatus" style="color:rgba(255,255,255,0.5);font-size:0.78rem">Looking for QR code...</p>
+                <button class="btn-cancel-scan" onclick="closeScanOverlay()">Cancel</button>`;
+            document.body.appendChild(overlay);
+
+            try {
+                scanStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+                const video = document.getElementById('scanVideo');
+                video.srcObject = scanStream;
+                video.play();
+
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                function scanFrame() {
+                    if (!document.getElementById('qrScanOverlay')) return;
+                    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                        canvas.width  = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const code = jsQR(imageData.data, imageData.width, imageData.height);
+                        if (code) {
+                            verifyQRToken(code.data, reqId, bookId);
+                            return;
+                        }
+                    }
+                    scanAnimFrame = requestAnimationFrame(scanFrame);
+                }
+                scanAnimFrame = requestAnimationFrame(scanFrame);
+
+            } catch (e) {
+                document.getElementById('scanStatus').textContent =
+                    '⚠️ Camera access denied. Please allow camera permission.';
+            }
+        }
+
+        function closeScanOverlay() {
+            document.getElementById('qrScanOverlay')?.remove();
+            if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+            if (scanAnimFrame) { cancelAnimationFrame(scanAnimFrame); scanAnimFrame = null; }
+        }
+
+        async function verifyQRToken(scannedToken, reqId, bookId) {
+            closeScanOverlay();
+            showToast('🔍 Verifying QR...', 'success');
+
+            try {
+                // Fetch the request and validate token + expiry
+                const { data: req, error } = await db.from('requests')
+                    .select('qr_token, qr_expires_at, item_received')
+                    .eq('id', reqId).single();
+                if (error) throw error;
+
+                if (req.item_received) {
+                    showToast('✅ Item already marked as received!', 'success');
+                    return;
+                }
+                if (!req.qr_token) {
+                    showToast('❌ Seller has not generated a QR yet. Ask them to generate one.', 'error');
+                    return;
+                }
+                if (req.qr_token !== scannedToken) {
+                    showToast('❌ Invalid QR code. Make sure you are scanning the right code.', 'error');
+                    return;
+                }
+                if (new Date(req.qr_expires_at) < new Date()) {
+                    showToast('❌ QR code has expired. Ask the seller to generate a new one.', 'error');
+                    return;
+                }
+
+                // Valid! Mark as received and clear the token
+                const { error: updateErr } = await db.from('requests')
+                    .update({ item_received: true, qr_token: null, qr_expires_at: null })
+                    .eq('id', reqId);
+                if (updateErr) throw updateErr;
+
+                showToast('✅ Item received confirmed! Please rate your seller.', 'success');
+                await loadBuyerNotifs();
+                await loadBooks();
+
+            } catch (e) {
+                showToast('Could not verify QR: ' + e.message, 'error');
+            }
         }
 
         async function markReceivedFromNotif(reqId, bookId) {
