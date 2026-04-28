@@ -1345,25 +1345,336 @@
             border-left: 3px solid rgba(255,255,255,0.4);
         }
 
-        /* ─── RESPONSIVE ─────────────────────────── */
+        /* ═══════════════════════════════════════════
+           RESPONSIVE — Mobile First
+           Breakpoints:
+           480px  = small phones
+           640px  = large phones
+           768px  = tablets
+           1024px = small laptops
+        ═══════════════════════════════════════════ */
+
+        /* ── TABLET (max 1024px) ─────────────────── */
         @media (max-width: 1024px) {
-            .page-body { grid-template-columns: 1fr; }
-            .sidebar { position: static; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: end; }
+            .page-body {
+                grid-template-columns: 1fr;
+                padding: 20px;
+                gap: 20px;
+            }
+
+            .sidebar {
+                position: static;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 14px;
+                align-items: end;
+                border-radius: var(--r-md);
+                padding: 16px;
+            }
+
             .sidebar-title { display: none; }
-            .reset-filters { margin-top: 8px; }
+            .reset-filters { margin-top: 0; }
+
+            .hero-strip { padding: 40px 24px; }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        /* ── LARGE PHONE (max 768px) ─────────────── */
+        @media (max-width: 768px) {
+
+            /* Topbar — compact */
+            .topbar-inner {
+                padding: 0 14px;
+                height: 60px;
+                gap: 10px;
+            }
+
+            .badge-count { display: none; }
+
+            /* Search bar — smaller */
+            .search-input {
+                height: 38px;
+                font-size: 0.85rem;
+            }
+
+            /* Sell button — icon only */
+            .sell-btn span { display: none; }
+            .sell-btn {
+                padding: 9px 12px;
+                border-radius: 10px;
+                min-width: 38px;
+                justify-content: center;
+            }
+
+            /* Hero — stacked */
+            .hero-strip { padding: 28px 16px; }
+            .hero-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .hero-text h1 { font-size: 1.8rem; }
+            .hero-text p  { font-size: 0.9rem; }
+            .hero-stats { display: none; }
+            .hero-badge { font-size: 0.72rem; }
+
+            /* Main layout */
+            .page-body { padding: 12px; gap: 12px; }
+
+            /* Sidebar — horizontal scrollable filter chips */
+            .sidebar {
+                display: flex;
+                flex-direction: row;
+                overflow-x: auto;
+                gap: 10px;
+                padding: 12px;
+                border-radius: 14px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            .sidebar::-webkit-scrollbar { display: none; }
+
+            .filter-group {
+                flex-shrink: 0;
+                margin-bottom: 0;
+                min-width: 130px;
+            }
+
+            .filter-label { font-size: 0.72rem; margin-bottom: 5px; }
+
+            .filter-select {
+                padding: 7px 28px 7px 10px;
+                font-size: 0.8rem;
+                border-radius: 10px;
+            }
+
+            .condition-pills {
+                flex-direction: row;
+                gap: 6px;
+                flex-wrap: nowrap;
+            }
+
+            .condition-pill {
+                flex-shrink: 0;
+                padding: 6px 10px;
+                font-size: 0.75rem;
+                border-radius: 20px;
+                white-space: nowrap;
+            }
+
+            .reset-filters {
+                flex-shrink: 0;
+                align-self: flex-end;
+                white-space: nowrap;
+                padding: 7px 14px;
+                font-size: 0.78rem;
+                border-radius: 20px;
+                min-width: auto;
+            }
+
+            /* Products grid — 2 columns */
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            /* Product cards — compact */
+            .card-img { height: 150px; }
+            .card-body { padding: 10px; }
+            .card-title { font-size: 0.88rem; }
+            .card-price { font-size: 1.1rem; }
+            .card-seller { display: none; }
+            .card-delete { opacity: 1; width: 26px; height: 26px; }
+
+            /* Products header */
+            .products-header { margin-bottom: 12px; }
+            .products-count { font-size: 0.82rem; }
+
+            /* Modal — full screen on mobile */
+            .modal-overlay { padding: 0; align-items: flex-end; }
+            .modal-box {
+                border-radius: 24px 24px 0 0;
+                max-height: 92vh;
+                width: 100%;
+                animation: modalInMobile 0.35s cubic-bezier(0.34,1.2,0.64,1);
+            }
+
+            @keyframes modalInMobile {
+                from { transform: translateY(100%); }
+                to   { transform: translateY(0); }
+            }
+
+            .modal-grid { grid-template-columns: 1fr; }
+            .modal-img { border-radius: 24px 24px 0 0; height: 220px; }
+            .modal-info { padding: 18px; }
+            .modal-title { font-size: 1.3rem; }
+            .modal-close { top: 12px; right: 12px; }
+            .chat-panel { padding: 16px; }
+
+            /* Notification panels — full screen */
+            .notif-panel { width: 100vw; }
+
+            /* My listings panel — full screen */
+            .my-listings-panel { width: 100vw; }
+
+            /* Toast — bottom center on mobile */
+            .toast {
+                bottom: 16px;
+                right: 16px;
+                left: 16px;
+                max-width: none;
+                font-size: 0.84rem;
+            }
+        }
+
+        /* ── SMALL PHONE (max 480px) ─────────────── */
+        @media (max-width: 480px) {
+
+            /* Topbar */
+            .topbar-inner {
+                padding: 0 10px;
+                height: 56px;
+                gap: 8px;
+            }
+
+            /* Logo — hide text, show icon only */
+            .logo-wrap img {
+                height: 30px;
+            }
+
+            /* Search — full flex */
+            .search-wrap { flex: 1; }
+            .search-input {
+                height: 36px;
+                font-size: 0.8rem;
+                padding-left: 36px;
+            }
+
+            /* Notif buttons — smaller */
+            .notif-btn { width: 36px; height: 36px; border-radius: 10px; }
+
+            /* Hero */
+            .hero-strip { padding: 22px 14px; }
+            .hero-text h1 { font-size: 1.55rem; letter-spacing: -0.5px; }
+            .hero-text p  { font-size: 0.82rem; }
+            .hero-badge { font-size: 0.68rem; padding: 4px 10px; }
+
+            /* Page body */
+            .page-body { padding: 10px; gap: 10px; }
+
+            /* Cards — 2 columns, very compact */
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .card-img { height: 130px; }
+            .card-body { padding: 8px; }
+            .card-title { font-size: 0.82rem; -webkit-line-clamp: 2; }
+            .card-price { font-size: 1rem; }
+            .card-category { font-size: 0.65rem; }
+
+            .availability-badge { font-size: 0.65rem; padding: 2px 7px; }
+
+            /* Condition badge on card — smaller */
+            .card-condition { font-size: 0.62rem; padding: 2px 6px; top: 6px; left: 6px; }
+
+            /* Filter sidebar */
+            .filter-group { min-width: 110px; }
+            .filter-select { font-size: 0.75rem; padding: 6px 24px 6px 8px; }
+            .condition-pill { font-size: 0.7rem; padding: 5px 8px; }
+
+            /* Modal */
+            .modal-img { height: 180px; }
+            .modal-info { padding: 14px; }
+            .modal-title { font-size: 1.15rem; }
+            .modal-price { font-size: 1.6rem; }
+            .meta-chips { gap: 6px; }
+            .meta-chip { font-size: 0.75rem; padding: 4px 10px; }
+
+            /* Request button */
+            .btn-request { padding: 12px; font-size: 0.85rem; }
+
+            /* Notification panel header */
+            .notif-panel-header { padding: 20px 16px 16px; }
+            .notif-panel-header h2 { font-size: 1.2rem; }
+            .notif-panel-body { padding: 10px; }
+
+            /* Request cards */
+            .req-card { padding: 12px; }
+            .req-btn { padding: 8px 10px; font-size: 0.78rem; }
+
+            /* My listings */
+            .panel-header { padding: 18px 16px 14px; }
+            .my-listing-card { padding: 10px; }
+            .my-listing-img { width: 60px; height: 60px; }
+        }
+
+        /* ── BOTTOM NAV BAR (mobile only) ────────── */
+        .bottom-nav {
+            display: none;
         }
 
         @media (max-width: 768px) {
-            .topbar-inner { padding: 0 16px; }
-            .hero-strip { padding: 28px 16px; }
-            .hero-stats { display: none; }
-            .page-body { padding: 16px; }
-            .sidebar { grid-template-columns: 1fr 1fr; }
-            .modal-grid { grid-template-columns: 1fr; }
-            .modal-img { border-radius: var(--r-xl) var(--r-xl) 0 0; height: 240px; }
-            .modal-info { padding: 20px; }
-            .chat-panel { padding: 16px; }
+            .bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0; left: 0; right: 0;
+                background: rgba(255,255,255,0.95);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-top: 1px solid rgba(226,232,240,0.8);
+                padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+                z-index: 90;
+                box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
+            }
+
+            .bottom-nav-item {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 3px;
+                padding: 4px 0;
+                cursor: pointer;
+                border: none;
+                background: none;
+                color: var(--muted);
+                font-family: 'Satoshi', sans-serif;
+                font-size: 0.65rem;
+                font-weight: 600;
+                text-decoration: none;
+                transition: color 0.2s;
+                position: relative;
+            }
+
+            .bottom-nav-item.active { color: var(--lime-dark); }
+            .bottom-nav-item:hover  { color: var(--ink); }
+
+            .bottom-nav-item svg { width: 22px; height: 22px; }
+
+            .bottom-nav-badge {
+                position: absolute;
+                top: 0; right: calc(50% - 18px);
+                min-width: 16px; height: 16px;
+                background: var(--red);
+                color: white;
+                font-size: 0.6rem; font-weight: 800;
+                border-radius: 20px;
+                display: none;
+                align-items: center; justify-content: center;
+                padding: 0 3px;
+                border: 1.5px solid white;
+            }
+
+            .bottom-nav-badge.show { display: flex; }
+
+            /* Push page content up so bottom nav doesn't cover it */
+            body { padding-bottom: 70px; }
+
+            /* Hide topbar bells on mobile — moved to bottom nav */
+            #sellerBellBtn, #buyerBellBtn { display: none !important; }
         }
+
 
         /* ─── MY LISTINGS PANEL ──────────────────── */
         .my-listings-overlay {
@@ -2939,20 +3250,26 @@ ${!r.item_received ? `<button class="req-btn req-btn-chat" style="background:var
                 const sellerCount = (sellerData || []).length;
                 const sellerDot = document.getElementById('sellerBellDot');
                 const sellerBtn = document.getElementById('sellerBellBtn');
+
+                // Bottom nav badges
+                const bottomSellerDot = document.getElementById('bottomSellerDot');
+                const bottomBuyerDot  = document.getElementById('bottomBuyerDot');
+
                 if (sellerCount > 0) {
                     sellerDot.textContent = sellerCount;
                     sellerDot.classList.add('show');
                     sellerBtn.style.display = 'flex';
+                    if (bottomSellerDot) { bottomSellerDot.textContent = sellerCount; bottomSellerDot.classList.add('show'); }
                 } else {
                     sellerDot.classList.remove('show');
-                    // Still show bell if seller has any listings
+                    if (bottomSellerDot) bottomSellerDot.classList.remove('show');
                 }
 
                 // Show seller bell if user has any listings
                 const { data: myItems } = await db.from('books').select('id').eq('seller_id', ME).limit(1);
                 if ((myItems || []).length > 0) sellerBtn.style.display = 'flex';
 
-                // Buyer bell — count approved requests (new approvals)
+                // Buyer bell — count approved requests
                 const { data: buyerData } = await db
                     .from('requests').select('id, status').eq('buyer_id', ME);
                 const buyerReqs = buyerData || [];
@@ -2961,8 +3278,10 @@ ${!r.item_received ? `<button class="req-btn req-btn-chat" style="background:var
                 if (newApprovals > 0) {
                     buyerDot.textContent = newApprovals;
                     buyerDot.classList.add('show');
+                    if (bottomBuyerDot) { bottomBuyerDot.textContent = newApprovals; bottomBuyerDot.classList.add('show'); }
                 } else {
                     buyerDot.classList.remove('show');
+                    if (bottomBuyerDot) bottomBuyerDot.classList.remove('show');
                 }
             } catch {}
         }
@@ -3660,5 +3979,53 @@ ${!r.item_received ? `<button class="req-btn req-btn-chat" style="background:var
             toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
         }
     </script>
+    <!-- MOBILE BOTTOM NAV -->
+    <nav class="bottom-nav" id="bottomNav">
+        <!-- Home -->
+        <a class="bottom-nav-item active" href="#">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            Home
+        </a>
+
+        <!-- Search -->
+        <button class="bottom-nav-item" onclick="document.getElementById('searchInput').focus();window.scrollTo({top:0,behavior:'smooth'})">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            Search
+        </button>
+
+        <!-- Sell -->
+        <a class="bottom-nav-item" href="sell_item_fixed.html" style="color:var(--lime-dark)">
+            <div style="width:44px;height:44px;background:linear-gradient(135deg,var(--lime-dark),#4d7c0f);border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(101,163,13,0.4);margin-top:-14px;border:3px solid white;">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+            </div>
+            Sell
+        </a>
+
+        <!-- Notifications (seller) -->
+        <button class="bottom-nav-item" onclick="openSellerNotifs()" id="bottomSellerBtn">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <span class="bottom-nav-badge" id="bottomSellerDot"></span>
+            Requests
+        </button>
+
+        <!-- My Requests (buyer) -->
+        <button class="bottom-nav-item" onclick="openBuyerNotifs()" id="bottomBuyerBtn">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            <span class="bottom-nav-badge" id="bottomBuyerDot"></span>
+            My Reqs
+        </button>
+    </nav>
+
 </body>
 </html>
