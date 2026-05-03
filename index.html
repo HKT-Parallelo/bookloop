@@ -2062,6 +2062,42 @@
         .btn-received:hover { background:#059669; }
         .buyer-rating-badge { display:inline-flex; align-items:center; gap:4px; background:#FEF3C7; border:1px solid #FDE68A; color:#92400E; border-radius:20px; padding:3px 10px; font-size:0.75rem; font-weight:700; }
 
+        /* ── WAITING LIST ── */
+        .req-status-badge.waiting { background:#EDE9FE; color:#5B21B6; border:1px solid #DDD6FE; }
+        .active-deal-section { background:#F0FDF4; border:1.5px solid #A7F3D0; border-radius:12px; padding:12px 14px; margin-bottom:12px; }
+        .active-deal-label { font-size:0.72rem; font-weight:800; color:#065F46; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
+        .waiting-list-section { margin-top:14px; padding-top:14px; border-top:2px dashed var(--border); }
+        .waiting-list-title { font-size:0.78rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
+
+        /* ── BUYER MESSAGE BOX ── */
+        .buyer-msg-box { margin-bottom:10px; }
+        .buyer-msg-box label { font-size:0.82rem; font-weight:700; color:var(--ink-3); display:block; margin-bottom:6px; }
+        .buyer-msg-input { width:100%; border:1.5px solid var(--border); border-radius:12px; padding:10px 14px; font-family:'Satoshi',sans-serif; font-size:0.85rem; color:var(--ink); background:var(--surface); resize:none; outline:none; transition:border-color 0.15s; }
+        .buyer-msg-input:focus { border-color:var(--lime-dark); }
+        .buyer-msg-counter { font-size:0.72rem; color:var(--muted-2); text-align:right; margin-top:3px; }
+        .buyer-msg-counter.warn { color:var(--red); }
+        .req-buyer-msg { background:var(--surface-2); border-left:3px solid var(--lime-dark); border-radius:0 8px 8px 0; padding:8px 12px; margin:8px 0; font-size:0.82rem; color:var(--ink-3); font-style:italic; line-height:1.5; }
+
+        /* ── WATCHLIST ── */
+        .btn-watchlist { width:38px; height:38px; border-radius:50%; border:1.5px solid var(--border); background:var(--surface-2); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.1rem; transition:all 0.2s; flex-shrink:0; }
+        .btn-watchlist:hover { border-color:#EF4444; background:#FEE2E2; transform:scale(1.1); }
+        .btn-watchlist.saved { background:#FEE2E2; border-color:#EF4444; }
+
+        /* ── SIMILAR PRODUCTS ── */
+        .similar-section { padding:20px 24px; border-top:1px solid var(--border); }
+        .similar-section h4 { font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:1rem; color:var(--ink); margin-bottom:12px; }
+        .similar-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+        .similar-card { border:1px solid var(--border); border-radius:12px; overflow:hidden; cursor:pointer; transition:transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
+        .similar-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-md); border-color:var(--lime-dark); }
+        .similar-img { width:100%; height:80px; object-fit:cover; background:var(--surface-3); }
+        .similar-body { padding:8px 10px; }
+        .similar-title { font-size:0.78rem; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:3px; }
+        .similar-price { font-size:0.82rem; font-weight:900; font-family:'Cabinet Grotesk',sans-serif; color:var(--ink); }
+
+        /* ── UNSEND ── */
+        .btn-unsend { padding:8px 16px; border-radius:20px; border:1.5px solid #FECACA; background:#FEE2E2; color:#991B1B; font-family:'Satoshi',sans-serif; font-size:0.8rem; font-weight:700; cursor:pointer; transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; }
+        .btn-unsend:hover { background:#FCA5A5; border-color:#F87171; }
+
         /* ── QR SYSTEM ── */
         .qr-box { background:var(--surface-3); border:1px solid var(--border); border-radius:var(--r-md); padding:16px; margin-top:10px; text-align:center; }
         .qr-box h5 { font-size:0.88rem; font-weight:700; margin-bottom:4px; color:var(--ink); }
@@ -2210,6 +2246,12 @@
                             <div class="dropdown-name" id="dropdownName">Loading…</div>
                             <div class="dropdown-email" id="dropdownEmail"></div>
                         </div>
+                        <button class="dropdown-item" onclick="openWatchlistPanel()">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                            </svg>
+                            My Watchlist
+                        </button>
                         <button class="dropdown-item" onclick="openMyListings()">
                             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
@@ -2341,6 +2383,20 @@
 
     <!-- MY LISTINGS PANEL -->
     <div class="my-listings-overlay" id="myListingsOverlay" onclick="closeMyListings()"></div>
+    <!-- WATCHLIST PANEL -->
+    <div class="my-listings-panel" id="watchlistPanel" style="right:-440px">
+        <div class="panel-header">
+            <div class="panel-header-left">
+                <h2>❤️ My Watchlist</h2>
+                <p id="watchlistSubtitle">Items you've saved</p>
+            </div>
+            <button class="panel-close" onclick="closeWatchlistPanel()">×</button>
+        </div>
+        <div class="panel-body" id="watchlistBody">
+            <div class="panel-loader">Loading…</div>
+        </div>
+    </div>
+
     <div class="my-listings-panel" id="myListingsPanel">
         <div class="panel-header">
             <div class="panel-header-left">
@@ -2409,7 +2465,10 @@
     <!-- PRODUCT MODAL -->
     <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
         <div class="modal-box" id="modalBox">
-            <button class="modal-close" onclick="closeModal()">×</button>
+            <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 16px 0;position:sticky;top:0;z-index:10;background:var(--surface)">
+                <button class="btn-watchlist" id="watchlistBtn" onclick="toggleWatchlist()" title="Save to Watchlist">🤍</button>
+                <button class="modal-close" style="position:static;float:none;margin:0" onclick="closeModal()">×</button>
+            </div>
             <div id="modalContent"></div>
         </div>
     </div>
@@ -2787,11 +2846,28 @@
             let buyerActionHtml = '';
             if (!isMine && !isSold) {
                 if (!existingReq) {
-                    buyerActionHtml = `<button class="btn-request" id="reqBtn" onclick="sendRequest(${book.id})">
-                        🛒 Request to Buy
-                    </button>`;
+                    buyerActionHtml = `
+                        <div class="buyer-msg-box">
+                            <label>💬 Message to seller <span style="color:var(--muted-2);font-weight:400">(optional)</span></label>
+                            <textarea class="buyer-msg-input" id="buyerMsgInput" rows="3"
+                                placeholder="Hi! I'm a sem 2 student and really need this. Can we meet at the library? 🙏"
+                                maxlength="150"
+                                oninput="const c=document.getElementById('buyerMsgCount');c.textContent=this.value.length+' / 150';c.className='buyer-msg-counter'+(this.value.length>130?' warn':'')"></textarea>
+                            <div class="buyer-msg-counter" id="buyerMsgCount">0 / 150</div>
+                        </div>
+                        <button class="btn-request" id="reqBtn" onclick="sendRequest(${book.id})">
+                            🛒 Request to Buy
+                        </button>`;
                 } else if (existingReq.status === 'pending') {
-                    buyerActionHtml = `<div class="req-note pending">⏳ Request sent — waiting for seller approval</div>`;
+                    buyerActionHtml = `
+                        <div class="req-note pending" style="margin-bottom:8px">⏳ Request sent — waiting for seller approval</div>
+                        <button class="btn-unsend" onclick="unsendRequest(${existingReq.id}, ${book.id})">↩️ Unsend Request</button>`;
+                } else if (existingReq.status === 'waiting') {
+                    buyerActionHtml = `
+                        <div class="req-note" style="background:#EDE9FE;color:#5B21B6;border:1px solid #DDD6FE;padding:10px 14px;border-radius:20px;font-size:0.83rem;font-weight:600;margin-bottom:8px">
+                            🕐 You're in the waiting list — seller has an active deal. You'll be notified if it opens up!
+                        </div>
+                        <button class="btn-unsend" onclick="unsendRequest(${existingReq.id}, ${book.id})">↩️ Leave Queue</button>`;
                 } else if (existingReq.status === 'approved') {
                     const alreadyRated = (existingReq.ratings || []).some(r => r.role === 'buyer' && r.rater_id === ME);
                     if (existingReq.item_received && alreadyRated) {
@@ -2887,6 +2963,32 @@
                     </div>` : ''}
                 </div>`;
 
+            // Similar products
+            const similar = allBooks
+                .filter(b => b.id !== book.id && b.category === book.category && b.status !== 'sold')
+                .slice(0, 6);
+            const similarHtml = similar.length ? `
+                <div class="similar-section">
+                    <h4>🔍 Similar Items</h4>
+                    <div class="similar-grid">
+                        ${similar.map(s => `
+                            <div class="similar-card" onclick="openModal(${s.id})">
+                                <img class="similar-img"
+                                     src="${s.image || 'https://placehold.co/160x80/F1F5F9/94A3B8?text=?'}"
+                                     onerror="this.src='https://placehold.co/160x80/F1F5F9/94A3B8?text=?'">
+                                <div class="similar-body">
+                                    <div class="similar-title">${s.title}</div>
+                                    <div class="similar-price">₹${s.price}</div>
+                                </div>
+                            </div>`).join('')}
+                    </div>
+                </div>` : '';
+            document.getElementById('modalContent').innerHTML += similarHtml;
+
+            // Watchlist heart
+            window._currentModalBookId = book.id;
+            updateWatchlistBtn(book.id);
+
             document.getElementById('modalOverlay').classList.add('open');
 
             if (showChat) {
@@ -2939,13 +3041,15 @@
                     .eq('buyer_id', ME)
                     .eq('status', 'declined');
 
+                const buyerMsg = document.getElementById('buyerMsgInput')?.value.trim() || null;
                 const { error } = await db.from('requests').insert([{
-                    book_id:     book.id,
-                    buyer_id:    ME,
-                    buyer_name:  buyerName,
-                    buyer_email: currentUser.email,
-                    seller_id:   book.seller_id,
-                    status:      'pending'
+                    book_id:       book.id,
+                    buyer_id:      ME,
+                    buyer_name:    buyerName,
+                    buyer_email:   currentUser.email,
+                    seller_id:     book.seller_id,
+                    status:        'pending',
+                    buyer_message: buyerMsg
                 }]);
                 if (error) throw error;
 
@@ -3018,7 +3122,13 @@
                     .filter(r => r.role === 'seller' && r.rater_id === ME)
                     .map(r => r.request_id));
 
-                body.innerHTML = reqs.map(r => {
+                // Group: active deal first, then waiting, then pending, then declined
+                const activeDeal = reqs.find(r => r.status === 'approved');
+                const waitingList = reqs.filter(r => r.status === 'waiting');
+                const pendingList = reqs.filter(r => r.status === 'pending');
+                const otherList   = reqs.filter(r => r.status === 'declined');
+
+                function buildReqCard(r) {
                     const title   = r.books?.title || 'Item';
                     const price   = r.books?.price || '—';
                     const initial = (r.buyer_name || 'S').charAt(0).toUpperCase();
@@ -3029,29 +3139,35 @@
                         ? `<span class="buyer-rating-badge">⭐ ${bRating.avg_stars} (${bRating.total_ratings})</span>`
                         : `<span style="font-size:0.72rem;color:var(--muted-2)">No rating yet</span>`;
 
+                    const msgHtml = r.buyer_message
+                        ? `<div class="req-buyer-msg">"${r.buyer_message}"</div>`
+                        : '';
+
                     const statusBadge = {
                         pending:  `<span class="req-status-badge pending">⏳ Pending</span>`,
-                        approved: `<span class="req-status-badge approved">✅ Approved</span>`,
+                        approved: `<span class="req-status-badge approved">✅ Active Deal</span>`,
+                        waiting:  `<span class="req-status-badge waiting">🕐 Waiting</span>`,
                         declined: `<span class="req-status-badge declined">❌ Declined</span>`
                     }[r.status] || '';
 
                     const alreadyRatedBuyer = ratedSet.has(r.id);
                     const canRateBuyer = r.status === 'approved' && r.buyer_rated && !alreadyRatedBuyer;
 
-                    const actions = r.status === 'pending' ? `
-                        <div class="req-actions">
+                    let actions = '';
+                    if (r.status === 'pending' || r.status === 'waiting') {
+                        actions = `<div class="req-actions">
                             <button class="req-btn req-btn-approve" onclick="respondRequest(${r.id}, 'approved')">✅ Approve</button>
                             <button class="req-btn req-btn-decline" onclick="respondRequest(${r.id}, 'declined')">❌ Decline</button>
-                        </div>` : r.status === 'approved' ? `
-                        <div class="req-actions">
+                        </div>`;
+                    } else if (r.status === 'approved') {
+                        actions = `<div class="req-actions">
                             <button class="req-btn req-btn-chat" onclick="closeSellerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
                             ${!r.item_received
-    ? `<button class="req-btn req-btn-decline" onclick="if(confirm('Revoke approval? This will reset the book to available and delete the chat.')) respondRequest(${r.id}, 'declined')">↩️ Revoke</button>`
-    : `<span style="font-size:0.78rem;color:var(--emerald);font-weight:700;align-self:center">✅ Item Received</span>`}
-${!r.item_received ? `<button class="req-btn req-btn-chat" style="background:var(--lime-dark);border-color:var(--lime-dark)" onclick="generateQR(${r.id}, '${r.book_id}')">🔲 Generate QR</button>` : ''}
+                                ? `<button class="req-btn req-btn-decline" onclick="if(confirm('Revoke? Waiting list buyers will be restored.')) respondRequest(${r.id}, 'declined')">↩️ Revoke</button>`
+                                : `<span style="font-size:0.78rem;color:var(--emerald);font-weight:700;align-self:center">✅ Received</span>`}
+                            ${!r.item_received ? `<button class="req-btn req-btn-chat" style="background:var(--lime-dark);border-color:var(--lime-dark)" onclick="generateQR(${r.id}, '${r.book_id}')">🔲 QR</button>` : ''}
                         </div>
-                        ${canRateBuyer ? `
-                        <div class="rate-box" style="margin-top:10px">
+                        ${canRateBuyer ? `<div class="rate-box" style="margin-top:10px">
                             <h5>⭐ Rate this buyer</h5>
                             <p>Buyer received the item — how was the experience?</p>
                             <div class="stars-row" id="sellerStarRow-${r.id}">
@@ -3059,23 +3175,60 @@ ${!r.item_received ? `<button class="req-btn req-btn-chat" style="background:var
                             </div>
                             <textarea class="rate-review" id="sellerRateReview-${r.id}" rows="2" placeholder="Leave a short review (optional)…"></textarea>
                             <button class="btn-received" onclick="submitRating(${r.id}, '${r.buyer_id}', 'seller', ${r.book_id})">Submit Rating ⭐</button>
-                        </div>` : alreadyRatedBuyer ? `<div style="font-size:0.78rem;color:var(--emerald);margin-top:6px;font-weight:600">✅ You rated this buyer</div>` : ''}` : '';
+                        </div>` : alreadyRatedBuyer ? `<div style="font-size:0.78rem;color:var(--emerald);margin-top:6px;font-weight:600">✅ You rated this buyer</div>` : ''}`;
+                    }
 
                     return `<div class="req-card" id="reqcard-${r.id}">
                         <div class="req-card-top">
                             <div class="req-avatar">${initial}</div>
                             <div class="req-info">
                                 <div class="req-name">${r.buyer_name || 'Student'}</div>
-                                <div class="req-item">wants to buy: ${title}</div>
+                                <div class="req-item">${title} · ₹${price}</div>
                             </div>
                             <div class="req-time">${time}</div>
                         </div>
-                        <div class="req-price">₹${price}</div>
                         <div style="margin:4px 0">${buyerRatingBadge}</div>
+                        ${msgHtml}
                         ${statusBadge}
                         ${actions}
                     </div>`;
-                }).join('');
+                }
+
+                let html = '';
+
+                // Active deal section
+                if (activeDeal) {
+                    html += `<div class="active-deal-section">
+                        <div class="active-deal-label">✅ Active Deal</div>
+                        ${buildReqCard(activeDeal)}
+                    </div>`;
+                }
+
+                // Waiting list section
+                if (waitingList.length) {
+                    html += `<div class="waiting-list-section">
+                        <div class="waiting-list-title">⏳ Waiting List (${waitingList.length})</div>
+                        ${waitingList.map(r => buildReqCard(r)).join('')}
+                    </div>`;
+                }
+
+                // Pending requests
+                if (pendingList.length) {
+                    html += `<div style="margin-top:14px">
+                        <div class="waiting-list-title">🔔 New Requests (${pendingList.length})</div>
+                        ${pendingList.map(r => buildReqCard(r)).join('')}
+                    </div>`;
+                }
+
+                // Declined
+                if (otherList.length) {
+                    html += `<div style="margin-top:14px">
+                        <div class="waiting-list-title">❌ Declined</div>
+                        ${otherList.map(r => buildReqCard(r)).join('')}
+                    </div>`;
+                }
+
+                body.innerHTML = html || `<div class="notif-empty"><div class="icon">🔔</div><h3>No requests yet</h3></div>`;
             } catch (e) {
                 body.innerHTML = `<div class="notif-empty"><div class="icon">⚠️</div><h3>Error</h3><p>${e.message}</p></div>`;
             }
@@ -3083,42 +3236,57 @@ ${!r.item_received ? `<button class="req-btn req-btn-chat" style="background:var
 
         async function respondRequest(reqId, status) {
             try {
-                // Get the request details + current status
                 const { data: reqData, error: fetchErr } = await db
-                    .from('requests').select('book_id, status').eq('id', reqId).single();
+                    .from('requests')
+                    .select('book_id, status, buyer_message, buyer_id, buyer_name')
+                    .eq('id', reqId).single();
                 if (fetchErr) throw fetchErr;
 
                 const wasApproved = reqData.status === 'approved';
 
-                // Update this request status
                 const { error } = await db.from('requests').update({ status }).eq('id', reqId);
                 if (error) throw error;
 
                 if (status === 'approved') {
-                    // Mark the book as sold
+                    // Mark book as sold
                     await db.from('books').update({ status: 'sold', deal_completed: true }).eq('id', reqData.book_id);
 
-                    // Decline all other pending requests for the same book
+                    // Move all other pending requests to WAITING (not declined)
                     await db.from('requests')
-                        .update({ status: 'declined' })
+                        .update({ status: 'waiting' })
                         .eq('book_id', reqData.book_id)
-                        .eq('status', 'pending')
+                        .in('status', ['pending'])
                         .neq('id', reqId);
 
-                    showToast('✅ Approved! Book marked as sold & other requests declined.', 'success');
+                    // Auto-push buyer's message to chat as first message
+                    if (reqData.buyer_message) {
+                        await db.from('messages').insert([{
+                            book_id:     reqData.book_id,
+                            sender_id:   reqData.buyer_id,
+                            sender_name: reqData.buyer_name || 'Buyer',
+                            content:     reqData.buyer_message
+                        }]);
+                    }
+
+                    showToast('✅ Approved! Others moved to waiting list.', 'success');
                     await loadBooks();
-                    await subscribeToMyChats(); // new deal — subscribe to its chat
+                    await subscribeToMyChats();
 
                 } else if (status === 'declined' && wasApproved) {
-                    // REVOKE: seller un-approves — reset book to available & wipe chat
+                    // REVOKE — reset book, wipe chat, restore waiting list to pending
                     await db.from('books')
                         .update({ status: 'available', deal_completed: false })
                         .eq('id', reqData.book_id);
 
-                    // Delete chat messages for this book
                     await db.from('messages').delete().eq('book_id', reqData.book_id);
 
-                    showToast('↩️ Approval revoked — book is listed as available again.', 'success');
+                    // Restore waiting buyers back to pending so seller can pick from them
+                    await db.from('requests')
+                        .update({ status: 'pending' })
+                        .eq('book_id', reqData.book_id)
+                        .eq('status', 'waiting');
+
+                    showToast('↩️ Deal revoked — waiting list restored. Pick your next buyer!', 'success');
                     await loadBooks();
 
                 } else {
@@ -3191,6 +3359,7 @@ ${!r.item_received ? `<button class="req-btn req-btn-chat" style="background:var
                     const statusBadge = {
                         pending:  `<span class="req-status-badge pending">⏳ Waiting for seller approval</span>`,
                         approved: `<span class="req-status-badge approved">✅ Approved — chat is open!</span>`,
+                        waiting:  `<span class="req-status-badge waiting">🕐 In waiting list — seller has an active deal</span>`,
                         declined: `<span class="req-status-badge declined">❌ Seller declined your request</span>`
                     }[r.status] || '';
 
@@ -3881,11 +4050,24 @@ ${!r.item_received ? `<button class="req-btn req-btn-chat" style="background:var
                     return;
                 }
 
-                // Valid! Mark as received and clear the token
+                // Valid! Mark as received, clear token, set sold_at timestamp
+                const now = new Date().toISOString();
                 const { error: updateErr } = await db.from('requests')
-                    .update({ item_received: true, qr_token: null, qr_expires_at: null })
+                    .update({ item_received: true, qr_token: null, qr_expires_at: null, sold_at: now })
                     .eq('id', reqId);
                 if (updateErr) throw updateErr;
+
+                // Set sold_at on the book too
+                await db.from('books').update({ sold_at: now }).eq('id', bookId);
+
+                // Cleanup: delete all waiting/pending requests for this book (deal is done)
+                await db.from('requests')
+                    .delete()
+                    .eq('book_id', bookId)
+                    .in('status', ['waiting', 'pending', 'declined']);
+
+                // Delete all chat messages (deal done, chat served its purpose)
+                await db.from('messages').delete().eq('book_id', bookId);
 
                 showToast('✅ Item received confirmed! Please rate your seller.', 'success');
                 await loadBuyerNotifs();
@@ -3971,6 +4153,124 @@ ${!r.item_received ? `<button class="req-btn req-btn-chat" style="background:var
         }
 
         let toastTimer;
+        // ── WATCHLIST PANEL ──────────────────────────────────────────────────────
+        function openWatchlistPanel() {
+            document.getElementById('watchlistPanel').style.right = '0';
+            document.getElementById('userDropdown')?.classList.remove('open');
+            loadWatchlistPanel();
+        }
+
+        function closeWatchlistPanel() {
+            document.getElementById('watchlistPanel').style.right = '-440px';
+        }
+
+        async function loadWatchlistPanel() {
+            const body = document.getElementById('watchlistBody');
+            const subtitle = document.getElementById('watchlistSubtitle');
+            body.innerHTML = '<div class="panel-loader">Loading…</div>';
+            try {
+                const { data, error } = await db.from('watchlist')
+                    .select('book_id, books(*)')
+                    .eq('user_id', ME)
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
+
+                const items = (data || []).filter(w => w.books);
+                subtitle.textContent = items.length
+                    ? `${items.length} saved item${items.length !== 1 ? 's' : ''}`
+                    : 'No saved items yet';
+
+                if (!items.length) {
+                    body.innerHTML = `<div style="text-align:center;padding:60px 20px">
+                        <div style="font-size:3rem;margin-bottom:12px">🤍</div>
+                        <h3 style="font-family:'Cabinet Grotesk',sans-serif;font-weight:800;color:var(--ink);margin-bottom:6px">Nothing saved yet</h3>
+                        <p style="font-size:0.85rem;color:var(--muted)">Tap the ❤️ on any item to save it here.</p>
+                    </div>`;
+                    return;
+                }
+
+                body.innerHTML = items.map(w => {
+                    const b = w.books;
+                    const isSold = b.status === 'sold' || b.deal_completed;
+                    return `<div style="border:1.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:10px;background:white;display:flex;cursor:pointer;transition:border-color 0.15s"
+                        onclick="closeWatchlistPanel();openModal(${b.id})"
+                        onmouseover="this.style.borderColor='var(--lime-dark)'"
+                        onmouseout="this.style.borderColor='var(--border)'">
+                        <img src="${b.image || 'https://placehold.co/90x90/F1F5F9/94A3B8?text=?'}"
+                             style="width:90px;height:90px;object-fit:cover;flex-shrink:0"
+                             onerror="this.src='https://placehold.co/90x90/F1F5F9/94A3B8?text=?'">
+                        <div style="padding:10px 14px;flex:1;min-width:0">
+                            <div style="font-size:0.7rem;font-weight:700;color:var(--lime-dark);text-transform:uppercase;margin-bottom:3px">${b.category || 'Item'}</div>
+                            <div style="font-weight:700;font-size:0.9rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px">${b.title}</div>
+                            <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:900;font-size:1.1rem;color:var(--ink);margin-bottom:6px">₹${b.price}</div>
+                            ${isSold
+                                ? `<span style="font-size:0.7rem;font-weight:700;color:var(--red);background:#FEE2E2;padding:2px 8px;border-radius:20px">SOLD</span>`
+                                : `<span style="font-size:0.7rem;font-weight:700;color:#065F46;background:#D1FAE5;padding:2px 8px;border-radius:20px">Available</span>`}
+                        </div>
+                        <button onclick="event.stopPropagation();removeWatchlistItem(${b.id})"
+                            style="background:none;border:none;cursor:pointer;padding:10px 14px;color:var(--muted);font-size:1.3rem;flex-shrink:0;align-self:flex-start;line-height:1"
+                            title="Remove from watchlist">×</button>
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                body.innerHTML = `<p style="color:var(--red);text-align:center;padding:40px;font-size:0.85rem">Could not load watchlist: ${e.message}</p>`;
+            }
+        }
+
+        async function removeWatchlistItem(bookId) {
+            await db.from('watchlist').delete().eq('user_id', ME).eq('book_id', bookId);
+            watchlistCache.delete(bookId);
+            showToast('Removed from watchlist', 'success');
+            loadWatchlistPanel();
+            if (window._currentModalBookId === bookId) updateWatchlistBtn(bookId);
+        }
+
+        // ── UNSEND REQUEST ────────────────────────────────────────────────────
+        async function unsendRequest(reqId, bookId) {
+            if (!confirm('Unsend your request? The seller will no longer see it.')) return;
+            try {
+                const { error } = await db.from('requests').delete().eq('id', reqId).eq('buyer_id', ME);
+                if (error) throw error;
+                showToast('↩️ Request unsent.', 'success');
+                await openModal(bookId);
+                await refreshNotifBadges();
+            } catch (e) { showToast('Could not unsend: ' + e.message, 'error'); }
+        }
+
+        // ── WATCHLIST ─────────────────────────────────────────────────────────
+        let watchlistCache = new Set();
+
+        async function loadWatchlist() {
+            try {
+                const { data } = await db.from('watchlist').select('book_id').eq('user_id', ME);
+                watchlistCache = new Set((data || []).map(w => w.book_id));
+            } catch {}
+        }
+
+        function updateWatchlistBtn(bookId) {
+            const btn = document.getElementById('watchlistBtn');
+            if (!btn) return;
+            const saved = watchlistCache.has(bookId);
+            btn.textContent = saved ? '❤️' : '🤍';
+            btn.className = 'btn-watchlist' + (saved ? ' saved' : '');
+            btn.title = saved ? 'Remove from Watchlist' : 'Save to Watchlist';
+        }
+
+        async function toggleWatchlist() {
+            const bookId = window._currentModalBookId;
+            if (!bookId) return;
+            if (watchlistCache.has(bookId)) {
+                await db.from('watchlist').delete().eq('user_id', ME).eq('book_id', bookId);
+                watchlistCache.delete(bookId);
+                showToast('Removed from watchlist', 'success');
+            } else {
+                await db.from('watchlist').insert([{ user_id: ME, book_id: bookId }]);
+                watchlistCache.add(bookId);
+                showToast('❤️ Saved to watchlist!', 'success');
+            }
+            updateWatchlistBtn(bookId);
+        }
+
         function showToast(msg, type = 'success') {
             const t = document.getElementById('toast');
             t.textContent = msg;
