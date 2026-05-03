@@ -2187,6 +2187,98 @@
         .req-note.declined { background:#FEE2E2; color:#991B1B; border:1px solid #FECACA; }
 
         @media (max-width:480px) { .notif-panel { width:100vw; } }
+
+        /* ─── GUEST PROMPT MODAL ─────────────────── */
+        .guest-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .guest-modal-overlay.open { display: flex; }
+        .guest-modal {
+            background: var(--surface);
+            border: 1px solid var(--border-2);
+            border-radius: 24px;
+            padding: 40px 36px;
+            max-width: 380px;
+            width: 90%;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            animation: fadeSlideUp 0.3s ease;
+        }
+        .guest-modal-icon { font-size: 48px; margin-bottom: 16px; }
+        .guest-modal h3 {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--ink);
+            margin-bottom: 8px;
+        }
+        .guest-modal p { font-size: 0.9rem; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+        .guest-modal-btns { display: flex; flex-direction: column; gap: 10px; }
+        .guest-signin-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 13px 20px;
+            background: var(--green);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.95rem;
+            font-family: 'Cabinet Grotesk', sans-serif;
+            border-radius: 12px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .guest-signin-btn:hover { background: var(--green-dark); }
+        .guest-cancel-btn {
+            padding: 12px;
+            background: transparent;
+            color: var(--muted);
+            font-size: 0.88rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .guest-cancel-btn:hover { border-color: var(--border-2); color: var(--ink-2); }
+
+        /* ─── GUEST NAVBAR BTNS ──────────────────── */
+        #guestBtns { display: none; align-items: center; gap: 8px; }
+        .nav-signin-btn {
+            padding: 8px 18px;
+            background: transparent;
+            border: 1px solid var(--border-2);
+            border-radius: 10px;
+            color: var(--ink-2);
+            font-size: 0.88rem;
+            font-weight: 600;
+            font-family: 'Satoshi', sans-serif;
+            cursor: pointer;
+            text-decoration: none;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .nav-signin-btn:hover { border-color: var(--green); color: var(--green); }
+        .nav-signup-btn {
+            padding: 8px 18px;
+            background: var(--green);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-size: 0.88rem;
+            font-weight: 700;
+            font-family: 'Cabinet Grotesk', sans-serif;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .nav-signup-btn:hover { background: var(--green-dark); }
+
     </style>
 </head>
 <body>
@@ -2208,13 +2300,18 @@
             </div>
 
             <div class="topbar-right">
+                <!-- Guest buttons (shown when not logged in) -->
+                <div id="guestBtns" style="display:none;align-items:center;gap:8px;">
+                    <a href="auth.html" class="nav-signin-btn">Sign In</a>
+                    <a href="auth.html" class="nav-signup-btn">Sign Up</a>
+                </div>
                 <div class="badge-count">
                     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                     <strong id="itemCount">0</strong> items listed
                 </div>
-                <a href="sell_item_fixed.html" class="sell-btn">
+                <a href="sell_item_fixed.html" class="sell-btn" onclick="if(!ME){event.preventDefault();showGuestModal();}">
                     <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path d="M12 5v14M5 12h14"/>
                     </svg>
@@ -2222,7 +2319,7 @@
                 </a>
 
                 <!-- Seller Bell — purchase requests -->
-                <button class="notif-btn" id="sellerBellBtn" onclick="openSellerNotifs()" title="Purchase Requests" style="display:none">
+                <button class="notif-btn" id="sellerBellBtn" onclick="if(!ME){showGuestModal();}else{openSellerNotifs();}" title="Purchase Requests" style="display:none">
                     <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                     </svg>
@@ -2230,14 +2327,14 @@
                 </button>
 
                 <!-- Buyer Bell — request status updates -->
-                <button class="notif-btn" id="buyerBellBtn" onclick="openBuyerNotifs()" title="My Requests">
+                <button class="notif-btn" id="buyerBellBtn" onclick="if(!ME){showGuestModal();}else{openBuyerNotifs();}" title="My Requests">
                     <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                     <span class="notif-dot" id="buyerBellDot"></span>
                 </button>
                 <!-- User Avatar + Dropdown -->
-                <div class="user-menu-wrap">
+                <div class="user-menu-wrap" id="userMenuWrap">
                     <button class="user-avatar-btn" id="avatarBtn" onclick="toggleDropdown()" title="Account">
                         <span id="avatarInitial">?</span>
                     </button>
@@ -2423,7 +2520,7 @@
             <div class="panel-loader">Loading your listings…</div>
         </div>
         <div class="panel-footer">
-            <a href="sell_item_fixed.html" class="panel-sell-btn">
+            <a href="sell_item_fixed.html" class="panel-sell-btn" onclick="if(!ME){event.preventDefault();showGuestModal();}" ">
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path d="M12 5v14M5 12h14"/>
                 </svg>
@@ -2488,10 +2585,16 @@
 
         async function initAuth() {
             const { data: { session } } = await db.auth.getSession();
+
             if (!session) {
-                window.location.href = 'auth.html';
+                // Guest mode — show login button instead of avatar
+                document.getElementById('guestBtns').style.display = 'flex';
+                document.getElementById('userMenuWrap').style.display = 'none';
+                document.getElementById('sellerBellBtn').style.display = 'none';
+                document.getElementById('buyerBellBtn').style.display = 'none';
                 return false;
             }
+
             currentUser = session.user;
             ME = currentUser.id;
 
@@ -2510,6 +2613,9 @@
                 document.getElementById('avatarInitial').textContent = name.charAt(0).toUpperCase();
             }
 
+            document.getElementById('guestBtns').style.display = 'none';
+            document.getElementById('userMenuWrap').style.display = 'flex';
+
             return true;
         }
 
@@ -2526,8 +2632,6 @@
 
         async function logout() {
             await db.auth.signOut();
-            localStorage.clear();
-            sessionStorage.clear();
             window.location.href = 'auth.html';
         }
 
@@ -2549,11 +2653,12 @@
             });
 
             const authed = await initAuth();
-            if (!authed) return;
             await checkSchema();
             await loadBooks();
-            await loadMyListingsBadge();
-            await refreshNotifBadges();
+            if (authed) {
+                await loadMyListingsBadge();
+                await refreshNotifBadges();
+            }
 
             // ── ANIMATE STAT COUNTERS ─────────────────────────────────────
             function animateCounter(el, target, suffix = '') {
@@ -2846,7 +2951,12 @@
 
             // Build buyer action section
             let buyerActionHtml = '';
-            if (!isMine && !isSold) {
+            if (!ME && !isSold) {
+                // Guest — show sign in prompt instead of request button
+                buyerActionHtml = `<button class="btn-request" onclick="closeModal();showGuestModal();">
+                    🔐 Sign in to Request
+                </button>`;
+            } else if (!isMine && !isSold) {
                 if (!existingReq) {
                     buyerActionHtml = `
                         <div class="buyer-msg-box">
@@ -3026,7 +3136,20 @@
         }
 
         // ── SEND REQUEST ─────────────────────────────────────────────────────
+
+        // ── GUEST MODAL ──────────────────────────────────────────────────────
+        function showGuestModal() {
+            document.getElementById('guestModalOverlay').classList.add('open');
+        }
+        function closeGuestModal() {
+            document.getElementById('guestModalOverlay').classList.remove('open');
+        }
+        document.addEventListener('click', e => {
+            if (e.target.id === 'guestModalOverlay') closeGuestModal();
+        });
+
         async function sendRequest(bookId) {
+            if (!ME) { showGuestModal(); return; }
             const book = allBooks.find(b => b.id === bookId || b.id === String(bookId));
             if (!book) return;
 
@@ -4328,6 +4451,23 @@
             My Reqs
         </button>
     </nav>
+
+
+    <!-- ═══════════ GUEST PROMPT MODAL ═══════════ -->
+    <div class="guest-modal-overlay" id="guestModalOverlay">
+        <div class="guest-modal">
+            <div class="guest-modal-icon">🔐</div>
+            <h3>Sign in to continue</h3>
+            <p>Create a free account to send purchase requests, sell items, and chat with other students.</p>
+            <div class="guest-modal-btns">
+                <a href="auth.html" class="guest-signin-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    Sign In / Sign Up
+                </a>
+                <button class="guest-cancel-btn" onclick="closeGuestModal()">Maybe later</button>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>
