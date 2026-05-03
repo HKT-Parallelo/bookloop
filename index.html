@@ -2526,6 +2526,8 @@
 
         async function logout() {
             await db.auth.signOut();
+            localStorage.clear();
+            sessionStorage.clear();
             window.location.href = 'auth.html';
         }
 
