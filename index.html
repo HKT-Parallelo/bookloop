@@ -2065,6 +2065,51 @@
         /* ── WAITING LIST ── */
         .req-status-badge.waiting { background:#EDE9FE; color:#5B21B6; border:1px solid #DDD6FE; }
         .active-deal-section { background:#F0FDF4; border:1.5px solid #A7F3D0; border-radius:12px; padding:12px 14px; margin-bottom:12px; }
+
+        /* ── ITEM GROUP CARD ── */
+        .item-group {
+            border:1.5px solid var(--border);
+            border-radius:16px; overflow:hidden;
+            margin-bottom:14px;
+            background:var(--surface);
+        }
+        .item-group-header {
+            display:flex; align-items:center; gap:10px;
+            padding:12px 14px; cursor:pointer;
+            background:var(--surface-2);
+            border-bottom:1px solid var(--border);
+            transition:background 0.15s;
+            user-select:none;
+        }
+        .item-group-header:hover { background:var(--lime-light); }
+        .item-group-img {
+            width:44px; height:44px; border-radius:8px;
+            object-fit:cover; background:var(--surface-3); flex-shrink:0;
+        }
+        .item-group-info { flex:1; min-width:0; }
+        .item-group-title {
+            font-weight:800; font-size:0.9rem; color:var(--ink);
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        .item-group-meta { font-size:0.75rem; color:var(--muted); margin-top:2px; }
+        .item-group-badges { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+        .item-group-count {
+            font-size:0.72rem; font-weight:700;
+            background:var(--ink); color:white;
+            padding:2px 8px; border-radius:20px;
+        }
+        .item-group-arrow {
+            font-size:0.8rem; color:var(--muted);
+            transition:transform 0.2s;
+        }
+        .item-group-arrow.open { transform:rotate(180deg); }
+        .item-group-body { padding:12px; }
+        .item-section-label {
+            font-size:0.72rem; font-weight:800; text-transform:uppercase;
+            letter-spacing:0.5px; margin-bottom:8px; margin-top:10px;
+            display:flex; align-items:center; gap:6px;
+        }
+        .item-section-label:first-child { margin-top:0; }
         .active-deal-label { font-size:0.72rem; font-weight:800; color:#065F46; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
         .waiting-list-section { margin-top:14px; padding-top:14px; border-top:2px dashed var(--border); }
         .waiting-list-title { font-size:0.78rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
@@ -3216,13 +3261,14 @@
                     .from('requests')
                     .select('*, books(title, price, image)')
                     .eq('seller_id', ME)
-                    .order('created_at', { ascending: false });
+                    .not('status', 'eq', 'declined')
+                    .order('created_at', { ascending: true });
                 if (error) throw error;
 
                 const reqs = data || [];
                 const pending = reqs.filter(r => r.status === 'pending').length;
                 document.getElementById('sellerNotifSubtitle').textContent =
-                    pending > 0 ? `${pending} pending request${pending > 1 ? 's' : ''}` : 'All caught up!';
+                    pending > 0 ? `${pending} new request${pending > 1 ? 's' : ''}` : 'All caught up!';
 
                 if (!reqs.length) {
                     body.innerHTML = `<div class="notif-empty">
@@ -3233,12 +3279,12 @@
                     return;
                 }
 
-                // Fetch buyer ratings for display
+                // Fetch buyer ratings
                 const { data: buyerRatingsData } = await db.from('buyer_ratings').select('*');
                 const buyerRatingsMap = {};
                 (buyerRatingsData || []).forEach(r => buyerRatingsMap[r.buyer_id] = r);
 
-                // Fetch existing ratings for these requests (to know if seller already rated)
+                // Fetch seller's already-submitted ratings
                 const reqIds = reqs.map(r => r.id);
                 const { data: existingRatings } = await db.from('ratings')
                     .select('request_id, role, rater_id')
@@ -3247,15 +3293,14 @@
                     .filter(r => r.role === 'seller' && r.rater_id === ME)
                     .map(r => r.request_id));
 
-                // Group: active deal first, then waiting, then pending, then declined
-                const activeDeal = reqs.find(r => r.status === 'approved');
-                const waitingList = reqs.filter(r => r.status === 'waiting');
-                const pendingList = reqs.filter(r => r.status === 'pending');
-                const otherList   = reqs.filter(r => r.status === 'declined');
+                // ── GROUP BY BOOK ─────────────────────────────────────────────
+                const bookMap = {};
+                reqs.forEach(r => {
+                    if (!bookMap[r.book_id]) bookMap[r.book_id] = { book: r.books, requests: [] };
+                    bookMap[r.book_id].requests.push(r);
+                });
 
                 function buildReqCard(r) {
-                    const title   = r.books?.title || 'Item';
-                    const price   = r.books?.price || '—';
                     const initial = (r.buyer_name || 'S').charAt(0).toUpperCase();
                     const time    = timeAgo(r.created_at);
                     const bRating = buyerRatingsMap[r.buyer_id];
@@ -3268,13 +3313,6 @@
                         ? `<div class="req-buyer-msg">"${r.buyer_message}"</div>`
                         : '';
 
-                    const statusBadge = {
-                        pending:  `<span class="req-status-badge pending">⏳ Pending</span>`,
-                        approved: `<span class="req-status-badge approved">✅ Active Deal</span>`,
-                        waiting:  `<span class="req-status-badge waiting">🕐 Waiting</span>`,
-                        declined: `<span class="req-status-badge declined">❌ Declined</span>`
-                    }[r.status] || '';
-
                     const alreadyRatedBuyer = ratedSet.has(r.id);
                     const canRateBuyer = r.status === 'approved' && r.buyer_rated && !alreadyRatedBuyer;
 
@@ -3286,15 +3324,15 @@
                         </div>`;
                     } else if (r.status === 'approved') {
                         actions = `<div class="req-actions">
-                            <button class="req-btn req-btn-chat" onclick="closeSellerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
+                            <button class="req-btn req-btn-chat" onclick="closeSellerNotifs();openModal(${r.book_id})">💬 Chat</button>
                             ${!r.item_received
-                                ? `<button class="req-btn req-btn-decline" onclick="if(confirm('Revoke? Waiting list buyers will be restored.')) respondRequest(${r.id}, 'declined')">↩️ Revoke</button>`
+                                ? `<button class="req-btn req-btn-decline" onclick="if(confirm('Revoke? Waiting list will be restored.')) respondRequest(${r.id}, 'declined')">↩️ Revoke</button>
+                                   <button class="req-btn req-btn-chat" style="background:var(--lime-dark);border-color:var(--lime-dark)" onclick="generateQR(${r.id}, '${r.book_id}')">🔲 QR</button>`
                                 : `<span style="font-size:0.78rem;color:var(--emerald);font-weight:700;align-self:center">✅ Received</span>`}
-                            ${!r.item_received ? `<button class="req-btn req-btn-chat" style="background:var(--lime-dark);border-color:var(--lime-dark)" onclick="generateQR(${r.id}, '${r.book_id}')">🔲 QR</button>` : ''}
                         </div>
                         ${canRateBuyer ? `<div class="rate-box" style="margin-top:10px">
                             <h5>⭐ Rate this buyer</h5>
-                            <p>Buyer received the item — how was the experience?</p>
+                            <p>Buyer received the item — how was your experience?</p>
                             <div class="stars-row" id="sellerStarRow-${r.id}">
                                 ${[1,2,3,4,5].map(n => `<button class="star-btn" data-val="${n}" onclick="selectSellerStar(${r.id},${n})" onmouseover="hoverSellerStar(${r.id},${n})" onmouseout="unhoverSellerStar(${r.id})">★</button>`).join('')}
                             </div>
@@ -3303,60 +3341,85 @@
                         </div>` : alreadyRatedBuyer ? `<div style="font-size:0.78rem;color:var(--emerald);margin-top:6px;font-weight:600">✅ You rated this buyer</div>` : ''}`;
                     }
 
-                    return `<div class="req-card" id="reqcard-${r.id}">
+                    return `<div class="req-card" id="reqcard-${r.id}" style="margin-bottom:8px">
                         <div class="req-card-top">
                             <div class="req-avatar">${initial}</div>
                             <div class="req-info">
                                 <div class="req-name">${r.buyer_name || 'Student'}</div>
-                                <div class="req-item">${title} · ₹${price}</div>
+                                <div style="margin:3px 0">${buyerRatingBadge}</div>
                             </div>
                             <div class="req-time">${time}</div>
                         </div>
-                        <div style="margin:4px 0">${buyerRatingBadge}</div>
                         ${msgHtml}
-                        ${statusBadge}
                         ${actions}
                     </div>`;
                 }
 
+                // ── RENDER GROUPED BY ITEM ────────────────────────────────────
                 let html = '';
+                Object.entries(bookMap).forEach(([bookId, group], idx) => {
+                    const book = group.book;
+                    const groupReqs = group.requests;
 
-                // Active deal section
-                if (activeDeal) {
-                    html += `<div class="active-deal-section">
-                        <div class="active-deal-label">✅ Active Deal</div>
-                        ${buildReqCard(activeDeal)}
-                    </div>`;
-                }
+                    const activeDeal  = groupReqs.find(r => r.status === 'approved');
+                    const waitingList = groupReqs.filter(r => r.status === 'waiting');
+                    const pendingList = groupReqs.filter(r => r.status === 'pending');
 
-                // Waiting list section
-                if (waitingList.length) {
-                    html += `<div class="waiting-list-section">
-                        <div class="waiting-list-title">⏳ Waiting List (${waitingList.length})</div>
-                        ${waitingList.map(r => buildReqCard(r)).join('')}
-                    </div>`;
-                }
+                    const totalCount = groupReqs.length;
+                    const newCount   = pendingList.length;
+                    const hasActive  = !!activeDeal;
 
-                // Pending requests
-                if (pendingList.length) {
-                    html += `<div style="margin-top:14px">
-                        <div class="waiting-list-title">🔔 New Requests (${pendingList.length})</div>
-                        ${pendingList.map(r => buildReqCard(r)).join('')}
-                    </div>`;
-                }
+                    const groupId = `itemgroup-${bookId}`;
+                    const isOpen  = idx === 0; // first item open by default
 
-                // Declined
-                if (otherList.length) {
-                    html += `<div style="margin-top:14px">
-                        <div class="waiting-list-title">❌ Declined</div>
-                        ${otherList.map(r => buildReqCard(r)).join('')}
+                    html += `<div class="item-group">
+                        <div class="item-group-header" onclick="toggleItemGroup('${groupId}')">
+                            <img class="item-group-img"
+                                src="${book?.image || 'https://placehold.co/44x44/F1F5F9/94A3B8?text=?'}"
+                                onerror="this.src='https://placehold.co/44x44/F1F5F9/94A3B8?text=?'">
+                            <div class="item-group-info">
+                                <div class="item-group-title">${book?.title || 'Item'}</div>
+                                <div class="item-group-meta">₹${book?.price || '—'} · ${totalCount} request${totalCount !== 1 ? 's' : ''}</div>
+                            </div>
+                            <div class="item-group-badges">
+                                ${hasActive ? `<span style="font-size:0.7rem;font-weight:700;background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:20px;border:1px solid #A7F3D0">✅ Active</span>` : ''}
+                                ${newCount > 0 ? `<span class="item-group-count">${newCount} new</span>` : ''}
+                                ${waitingList.length > 0 ? `<span style="font-size:0.7rem;font-weight:700;background:#EDE9FE;color:#5B21B6;padding:2px 8px;border-radius:20px">⏳ ${waitingList.length}</span>` : ''}
+                            </div>
+                            <span class="item-group-arrow ${isOpen ? 'open' : ''}" id="${groupId}-arrow">▼</span>
+                        </div>
+                        <div class="item-group-body" id="${groupId}" style="display:${isOpen ? 'block' : 'none'}">
+
+                            ${activeDeal ? `
+                                <div class="item-section-label" style="color:#065F46">✅ Active Deal</div>
+                                ${buildReqCard(activeDeal)}` : ''}
+
+                            ${waitingList.length ? `
+                                <div class="item-section-label" style="color:#5B21B6">⏳ Waiting List (${waitingList.length})</div>
+                                ${waitingList.map(r => buildReqCard(r)).join('')}` : ''}
+
+                            ${pendingList.length ? `
+                                <div class="item-section-label" style="color:var(--ink)">🔔 New Requests (${pendingList.length})</div>
+                                ${pendingList.map(r => buildReqCard(r)).join('')}` : ''}
+
+                        </div>
                     </div>`;
-                }
+                });
 
                 body.innerHTML = html || `<div class="notif-empty"><div class="icon">🔔</div><h3>No requests yet</h3></div>`;
+
             } catch (e) {
                 body.innerHTML = `<div class="notif-empty"><div class="icon">⚠️</div><h3>Error</h3><p>${e.message}</p></div>`;
             }
+        }
+
+        function toggleItemGroup(groupId) {
+            const body  = document.getElementById(groupId);
+            const arrow = document.getElementById(groupId + '-arrow');
+            if (!body) return;
+            const isOpen = body.style.display !== 'none';
+            body.style.display  = isOpen ? 'none' : 'block';
+            arrow.className = 'item-group-arrow' + (isOpen ? '' : ' open');
         }
 
         async function respondRequest(reqId, status) {
@@ -3373,6 +3436,19 @@
                 if (error) throw error;
 
                 if (status === 'approved') {
+                    // ── GUARD: block if another buyer is already approved ──
+                    const { data: activeDeals } = await db.from('requests')
+                        .select('id')
+                        .eq('book_id', reqData.book_id)
+                        .eq('status', 'approved')
+                        .neq('id', reqId);
+
+                    if (activeDeals && activeDeals.length > 0) {
+                        showToast('⚠️ You already have an active deal for this item! Revoke it first before approving someone else.', 'error');
+                        await loadSellerNotifs();
+                        return;
+                    }
+
                     // Mark book as sold
                     await db.from('books').update({ status: 'sold', deal_completed: true }).eq('id', reqData.book_id);
 
