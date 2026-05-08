@@ -3362,14 +3362,16 @@
                         </div>` : alreadyRatedBuyer ? `<div style="font-size:0.78rem;color:var(--emerald);margin-top:6px;font-weight:600">✅ You rated this buyer</div>` : ''}`;
                     }
 
-                    return `<div class="req-card" id="reqcard-${r.id}" style="margin-bottom:8px">
+                    const showSellerDismissX = r.status === 'approved' && r.item_received;
+                    return `<div class="req-card" id="reqcard-${r.id}" style="margin-bottom:8px;position:relative">
+                        ${showSellerDismissX ? `<button onclick="dismissSellerReceivedNotif(${r.id})" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface-2);color:var(--muted);font-size:0.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;z-index:2;transition:all 0.15s" onmouseover="this.style.background='var(--red)';this.style.color='white';this.style.borderColor='var(--red)'" onmouseout="this.style.background='var(--surface-2)';this.style.color='var(--muted)';this.style.borderColor='var(--border)'">×</button>` : ''}
                         <div class="req-card-top">
                             <div class="req-avatar">${initial}</div>
                             <div class="req-info">
                                 <div class="req-name">${r.buyer_name || 'Student'}</div>
                                 <div style="margin:3px 0">${buyerRatingBadge}</div>
                             </div>
-                            <div class="req-time">${time}</div>
+                            <div class="req-time" style="margin-right:${showSellerDismissX ? '20px' : '0'}">${time}</div>
                         </div>
                         ${msgHtml}
                         ${actions}
@@ -3590,17 +3592,15 @@
                         const alreadyRated = alreadyRatedSet.has(r.id);
                         if (r.item_received) {
                             if (alreadyRated) {
-                                // Received + rated — just show dismiss
+                                // Received + rated — just show dismiss as X on card
                                 actions = `<div class="req-actions">
                                     <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
                                     <span style="font-size:0.78rem;color:var(--emerald);font-weight:600;align-self:center">✅ Rated</span>
-                                    <button class="btn-unsend" onclick="dismissReceivedNotif(${r.id})">× Dismiss</button>
                                 </div>`;
                             } else {
-                                // Received but not rated yet — show rating + dismiss
+                                // Received but not rated yet — show rating, X on card corner
                                 actions = `<div class="req-actions" style="margin-bottom:8px">
                                     <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
-                                    <button class="btn-unsend" onclick="dismissReceivedNotif(${r.id})">× Dismiss</button>
                                 </div>
                                 <div class="rate-box">
                                     <h5>⭐ Rate your seller</h5>
@@ -3625,14 +3625,16 @@
                         }
                     }
 
-                    return `<div class="req-card" id="buyerreqcard-${r.id}">
+                    const showDismissX = r.status === 'approved' && r.item_received;
+                    return `<div class="req-card" id="buyerreqcard-${r.id}" style="position:relative">
+                        ${showDismissX ? `<button onclick="dismissReceivedNotif(${r.id})" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface-2);color:var(--muted);font-size:0.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;z-index:2;transition:all 0.15s" onmouseover="this.style.background='var(--red)';this.style.color='white';this.style.borderColor='var(--red)'" onmouseout="this.style.background='var(--surface-2)';this.style.color='var(--muted)';this.style.borderColor='var(--border)'">×</button>` : ''}
                         <div class="req-card-top">
                             <div class="req-avatar" style="background:var(--lime-dark)">🛒</div>
                             <div class="req-info">
                                 <div class="req-name">${title}</div>
                                 <div class="req-item">₹${price}</div>
                             </div>
-                            <div class="req-time">${time}</div>
+                            <div class="req-time" style="margin-right:${showDismissX ? '20px' : '0'}">${time}</div>
                         </div>
                         ${statusBadge}
                         ${actions}
@@ -3898,6 +3900,10 @@
                         ${date ? `<span style="font-size:0.72rem;color:var(--muted-2);margin-left:auto">${date}</span>` : ''}
                     </div>
                     <div class="my-listing-actions">
+                        ${!isSold ? `<button class="ml-btn" style="background:var(--surface-2);border:1.5px solid var(--border);color:var(--ink-3)"
+                                onclick="window.location.href='sell_item_fixed.html?edit=${b.id}'">
+                            ✏️ Edit
+                        </button>` : ''}
                         <button class="ml-btn ml-btn-sold ${isSold ? 'already-sold' : ''}"
                                 onclick="toggleSoldStatus(${b.id}, ${isSold})">
                             ${isSold ? '↩️ Mark Available' : '✅ Mark as Sold'}
@@ -4456,6 +4462,18 @@
             showToast('Removed from watchlist', 'success');
             loadWatchlistPanel();
             if (window._currentModalBookId === bookId) updateWatchlistBtn(bookId);
+        }
+
+        // ── SELLER DISMISS RECEIVED NOTIFICATION ─────────────────────────────
+        async function dismissSellerReceivedNotif(reqId) {
+            try {
+                await db.from('requests').delete().eq('id', reqId).eq('seller_id', ME);
+                showToast('Notification dismissed', 'success');
+                await loadSellerNotifs();
+                await refreshNotifBadges();
+            } catch (e) {
+                showToast('Could not dismiss: ' + e.message, 'error');
+            }
         }
 
         // ── BUYER CANCEL DEAL ─────────────────────────────────────────────────
