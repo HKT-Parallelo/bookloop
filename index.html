@@ -2820,7 +2820,20 @@
                 const ratingsMap = {};
                 (ratingData || []).forEach(r => ratingsMap[r.seller_id] = r);
 
-                allBooks = (data || []).map(b => ({ ...b, _rating: ratingsMap[b.seller_id] || null }));
+                // Fetch queue counts (approved + waiting) per book
+                const { data: queueData } = await db.from('requests')
+                    .select('book_id')
+                    .in('status', ['approved', 'waiting']);
+                const queueMap = {};
+                (queueData || []).forEach(r => {
+                    queueMap[r.book_id] = (queueMap[r.book_id] || 0) + 1;
+                });
+
+                allBooks = (data || []).map(b => ({
+                    ...b,
+                    _rating: ratingsMap[b.seller_id] || null,
+                    _queueCount: queueMap[b.id] || 0
+                }));
                 applyFilters();
                 document.getElementById('statItems').textContent = allBooks.length;
                 document.getElementById('itemCount').textContent = allBooks.length;
@@ -2882,11 +2895,16 @@
         function buildCard(b, index = 0) {
             const isMine = ME === (b.seller_id || b.seller);
             const condClass = { Excellent:'cond-excellent', Good:'cond-good', Fair:'cond-fair', Poor:'cond-poor' }[b.condition] || '';
+            const isSold = b.status === 'sold';
+            const queueCount = b._queueCount || 0;
 
-            const isSold = b.deal_completed === true || b.available === false || b.status === 'sold';
             const availBadge = isSold
                 ? `<span class="availability-badge sold"><span class="availability-dot"></span>Sold</span>`
                 : `<span class="availability-badge available"><span class="availability-dot"></span>Available</span>`;
+
+            const queueBadge = !isSold && queueCount > 0
+                ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;background:#EDE9FE;color:#5B21B6;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;margin-left:6px">⏳ ${queueCount} in queue</span>`
+                : '';
 
             return `<div class="product-card" onclick="openModal(${b.id})" style="${isSold ? 'opacity:0.72;' : ''}animation-delay:${index * 55}ms">
                 <div class="card-img">
@@ -2904,7 +2922,9 @@
                 <div class="card-body">
                     ${b.category ? `<div class="card-category">${b.category}</div>` : ''}
                     <div class="card-title">${b.title}</div>
-                    ${availBadge}
+                    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px">
+                        ${availBadge}${queueBadge}
+                    </div>
                     <div class="card-footer">
                         <div>
                             <div class="card-price">₹${b.price} <span>/ used</span></div>
@@ -3077,6 +3097,7 @@
                             <span class="modal-price-sub">used price</span>
                             <span class="modal-savings">≈ 50% off retail</span>
                         </div>
+                        ${book._queueCount > 0 ? `<div style="display:inline-flex;align-items:center;gap:5px;font-size:0.82rem;font-weight:700;background:#EDE9FE;color:#5B21B6;padding:5px 12px;border-radius:20px;border:1px solid #DDD6FE;margin-bottom:10px">⏳ ${book._queueCount} already in queue — you can still join!</div>` : ''}
                         <div class="meta-chips">
                             ${book.condition ? `<span class="meta-chip">📦 ${book.condition}</span>` : ''}
                             ${book.semester ? `<span class="meta-chip">📅 Sem ${book.semester}</span>` : ''}
@@ -3326,7 +3347,7 @@
                         actions = `<div class="req-actions">
                             <button class="req-btn req-btn-chat" onclick="closeSellerNotifs();openModal(${r.book_id})">💬 Chat</button>
                             ${!r.item_received
-                                ? `<button class="req-btn req-btn-decline" onclick="if(confirm('Revoke? Waiting list will be restored.')) respondRequest(${r.id}, 'declined')">↩️ Revoke</button>
+                                ? `<button class="req-btn req-btn-decline" onclick="if(confirm('Cancel this deal? Waiting list buyers will be restored.')) respondRequest(${r.id}, 'declined')">🚫 Cancel Deal</button>
                                    <button class="req-btn req-btn-chat" style="background:var(--lime-dark);border-color:var(--lime-dark)" onclick="generateQR(${r.id}, '${r.book_id}')">🔲 QR</button>`
                                 : `<span style="font-size:0.78rem;color:var(--emerald);font-weight:700;align-self:center">✅ Received</span>`}
                         </div>
@@ -3449,10 +3470,10 @@
                         return;
                     }
 
-                    // Mark book as sold
-                    await db.from('books').update({ status: 'sold', deal_completed: true }).eq('id', reqData.book_id);
+                    // Book stays VISIBLE in marketplace — do NOT mark as sold yet
+                    // Only QR scan marks it as sold
 
-                    // Move all other pending requests to WAITING (not declined)
+                    // Move all other pending requests to WAITING
                     await db.from('requests')
                         .update({ status: 'waiting' })
                         .eq('book_id', reqData.book_id)
@@ -3469,7 +3490,7 @@
                         }]);
                     }
 
-                    showToast('✅ Approved! Others moved to waiting list.', 'success');
+                    showToast('✅ Approved! Chat is open. Item stays on marketplace.', 'success');
                     await loadBooks();
                     await subscribeToMyChats();
 
@@ -3487,7 +3508,7 @@
                         .eq('book_id', reqData.book_id)
                         .eq('status', 'waiting');
 
-                    showToast('↩️ Deal revoked — waiting list restored. Pick your next buyer!', 'success');
+                    showToast('🚫 Deal cancelled — waiting list restored. Pick your next buyer!', 'success');
                     await loadBooks();
 
                 } else {
@@ -3567,29 +3588,40 @@
                     let actions = '';
                     if (r.status === 'approved') {
                         const alreadyRated = alreadyRatedSet.has(r.id);
-                        if (alreadyRated) {
-                            actions = `<div class="req-actions">
-                                <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
-                                <span style="font-size:0.78rem;color:var(--emerald);font-weight:600;align-self:center">✅ Rated</span>
-                            </div>`;
-                        } else if (r.item_received) {
-                            actions = `<div class="req-actions">
-                                <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
-                            </div>
-                            <div class="rate-box">
-                                <h5>⭐ Rate your seller</h5>
-                                <p>How was your experience with <strong>${r.books?.seller || 'the seller'}</strong>?</p>
-                                <div class="stars-row" id="starRow-${r.id}">
-                                    ${[1,2,3,4,5].map(n => `<button class="star-btn" data-val="${n}" onclick="selectBuyerStar('${r.id}',${n})" onmouseover="hoverBuyerStar('${r.id}',${n})" onmouseout="unhoverBuyerStar('${r.id}')">★</button>`).join('')}
+                        if (r.item_received) {
+                            if (alreadyRated) {
+                                // Received + rated — just show dismiss
+                                actions = `<div class="req-actions">
+                                    <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
+                                    <span style="font-size:0.78rem;color:var(--emerald);font-weight:600;align-self:center">✅ Rated</span>
+                                    <button class="btn-unsend" onclick="dismissReceivedNotif(${r.id})">× Dismiss</button>
+                                </div>`;
+                            } else {
+                                // Received but not rated yet — show rating + dismiss
+                                actions = `<div class="req-actions" style="margin-bottom:8px">
+                                    <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
+                                    <button class="btn-unsend" onclick="dismissReceivedNotif(${r.id})">× Dismiss</button>
                                 </div>
-                                <textarea class="rate-review" id="buyerRateReview-${r.id}" rows="2" placeholder="Leave a short review (optional)…"></textarea>
-                                <button class="btn-received" onclick="submitBuyerRatingFromNotif(${r.id}, '${r.seller_id}', ${r.book_id})">Submit Rating ⭐</button>
-                            </div>`;
+                                <div class="rate-box">
+                                    <h5>⭐ Rate your seller</h5>
+                                    <p>How was your experience with <strong>${r.books?.seller || 'the seller'}</strong>?</p>
+                                    <div class="stars-row" id="starRow-${r.id}">
+                                        ${[1,2,3,4,5].map(n => `<button class="star-btn" data-val="${n}" onclick="selectBuyerStar('${r.id}',${n})" onmouseover="hoverBuyerStar('${r.id}',${n})" onmouseout="unhoverBuyerStar('${r.id}')">★</button>`).join('')}
+                                    </div>
+                                    <textarea class="rate-review" id="buyerRateReview-${r.id}" rows="2" placeholder="Leave a short review (optional)…"></textarea>
+                                    <button class="btn-received" onclick="submitBuyerRatingFromNotif(${r.id}, '${r.seller_id}', ${r.book_id})">Submit Rating ⭐</button>
+                                </div>`;
+                            }
                         } else {
+                            // Active deal — not received yet
                             actions = `<div class="req-actions">
                                 <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
                                 <button class="btn-scan" style="width:auto;font-size:0.82rem;padding:8px 14px;margin-top:0" onclick="openQRScanner(${r.id}, ${r.book_id})">📷 Scan QR</button>
-                            </div>`;
+                            </div>
+                            <button class="btn-unsend" style="margin-top:8px;width:100%;justify-content:center"
+                                onclick="buyerCancelDeal(${r.id}, ${r.book_id})">
+                                ❌ I don't want this anymore
+                            </button>`;
                         }
                     }
 
@@ -4424,6 +4456,43 @@
             showToast('Removed from watchlist', 'success');
             loadWatchlistPanel();
             if (window._currentModalBookId === bookId) updateWatchlistBtn(bookId);
+        }
+
+        // ── BUYER CANCEL DEAL ─────────────────────────────────────────────────
+        async function buyerCancelDeal(reqId, bookId) {
+            if (!confirm("Cancel this deal? The seller will be notified and the waiting list will be restored.")) return;
+            try {
+                const { error } = await db.from('requests').delete().eq('id', reqId).eq('buyer_id', ME);
+                if (error) throw error;
+
+                // Wipe chat messages
+                await db.from('messages').delete().eq('book_id', bookId);
+
+                // Restore waiting list back to pending
+                await db.from('requests')
+                    .update({ status: 'pending' })
+                    .eq('book_id', bookId)
+                    .eq('status', 'waiting');
+
+                showToast('↩️ Deal cancelled. Seller can now choose from the waiting list.', 'success');
+                await loadBuyerNotifs();
+                await loadBooks();
+                await refreshNotifBadges();
+            } catch (e) {
+                showToast('Could not cancel: ' + e.message, 'error');
+            }
+        }
+
+        // ── DISMISS RECEIVED NOTIFICATION ─────────────────────────────────────
+        async function dismissReceivedNotif(reqId) {
+            try {
+                await db.from('requests').delete().eq('id', reqId).eq('buyer_id', ME);
+                showToast('Notification dismissed', 'success');
+                await loadBuyerNotifs();
+                await refreshNotifBadges();
+            } catch (e) {
+                showToast('Could not dismiss: ' + e.message, 'error');
+            }
         }
 
         // ── UNSEND REQUEST ────────────────────────────────────────────────────
