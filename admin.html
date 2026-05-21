@@ -272,8 +272,10 @@
         // Password correct — now check Supabase session + UUID
         const { data: { session } } = await db.auth.getSession();
         if (!session) {
-            document.getElementById('pwError').textContent = '❌ You must be logged in to BookLoop first.';
-            document.getElementById('pwError').style.display = 'block';
+            // Not logged in — redirect to auth.html, come back after login
+            sessionStorage.setItem('adminRedirect', 'true');
+            sessionStorage.setItem('adminPwHash', await sha256(input));
+            window.location.href = 'auth.html';
             return;
         }
         if (session.user.id !== ADMIN_UUID) {
@@ -578,7 +580,27 @@
     }
 
     // ── INIT ──────────────────────────────────────────────────────────────────
-    document.getElementById('pwInput').focus();
+    // If redirected back from auth.html after login, auto-verify
+    (async () => {
+        const savedHash = sessionStorage.getItem('adminPwHash');
+        const fromRedirect = sessionStorage.getItem('adminRedirect');
+        if (savedHash && fromRedirect) {
+            sessionStorage.removeItem('adminRedirect');
+            sessionStorage.removeItem('adminPwHash');
+            const { data: { session } } = await db.auth.getSession();
+            if (session && session.user.id === ADMIN_UUID) {
+                if (savedHash === ADMIN_PW_HASH) {
+                    adminUnlocked = true;
+                    document.getElementById('passwordScreen').style.display = 'none';
+                    document.getElementById('adminPanel').style.display = 'block';
+                    document.getElementById('adminEmail').textContent = session.user.email;
+                    loadAllData();
+                    return;
+                }
+            }
+        }
+        document.getElementById('pwInput').focus();
+    })();
 </script>
 </body>
 </html>
