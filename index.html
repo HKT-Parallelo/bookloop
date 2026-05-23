@@ -2437,6 +2437,86 @@
         }
         .nav-signup-btn:hover { background: var(--green-dark); }
 
+
+        /* ══ AD BANNER ══════════════════════════════════════════════════ */
+        .ad-banner-wrap {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            background: #111722;
+            line-height: 0;
+        }
+        .ad-slider {
+            display: flex;
+            width: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .ad-slide {
+            min-width: 100%;
+            position: relative;
+            cursor: pointer;
+            display: block;
+            text-decoration: none;
+            line-height: 0;
+        }
+        .ad-slide img {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            display: block;
+            background: #111722;
+        }
+        .ad-slide-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a2235, #0f1620);
+            color: rgba(255,255,255,0.2);
+            font-size: 0.9rem;
+        }
+        .ad-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #fff;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+            z-index: 10;
+        }
+        .ad-arrow:hover { background: rgba(0,0,0,0.8); }
+        .ad-prev { left: 14px; }
+        .ad-next { right: 14px; }
+        .ad-dots {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+        }
+        .ad-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        .ad-dot.active {
+            background: #fff;
+            width: 20px;
+            border-radius: 4px;
+        }
+
     </style>
 </head>
 <body>
@@ -2489,7 +2569,7 @@
                             <path style="fill:#EBD75C;" d="M476.393,444.247c0,37.414-106.55,67.753-237.999,67.753c-131.44,0-237.988-30.339-237.988-67.753 c0-37.414,106.548-67.753,237.988-67.753C369.843,376.494,476.393,406.833,476.393,444.247z"/>
                             <path style="fill:#EDC953;" d="M295.337,424.841c0,29.657-24.044,53.702-53.688,53.702c-29.643,0-53.68-24.044-53.68-53.702 c0-9.943,2.71-19.263,7.427-27.242c14.223-0.674,28.941-1.018,44.002-1.018c16.718,0,32.977,0.424,48.633,1.248 C292.684,405.757,295.337,414.998,295.337,424.841z"/>
                             <circle style="fill:#FFFFFF;" cx="222.329" cy="448.799" r="11.047"/>
-                            <path style="fill:#FFFFFF;" d="M114.499,218.615c0.007-25.005,7.947-48.11,21.474-67.058 c13.52-18.933,32.625-33.657,54.834-41.715c5.262-1.914,7.979-7.721,6.072-12.99c-1.915-5.262-7.729-7.972-12.99-6.058 c-26.145,9.484-48.54,26.747-64.423,48.984c-15.882,22.224-25.256,49.494-25.248,78.836c0,5.592,4.541,10.13,10.136,10.13 C109.957,228.744,114.499,224.206,114.499,218.615z"/>
+                            <path style="fill:#ffffff;" d="M114.499,218.615c0.007-25.005,7.947-48.11,21.474-67.058 c13.52-18.933,32.625-33.657,54.834-41.715c5.262-1.914,7.979-7.721,6.072-12.99c-1.915-5.262-7.729-7.972-12.99-6.058 c-26.145,9.484-48.54,26.747-64.423,48.984c-15.882,22.224-25.256,49.494-25.248,78.836c0,5.592,4.541,10.13,10.136,10.13 C109.957,228.744,114.499,224.206,114.499,218.615z"/>
                         </g>
                     </svg>
                     <span class="notif-dot" id="sellerBellDot"></span>
@@ -2497,9 +2577,7 @@
 
                 <!-- Buyer Bell — request status updates -->
                 <button class="notif-btn" id="buyerBellBtn" onclick="if(!ME){showGuestModal();}else{openBuyerNotifs();}" title="My Requests">
-                    <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                    </svg>
+                    <svg viewBox="-4 -6 35 35" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ff2424"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M7.2998 5H22L20 12H8.37675M21 16H9L7 3H4M4 8H2M5 11H2M6 14H2M10 20C10 20.5523 9.55228 21 9 21C8.44772 21 8 20.5523 8 20C8 19.4477 8.44772 19 9 19C9.55228 19 10 19.4477 10 20ZM21 20C21 20.5523 20.5523 21 20 21C19.4477 21 19 20.5523 19 20C19 19.4477 19.4477 19 20 19C20.5523 19 21 19.4477 21 20Z" stroke="#31873b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
                     <span class="notif-dot" id="buyerBellDot"></span>
                 </button>
                 <!-- User Avatar + Dropdown -->
@@ -2538,32 +2616,18 @@
     </nav>
 
     <!-- HERO -->
-    <div class="hero-strip">
-        <div class="hero-grid-overlay"></div>
-        <div class="hero-inner">
-            <div class="hero-text">
-                <div class="hero-badge">
-                    <span class="hero-badge-dot"></span>
-                    Live Marketplace
-                </div>
-                <h1>Study Smart,<br>Spend <em>Less</em></h1>
-                <p>Buy & sell used academic materials between students at your college — zero fees, zero hassle.</p>
-            </div>
-            <div class="hero-stats">
-                <div class="stat">
-                    <div class="stat-num" id="statItems">—</div>
-                    <div class="stat-label">Items Listed</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num" id="statSavings">50%</div>
-                    <div class="stat-label">Avg Savings</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num">₹0</div>
-                    <div class="stat-label">Platform Fee</div>
-                </div>
-            </div>
+    <!-- ══ AD BANNER ══ -->
+    <div class="ad-banner-wrap" id="adBannerWrap" style="display:none">
+        <div class="ad-slider" id="adSlider">
+            <!-- slides injected by JS -->
         </div>
+        <div class="ad-dots" id="adDots"></div>
+        <button class="ad-arrow ad-prev" onclick="adSlide(-1)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="ad-arrow ad-next" onclick="adSlide(1)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
     </div>
 
     <!-- MAIN -->
@@ -2877,6 +2941,7 @@
 
             const authed = await initAuth();
             await checkSchema();
+            await loadAds();
             await loadBooks();
             if (authed) {
                 await loadMyListingsBadge();
@@ -3391,6 +3456,72 @@
         }
 
         // ── SEND REQUEST ─────────────────────────────────────────────────────
+
+
+        // ── ADVERTISEMENTS ───────────────────────────────────────────────────
+        let adIndex = 0;
+        let adData = [];
+        let adTimer = null;
+
+        async function loadAds() {
+            try {
+                const { data, error } = await db.from('advertisements')
+                    .select('*')
+                    .eq('active', true)
+                    .order('display_order', { ascending: true })
+                    .limit(5);
+
+                if (error || !data || data.length === 0) return;
+                adData = data;
+
+                const wrap = document.getElementById('adBannerWrap');
+                const slider = document.getElementById('adSlider');
+                const dotsEl = document.getElementById('adDots');
+
+                // Build slides
+                slider.innerHTML = data.map(ad => `
+                    <a class="ad-slide" href="${ad.link_url || '#'}" ${ad.link_url ? 'target="_blank" rel="noopener"' : 'onclick="return false"'}>
+                        <img src="${ad.image_url}" alt="${ad.title || 'Advertisement'}" loading="lazy">
+                    </a>
+                `).join('');
+
+                // Build dots
+                dotsEl.innerHTML = data.map((_, i) => `
+                    <button class="ad-dot ${i === 0 ? 'active' : ''}" onclick="goToAd(${i})"></button>
+                `).join('');
+
+                wrap.style.display = 'block';
+                startAdTimer();
+            } catch(e) {}
+        }
+
+        function adSlide(dir) {
+            adIndex = (adIndex + dir + adData.length) % adData.length;
+            updateAdSlider();
+            resetAdTimer();
+        }
+
+        function goToAd(i) {
+            adIndex = i;
+            updateAdSlider();
+            resetAdTimer();
+        }
+
+        function updateAdSlider() {
+            document.getElementById('adSlider').style.transform = `translateX(-${adIndex * 100}%)`;
+            document.querySelectorAll('.ad-dot').forEach((d, i) => d.classList.toggle('active', i === adIndex));
+        }
+
+        function startAdTimer() {
+            adTimer = setInterval(() => {
+                if (adData.length > 1) adSlide(1);
+            }, 4000);
+        }
+
+        function resetAdTimer() {
+            clearInterval(adTimer);
+            startAdTimer();
+        }
 
         // ── GUEST MODAL ──────────────────────────────────────────────────────
         function showGuestModal() {
