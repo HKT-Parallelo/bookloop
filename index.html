@@ -3019,13 +3019,29 @@
                     table: 'requests',
                     filter: `seller_id=eq.${ME}`
                 }, async (payload) => {
-                    // item_received toggled — refresh seller panel live
                     if (payload.new.item_received && !payload.old.item_received) {
                         showToast('Item marked as received!', 'success');
                     }
                     await refreshNotifBadges();
                     if (document.getElementById('sellerNotifPanel').classList.contains('open')) {
                         await loadSellerNotifs();
+                    }
+                })
+                .on('postgres_changes', {
+                    event: 'DELETE',
+                    schema: 'public',
+                    table: 'requests'
+                }, async (payload) => {
+                    // Buyer cancelled — remove card from seller panel instantly
+                    const card = document.getElementById(`reqcard-${payload.old.id}`);
+                    if (card) card.remove();
+                    showToast('A buyer cancelled their deal.', 'error');
+                    await refreshNotifBadges();
+                    if (document.getElementById('sellerNotifPanel').classList.contains('open')) {
+                        const body = document.getElementById('sellerNotifBody');
+                        if (body && !body.querySelector('.req-card')) {
+                            body.innerHTML = '<div class="notif-empty"><h3>No requests yet</h3><p>When students request your items, they will appear here.</p></div>';
+                        }
                     }
                 })
                 .subscribe();
@@ -3432,14 +3448,14 @@
                 <div class="similar-section">
                     <h4><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Similar Items</h4>
                     <div class="similar-grid">
-                        ${similar.map(sim => `
-                            <div class="similar-card" onclick="openModal(${sim.id})">
+                        ${similar.map(s => `
+                            <div class="similar-card" onclick="openModal(${s.id})">
                                 <img class="similar-img"
-                                     src="${sim.image || 'https://placehold.co/160x80/F1F5F9/94A3B8?text=?'}"
+                                     src="${s.image || 'https://placehold.co/160x80/F1F5F9/94A3B8?text=?'}"
                                      onerror="this.src='https://placehold.co/160x80/F1F5F9/94A3B8?text=?'">
                                 <div class="similar-body">
-                                    <div class="similar-title">${s(sim.title)}</div>
-                                    <div class="similar-price">₹${sim.price}</div>
+                                    <div class="similar-title">${s(s.title)}</div>
+                                    <div class="similar-price">₹${s.price}</div>
                                 </div>
                             </div>`).join('')}
                     </div>
@@ -3452,8 +3468,6 @@
             updateWatchlistBtn(book.id);
 
             document.getElementById('modalOverlay').classList.add('open');
-            // Push state so mobile back button closes modal instead of leaving page
-            history.pushState({ modal: true, bookId: id }, '', window.location.pathname);
 
             if (showChat) {
                 await loadChat(id);
@@ -3691,7 +3705,6 @@
             document.getElementById('sellerNotifOverlay').classList.add('open');
             document.getElementById('sellerNotifPanel').classList.add('open');
             document.body.style.overflow = 'hidden';
-            history.pushState({ panel: 'seller' }, '', window.location.pathname);
             await loadSellerNotifs();
         }
 
@@ -3699,7 +3712,6 @@
             document.getElementById('sellerNotifOverlay').classList.remove('open');
             document.getElementById('sellerNotifPanel').classList.remove('open');
             document.body.style.overflow = '';
-            if (history.state?.panel === 'seller') history.back();
         }
 
         async function loadSellerNotifs() {
@@ -3957,7 +3969,6 @@
             document.getElementById('buyerNotifOverlay').classList.add('open');
             document.getElementById('buyerNotifPanel').classList.add('open');
             document.body.style.overflow = 'hidden';
-            history.pushState({ panel: 'buyer' }, '', window.location.pathname);
             await loadBuyerNotifs();
         }
 
@@ -3965,7 +3976,6 @@
             document.getElementById('buyerNotifOverlay').classList.remove('open');
             document.getElementById('buyerNotifPanel').classList.remove('open');
             document.body.style.overflow = '';
-            if (history.state?.panel === 'buyer') history.back();
         }
 
         async function loadBuyerNotifs() {
@@ -4139,37 +4149,7 @@
             }
             window._openChatBookId = null;
             window._currentModalBook = null;
-            // If we pushed a modal state, go back so URL is clean
-            if (history.state?.modal) {
-                history.back();
-            }
         }
-
-        // Handle mobile back button — closes modal/panels instead of leaving page
-        window.addEventListener('popstate', (e) => {
-            const modal = document.getElementById('modalOverlay');
-            const sellerPanel = document.getElementById('sellerNotifPanel');
-            const buyerPanel = document.getElementById('buyerNotifPanel');
-
-            if (modal.classList.contains('open')) {
-                modal.classList.remove('open');
-                if (chatInterval) { clearInterval(chatInterval); chatInterval = null; }
-                if (realtimeChatChannel) {
-                    db.removeChannel(realtimeChatChannel);
-                    realtimeChatChannel = null;
-                }
-                window._openChatBookId = null;
-                window._currentModalBook = null;
-            } else if (sellerPanel.classList.contains('open')) {
-                sellerPanel.classList.remove('open');
-                document.getElementById('sellerNotifOverlay').classList.remove('open');
-                document.body.style.overflow = '';
-            } else if (buyerPanel.classList.contains('open')) {
-                buyerPanel.classList.remove('open');
-                document.getElementById('buyerNotifOverlay').classList.remove('open');
-                document.body.style.overflow = '';
-            }
-        });
 
         function handleOverlayClick(e) {
             if (e.target.id === 'modalOverlay') closeModal();
@@ -5027,11 +5007,10 @@ ${url}`;
         async function buyerCancelDeal(reqId, bookId) {
             if (!confirm("Cancel this deal? The seller will be notified and the waiting list will be restored.")) return;
             try {
-                // Delete the request
                 const { error } = await db.from('requests').delete().eq('id', reqId).eq('buyer_id', ME);
                 if (error) throw error;
 
-                // Wipe chat messages for this book
+                // Wipe chat messages
                 await db.from('messages').delete().eq('book_id', bookId);
 
                 // Restore waiting list back to pending
@@ -5040,21 +5019,8 @@ ${url}`;
                     .eq('book_id', bookId)
                     .eq('status', 'waiting');
 
-                // Remove card from UI immediately without waiting for reload
-                const card = document.getElementById(`buyerreqcard-${reqId}`);
-                if (card) card.remove();
-
-                // Check if panel is now empty
-                const body = document.getElementById('buyerNotifBody');
-                if (body && !body.querySelector('.req-card')) {
-                    body.innerHTML = `<div class="notif-empty">
-                        <div class="icon">🛒</div>
-                        <h3>No active requests</h3>
-                        <p>Browse listings and request items you want to buy.</p>
-                    </div>`;
-                }
-
                 showToast('↩️ Deal cancelled. Seller can now choose from the waiting list.', 'success');
+                await loadBuyerNotifs();
                 await loadBooks();
                 await refreshNotifBadges();
             } catch (e) {
