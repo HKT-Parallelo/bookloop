@@ -3081,7 +3081,7 @@
                 const { data, error } = await db
                     .from('books')
                     .select('*')
-                    .neq('status', 'sold')
+                    .or("status.is.null,status.neq.sold")
                     .order('created_at', { ascending: false });
                 if (error) throw error;
 
@@ -3223,7 +3223,7 @@
         }
 
         async function openModal(id) {
-            let book = allBooks.find(b => b.id === id || b.id === String(id));
+            let book = allBooks.find(b => Number(b.id) === Number(id));
             if (!book) {
                 // Book may be sold/filtered out of allBooks — fetch directly from DB
                 try {
@@ -3238,7 +3238,7 @@
 
             const isMine = ME === (book.seller_id || book.seller);
             const initials = (book.seller || 'S').charAt(0).toUpperCase();
-            const isSold = book.deal_completed === true || book.available === false || book.status === 'sold';
+            const isSold = book.deal_completed === true || book.status === 'sold';
 
             const availStatusHtml = isSold
                 ? `<span style="display:inline-flex;align-items:center;gap:6px;background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;padding:4px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;margin-bottom:12px">
@@ -3432,14 +3432,14 @@
                 <div class="similar-section">
                     <h4><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Similar Items</h4>
                     <div class="similar-grid">
-                        ${similar.map(s => `
-                            <div class="similar-card" onclick="openModal(${s.id})">
+                        ${similar.map(sim => `
+                            <div class="similar-card" onclick="openModal(${sim.id})">
                                 <img class="similar-img"
-                                     src="${s.image || 'https://placehold.co/160x80/F1F5F9/94A3B8?text=?'}"
+                                     src="${sim.image || 'https://placehold.co/160x80/F1F5F9/94A3B8?text=?'}"
                                      onerror="this.src='https://placehold.co/160x80/F1F5F9/94A3B8?text=?'">
                                 <div class="similar-body">
-                                    <div class="similar-title">${s(s.title)}</div>
-                                    <div class="similar-price">₹${s.price}</div>
+                                    <div class="similar-title">${s(sim.title)}</div>
+                                    <div class="similar-price">₹${sim.price}</div>
                                 </div>
                             </div>`).join('')}
                     </div>
@@ -4332,7 +4332,7 @@
 
                 // Update stats
                 const total  = myListings.length;
-                const sold   = myListings.filter(b => b.deal_completed === true || b.available === false || b.status === 'sold').length;
+                const sold   = myListings.filter(b => b.deal_completed === true || b.status === 'sold').length;
                 const active = total - sold;
 
                 document.getElementById('statTotal').textContent  = total;
@@ -4363,7 +4363,7 @@
         }
 
         function buildMyListingCard(b) {
-            const isSold = b.deal_completed === true || b.available === false || b.status === 'sold';
+            const isSold = b.deal_completed === true || b.status === 'sold';
             const condColors = { Excellent:'#065F46', Good:'#1E40AF', Fair:'#92400E', Poor:'#991B1B' };
             const date = b.created_at ? new Date(b.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short' }) : '';
 
@@ -4434,9 +4434,9 @@
             try {
                 const { data } = await db
                     .from('books')
-                    .select('id, deal_completed, available')
+                    .select('id, deal_completed, status')
                     .eq('seller_id', ME);
-                const active = (data || []).filter(b => !b.deal_completed && b.available !== false).length;
+                const active = (data || []).filter(b => !b.deal_completed && b.status !== 'sold').length;
                 const badge = document.getElementById('myListingsBadge');
                 if (active > 0) { badge.textContent = active; badge.style.display = 'inline'; }
             } catch {}
