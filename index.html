@@ -3448,14 +3448,14 @@
                 <div class="similar-section">
                     <h4><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Similar Items</h4>
                     <div class="similar-grid">
-                        ${similar.map(s => `
-                            <div class="similar-card" onclick="openModal(${s.id})">
+                        ${similar.map(sim => `
+                            <div class="similar-card" onclick="openModal(${sim.id})">
                                 <img class="similar-img"
-                                     src="${s.image || 'https://placehold.co/160x80/F1F5F9/94A3B8?text=?'}"
+                                     src="${sim.image || 'https://placehold.co/160x80/F1F5F9/94A3B8?text=?'}"
                                      onerror="this.src='https://placehold.co/160x80/F1F5F9/94A3B8?text=?'">
                                 <div class="similar-body">
-                                    <div class="similar-title">${s(s.title)}</div>
-                                    <div class="similar-price">₹${s.price}</div>
+                                    <div class="similar-title">${s(sim.title)}</div>
+                                    <div class="similar-price">₹${sim.price}</div>
                                 </div>
                             </div>`).join('')}
                     </div>
