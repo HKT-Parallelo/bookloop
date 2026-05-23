@@ -2238,6 +2238,8 @@
 
         /* ── WATCHLIST ── */
         .btn-watchlist { width:38px; height:38px; border-radius:50%; border:1.5px solid var(--border); background:var(--surface-2); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.1rem; transition:all 0.2s; flex-shrink:0; }
+        .btn-share { width:38px; height:38px; border-radius:50%; border:1.5px solid var(--border); background:var(--surface-2); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1rem; transition:all 0.2s; flex-shrink:0; color:var(--muted); }
+        .btn-share:hover { border-color:var(--lime-dark); background:var(--lime-light); color:var(--lime-dark); transform:scale(1.1); }
         .btn-watchlist:hover { border-color:#EF4444; background:#FEE2E2; transform:scale(1.1); }
         .btn-watchlist.saved { background:#FEE2E2; border-color:#EF4444; }
 
@@ -2822,6 +2824,11 @@
     <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
         <div class="modal-box" id="modalBox">
             <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 16px 0;position:sticky;top:0;z-index:10;background:var(--surface)">
+                <button class="btn-share" id="shareBtn" onclick="shareItem()" title="Share this item">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/>
+                    </svg>
+                </button>
                 <button class="btn-watchlist" id="watchlistBtn" onclick="toggleWatchlist()" title="Save to Watchlist">🤍</button>
                 <button class="modal-close" style="position:static;float:none;margin:0" onclick="closeModal()">×</button>
             </div>
@@ -3047,6 +3054,14 @@
             // So new messages show as popup even when modal is closed
             await subscribeToMyChats();
 
+            // Auto-open item if ?item=ID in URL (from share link)
+            const urlParams = new URLSearchParams(window.location.search);
+            const sharedItemId = urlParams.get('item');
+            if (sharedItemId) {
+                await openModal(parseInt(sharedItemId));
+                window.history.replaceState({}, '', window.location.pathname);
+            }
+
             // Fallback polling every 30s (safety net)
             setInterval(refreshNotifBadges, 30000);
         });
@@ -3063,10 +3078,11 @@
         // ── LOAD & DISPLAY ──────────────────────────────────────────────────
         async function loadBooks() {
             try {
-                let q = db.from('books').select('*').order('created_at', { ascending: false });
-                if (hasEnhanced) q = q.or('deal_completed.is.null,deal_completed.eq.false');
-                q = q.or("status.is.null,status.neq.sold");
-                const { data, error } = await q;
+                const { data, error } = await db
+                    .from('books')
+                    .select('*')
+                    .neq('status', 'sold')
+                    .order('created_at', { ascending: false });
                 if (error) throw error;
 
                 // Fetch seller ratings and attach to books
@@ -3089,11 +3105,14 @@
                     _queueCount: queueMap[b.id] || 0
                 }));
                 applyFilters();
-                document.getElementById('statItems').textContent = allBooks.length;
-                document.getElementById('itemCount').textContent = allBooks.length;
+                const statItems = document.getElementById('statItems');
+                const itemCount = document.getElementById('itemCount');
+                if (statItems) statItems.textContent = allBooks.length;
+                if (itemCount) itemCount.textContent = allBooks.length;
             } catch (e) {
+                console.error('loadBooks error:', e);
                 showGrid([]);
-                showToast('Could not load listings', 'error');
+                showToast('Could not load listings: ' + e.message, 'error');
             }
         }
 
@@ -4856,6 +4875,34 @@
         }
 
         let toastTimer;
+        // ── SHARE LISTING ────────────────────────────────────────────────────────
+        function shareItem() {
+            const bookId = window._currentModalBookId;
+            if (!bookId) return;
+
+            const book = allBooks.find(b => b.id === bookId);
+            const title = book?.title || 'Check this out';
+            const price = book?.price ? '₹' + book.price : '';
+            const url   = `${window.location.origin}${window.location.pathname}?item=${bookId}`;
+
+            const text = `${title} ${price} — available on BookLoop!
+${url}`;
+
+            // Try native share (mobile) first
+            if (navigator.share) {
+                navigator.share({ title, text, url })
+                    .catch(() => {}); // user cancelled — no error needed
+            } else {
+                // Fallback — copy link to clipboard
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast('🔗 Link copied! Share it on WhatsApp or anywhere.', 'success');
+                }).catch(() => {
+                    // Last fallback — show the link in a prompt
+                    prompt('Copy this link:', url);
+                });
+            }
+        }
+
         // ── WATCHLIST PANEL ──────────────────────────────────────────────────────
         function openWatchlistPanel() {
             document.getElementById('watchlistPanel').style.right = '0';
