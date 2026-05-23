@@ -480,87 +480,240 @@
         .page-body {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 32px;
-            display: grid;
-            grid-template-columns: 220px 1fr;
-            gap: 28px;
+            padding: 24px 32px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            position: relative;
+        }
+
+        /* ─── FILTER TOPBAR ──────────────────────── */
+        .filter-topbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-toggle-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--ink);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.34,1.3,0.64,1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            position: relative;
+        }
+
+        .filter-toggle-btn:hover {
+            border-color: var(--lime-dark);
+            color: var(--lime-dark);
+            box-shadow: 0 4px 16px rgba(101,163,13,0.15);
+            transform: translateY(-1px);
+        }
+
+        .filter-toggle-btn.active {
+            background: var(--lime-light);
+            border-color: var(--lime-dark);
+            color: var(--lime-dark);
+        }
+
+        .filter-toggle-btn svg {
+            transition: transform 0.3s ease;
+        }
+
+        .filter-toggle-btn.active svg {
+            transform: rotate(180deg);
+        }
+
+        /* Active filter count badge */
+        .filter-active-badge {
+            display: none;
+            min-width: 18px;
+            height: 18px;
+            background: var(--lime-dark);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 800;
+            border-radius: 20px;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+        }
+
+        .filter-active-badge.show { display: flex; }
+
+        /* Quick filter chips in topbar */
+        .quick-filters {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .quick-chip {
+            padding: 7px 14px;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .quick-chip:hover { border-color: var(--lime-dark); color: var(--lime-dark); }
+        .quick-chip.active { background: var(--lime-light); border-color: var(--lime-dark); color: var(--lime-dark); }
+
+        .products-count {
+            font-size: 0.88rem;
+            color: var(--muted);
+            margin-left: auto;
+            white-space: nowrap;
+        }
+
+        .products-count strong { color: var(--ink); }
+
+        /* ─── CONTENT ROW (sidebar + grid) ───────── */
+        .content-row {
+            display: flex;
+            gap: 0;
             align-items: start;
+            position: relative;
         }
 
         /* ─── SIDEBAR ────────────────────────────── */
         .sidebar {
-            background: var(--surface);
-            border: 1px solid var(--border);
+            width: 0;
+            overflow: hidden;
+            opacity: 0;
+            flex-shrink: 0;
+            background: white;
             border-radius: var(--r-lg);
-            padding: 20px;
+            border: 1.5px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+            transition: width 0.4s cubic-bezier(0.34,1.1,0.64,1),
+                        opacity 0.3s ease,
+                        margin-right 0.4s cubic-bezier(0.34,1.1,0.64,1);
             position: sticky;
-            top: 100px;
+            top: 90px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            width: 230px;
+            opacity: 1;
+            margin-right: 24px;
+            overflow-y: auto;
+        }
+
+        /* Inner padding wrapper so content doesn't show during slide */
+        .sidebar-inner {
+            padding: 20px;
+            width: 230px;
         }
 
         .sidebar-title {
             font-family: 'Cabinet Grotesk', sans-serif;
-            font-weight: 800;
+            font-weight: 900;
             font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--muted);
-            margin-bottom: 16px;
+            letter-spacing: 1.2px;
+            color: var(--muted-2);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .filter-group { margin-bottom: 24px; }
+        .sidebar-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .filter-group { margin-bottom: 20px; }
 
         .filter-label {
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: 700;
-            color: var(--ink-3);
+            color: var(--ink);
             margin-bottom: 8px;
             display: block;
         }
 
         .filter-select {
             width: 100%;
-            padding: 9px 12px;
+            padding: 9px 28px 9px 12px;
             border: 1.5px solid var(--border);
-            border-radius: var(--r-sm);
+            border-radius: 10px;
             font-family: 'Satoshi', sans-serif;
-            font-size: 0.85rem;
+            font-size: 0.84rem;
             color: var(--ink);
             background: var(--surface-2);
             cursor: pointer;
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 10px center;
-            padding-right: 28px;
+            background-color: white;
         }
 
-        .filter-select:focus { border-color: var(--lime-dark); }
+        .filter-select:focus {
+            border-color: var(--lime-dark);
+            box-shadow: 0 0 0 3px rgba(132,204,22,0.1);
+        }
 
         .condition-pills { display: flex; flex-direction: column; gap: 6px; }
 
         .condition-pill {
             padding: 8px 12px;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1.5px solid var(--border);
-            font-size: 0.83rem;
-            font-weight: 500;
+            font-size: 0.82rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.15s;
-            background: var(--surface-2);
+            transition: all 0.2s cubic-bezier(0.34,1.3,0.64,1);
+            background: white;
             color: var(--muted);
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .condition-pill:hover { border-color: var(--lime-dark); color: var(--ink); }
-        .condition-pill.active { background: var(--lime-light); border-color: var(--lime-dark); color: var(--lime-dark); font-weight: 700; }
+        .condition-pill:hover {
+            border-color: var(--lime-dark);
+            color: var(--lime-dark);
+            transform: translateX(3px);
+        }
+
+        .condition-pill.active {
+            background: var(--lime-light);
+            border-color: var(--lime-dark);
+            color: var(--lime-dark);
+            font-weight: 700;
+            transform: translateX(3px);
+        }
 
         .condition-dot {
-            width: 8px;
-            height: 8px;
+            width: 8px; height: 8px;
             border-radius: 50%;
             flex-shrink: 0;
         }
@@ -568,47 +721,42 @@
         .reset-filters {
             width: 100%;
             padding: 9px;
-            border-radius: 8px;
-            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            border: 1.5px dashed var(--border);
             background: transparent;
             font-family: 'Satoshi', sans-serif;
             font-size: 0.82rem;
             color: var(--muted);
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.2s;
+            margin-top: 4px;
         }
 
-        .reset-filters:hover { color: var(--red); border-color: var(--red); }
+        .reset-filters:hover { color: var(--red); border-color: var(--red); background: #FEF2F2; }
 
-        /* ─── PRODUCTS ───────────────────────────── */
-        .products-section {}
+        /* ─── PRODUCTS SECTION ───────────────────── */
+        .products-section {
+            flex: 1;
+            min-width: 0;
+            transition: all 0.4s cubic-bezier(0.34,1.1,0.64,1);
+        }
 
         .products-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
-
-        .products-count {
-            font-size: 0.9rem;
-            color: var(--muted);
-        }
-
-        .products-count strong { color: var(--ink); }
 
         .view-toggle { display: flex; gap: 4px; }
 
         .view-btn {
-            width: 34px;
-            height: 34px;
+            width: 34px; height: 34px;
             border: 1.5px solid var(--border);
             border-radius: 8px;
             background: transparent;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             color: var(--muted);
             transition: all 0.15s;
         }
@@ -621,7 +769,7 @@
 
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 18px;
         }
 
@@ -1505,326 +1653,141 @@
 
         /* ── TABLET (max 1024px) ─────────────────── */
         @media (max-width: 1024px) {
-            .page-body {
-                grid-template-columns: 1fr;
-                padding: 20px;
-                gap: 20px;
-            }
-
-            .sidebar {
-                position: static;
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 14px;
-                align-items: end;
-                border-radius: var(--r-md);
-                padding: 16px;
-            }
-
-            .sidebar-title { display: none; }
-            .reset-filters { margin-top: 0; }
-
-            .hero-strip { padding: 40px 24px; }
-
-            .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            }
+            .page-body { padding: 20px; }
+            .sidebar.open { width: 200px; }
+            .sidebar-inner { width: 200px; }
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
         }
 
         /* ── LARGE PHONE (max 768px) ─────────────── */
         @media (max-width: 768px) {
-
-            /* Topbar — compact */
-            .topbar-inner {
-                padding: 0 14px;
-                height: 60px;
-                gap: 10px;
-            }
-
+            .topbar-inner { padding: 0 14px; height: 60px; gap: 10px; }
             .badge-count { display: none; }
-
-            /* Search bar — smaller */
-            .search-input {
-                height: 38px;
-                font-size: 0.85rem;
-            }
-
-            /* Sell button — icon only */
+            .search-input { height: 38px; font-size: 0.85rem; }
             .sell-btn span { display: none; }
-            .sell-btn {
-                padding: 9px 12px;
-                border-radius: 10px;
-                min-width: 38px;
-                justify-content: center;
-            }
-
-            /* Hero — stacked */
+            .sell-btn { padding: 9px 12px; border-radius: 10px; min-width: 38px; justify-content: center; }
             .hero-strip { padding: 28px 16px; }
             .hero-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
             .hero-text h1 { font-size: 1.8rem; }
             .hero-text p  { font-size: 0.9rem; }
             .hero-stats { display: none; }
-            .hero-badge { font-size: 0.72rem; }
+            .page-body { padding: 12px; }
+            .filter-topbar { gap: 8px; }
+            .quick-filters { display: none; }
 
-            /* Main layout */
-            .page-body { padding: 12px; gap: 12px; }
-
-            /* Sidebar — horizontal scrollable filter chips */
+            /* Filter sidebar on mobile — overlay style */
             .sidebar {
-                display: flex;
-                flex-direction: row;
-                overflow-x: auto;
-                gap: 10px;
-                padding: 12px;
-                border-radius: 14px;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: none;
-            }
-            .sidebar::-webkit-scrollbar { display: none; }
-
-            .filter-group {
-                flex-shrink: 0;
-                margin-bottom: 0;
-                min-width: 130px;
+                position: fixed !important;
+                top: 0; left: -300px;
+                height: 100vh;
+                width: 0 !important;
+                z-index: 300;
+                border-radius: 0 !important;
+                border: none !important;
+                box-shadow: none;
+                transition: left 0.4s cubic-bezier(0.34,1.1,0.64,1), width 0.4s, opacity 0.3s;
+                overflow-y: auto;
+                margin-right: 0 !important;
             }
 
-            .filter-label { font-size: 0.72rem; margin-bottom: 5px; }
-
-            .filter-select {
-                padding: 7px 28px 7px 10px;
-                font-size: 0.8rem;
-                border-radius: 10px;
+            .sidebar.open {
+                left: 0 !important;
+                width: 280px !important;
+                opacity: 1 !important;
+                box-shadow: 4px 0 40px rgba(0,0,0,0.15) !important;
             }
 
-            .condition-pills {
-                flex-direction: row;
-                gap: 6px;
-                flex-wrap: nowrap;
-            }
+            .sidebar-inner { width: 280px; }
 
-            .condition-pill {
-                flex-shrink: 0;
-                padding: 6px 10px;
-                font-size: 0.75rem;
-                border-radius: 20px;
-                white-space: nowrap;
-            }
-
-            .reset-filters {
-                flex-shrink: 0;
-                align-self: flex-end;
-                white-space: nowrap;
-                padding: 7px 14px;
-                font-size: 0.78rem;
-                border-radius: 20px;
-                min-width: auto;
-            }
-
-            /* Products grid — 2 columns */
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-
-            /* Product cards — compact */
+            .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .card-img { height: 150px; }
             .card-body { padding: 10px; }
             .card-title { font-size: 0.88rem; }
             .card-price { font-size: 1.1rem; }
             .card-seller { display: none; }
             .card-delete { opacity: 1; width: 26px; height: 26px; }
-            .card-report { opacity: 1; height: 26px; padding: 0 8px; }
-
-            /* Products header */
-            .products-header { margin-bottom: 12px; }
-            .products-count { font-size: 0.82rem; }
-
-            /* Modal — full screen on mobile */
             .modal-overlay { padding: 0; align-items: flex-end; }
-            .modal-box {
-                border-radius: 24px 24px 0 0;
-                max-height: 92vh;
-                width: 100%;
-                animation: modalInMobile 0.35s cubic-bezier(0.34,1.2,0.64,1);
-            }
-
-            @keyframes modalInMobile {
-                from { transform: translateY(100%); }
-                to   { transform: translateY(0); }
-            }
-
+            .modal-box { border-radius: 24px 24px 0 0; max-height: 92vh; width: 100%; animation: modalInMobile 0.35s cubic-bezier(0.34,1.2,0.64,1); }
+            @keyframes modalInMobile { from { transform: translateY(100%); } to { transform: translateY(0); } }
             .modal-grid { grid-template-columns: 1fr; }
             .modal-img { border-radius: 24px 24px 0 0; height: 220px; }
             .modal-info { padding: 18px; }
             .modal-title { font-size: 1.3rem; }
             .modal-close { top: 12px; right: 12px; }
             .chat-panel { padding: 16px; }
-
-            /* Notification panels — full screen */
             .notif-panel { width: 100vw; }
-
-            /* My listings panel — full screen */
             .my-listings-panel { width: 100vw; }
-
-            /* Toast — bottom center on mobile */
-            .toast {
-                bottom: 16px;
-                right: 16px;
-                left: 16px;
-                max-width: none;
-                font-size: 0.84rem;
-            }
+            .toast { bottom: 16px; right: 16px; left: 16px; max-width: none; font-size: 0.84rem; }
         }
 
         /* ── SMALL PHONE (max 480px) ─────────────── */
         @media (max-width: 480px) {
-
-            /* Topbar */
-            .topbar-inner {
-                padding: 0 10px;
-                height: 56px;
-                gap: 8px;
-            }
-
-            /* Logo — hide text, show icon only */
-            .logo-wrap img {
-                height: 30px;
-            }
-
-            /* Search — full flex */
+            .topbar-inner { padding: 0 10px; height: 56px; gap: 8px; }
+            .logo-wrap img { height: 30px; }
             .search-wrap { flex: 1; }
-            .search-input {
-                height: 36px;
-                font-size: 0.8rem;
-                padding-left: 36px;
-            }
-
-            /* Notif buttons — smaller */
+            .search-input { height: 36px; font-size: 0.8rem; padding-left: 36px; }
             .notif-btn { width: 36px; height: 36px; border-radius: 10px; }
-
-            /* Hero */
             .hero-strip { padding: 22px 14px; }
             .hero-text h1 { font-size: 1.55rem; letter-spacing: -0.5px; }
             .hero-text p  { font-size: 0.82rem; }
-            .hero-badge { font-size: 0.68rem; padding: 4px 10px; }
-
-            /* Page body */
-            .page-body { padding: 10px; gap: 10px; }
-
-            /* Cards — 2 columns, very compact */
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
-            }
-
+            .page-body { padding: 10px; }
+            .products-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
             .card-img { height: 130px; }
             .card-body { padding: 8px; }
-            .card-title { font-size: 0.82rem; -webkit-line-clamp: 2; }
+            .card-title { font-size: 0.82rem; }
             .card-price { font-size: 1rem; }
-            .card-category { font-size: 0.65rem; }
-
-            .availability-badge { font-size: 0.65rem; padding: 2px 7px; }
-
-            /* Condition badge on card — smaller */
-            .card-condition { font-size: 0.62rem; padding: 2px 6px; top: 6px; left: 6px; }
-
-            /* Filter sidebar */
-            .filter-group { min-width: 110px; }
-            .filter-select { font-size: 0.75rem; padding: 6px 24px 6px 8px; }
-            .condition-pill { font-size: 0.7rem; padding: 5px 8px; }
-
-            /* Modal */
             .modal-img { height: 180px; }
             .modal-info { padding: 14px; }
             .modal-title { font-size: 1.15rem; }
-            .modal-price { font-size: 1.6rem; }
-            .meta-chips { gap: 6px; }
-            .meta-chip { font-size: 0.75rem; padding: 4px 10px; }
-
-            /* Request button */
-            .btn-request { padding: 12px; font-size: 0.85rem; }
-
-            /* Notification panel header */
-            .notif-panel-header { padding: 20px 16px 16px; }
-            .notif-panel-header h2 { font-size: 1.2rem; }
-            .notif-panel-body { padding: 10px; }
-
-            /* Request cards */
-            .req-card { padding: 12px; }
-            .req-btn { padding: 8px 10px; font-size: 0.78rem; }
-
-            /* My listings */
-            .panel-header { padding: 18px 16px 14px; }
-            .my-listing-card { padding: 10px; }
-            .my-listing-img { width: 60px; height: 60px; }
+            .notif-panel { width: 100vw; }
         }
 
-        /* ── BOTTOM NAV BAR (mobile only) ────────── */
-        .bottom-nav {
-            display: none;
-        }
+        /* ── BOTTOM NAV BAR ──────────────────────── */
+        .bottom-nav { display: none; }
 
         @media (max-width: 768px) {
             .bottom-nav {
-                display: flex;
-                position: fixed;
+                display: flex; position: fixed;
                 bottom: 0; left: 0; right: 0;
                 background: rgba(255,255,255,0.95);
-                backdrop-filter: blur(20px);
-                -webkit-backdrop-filter: blur(20px);
+                backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
                 border-top: 1px solid rgba(226,232,240,0.8);
                 padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-                z-index: 90;
-                box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
+                z-index: 90; box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
             }
-
             .bottom-nav-item {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 3px;
-                padding: 4px 0;
-                cursor: pointer;
-                border: none;
-                background: none;
-                color: var(--muted);
-                font-family: 'Satoshi', sans-serif;
-                font-size: 0.65rem;
-                font-weight: 600;
-                text-decoration: none;
-                transition: color 0.2s;
-                position: relative;
+                flex: 1; display: flex; flex-direction: column; align-items: center;
+                gap: 3px; padding: 4px 0; cursor: pointer; border: none; background: none;
+                color: var(--muted); font-family: 'Satoshi', sans-serif;
+                font-size: 0.65rem; font-weight: 600; text-decoration: none;
+                transition: color 0.2s; position: relative;
             }
-
             .bottom-nav-item.active { color: var(--lime-dark); }
             .bottom-nav-item:hover  { color: var(--ink); }
-
             .bottom-nav-item svg { width: 22px; height: 22px; }
-
             .bottom-nav-badge {
-                position: absolute;
-                top: 0; right: calc(50% - 18px);
-                min-width: 16px; height: 16px;
-                background: var(--red);
-                color: white;
-                font-size: 0.6rem; font-weight: 800;
-                border-radius: 20px;
-                display: none;
-                align-items: center; justify-content: center;
-                padding: 0 3px;
-                border: 1.5px solid white;
+                position: absolute; top: 0; right: calc(50% - 18px);
+                min-width: 16px; height: 16px; background: var(--red); color: white;
+                font-size: 0.6rem; font-weight: 800; border-radius: 20px;
+                display: none; align-items: center; justify-content: center;
+                padding: 0 3px; border: 1.5px solid white;
             }
-
             .bottom-nav-badge.show { display: flex; }
-
-            /* Push page content up so bottom nav doesn't cover it */
             body { padding-bottom: 70px; }
-
-            /* Hide topbar bells on mobile — moved to bottom nav */
             #sellerBellBtn, #buyerBellBtn { display: none !important; }
         }
 
+
+
+        /* Filter mobile overlay */
+        .filter-mobile-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(13,17,23,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 299;
+        }
+        .filter-mobile-overlay.show { display: block; }
 
         /* ─── MY LISTINGS PANEL ──────────────────── */
         .my-listings-overlay {
@@ -2595,82 +2558,108 @@
     <!-- MAIN -->
     <div class="page-body">
 
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <div class="sidebar-title">Filters</div>
+        <!-- FILTER TOPBAR -->
+        <div class="filter-topbar">
+            <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilters()">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <line x1="4" y1="6" x2="20" y2="6"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
+                    <line x1="11" y1="18" x2="13" y2="18"/>
+                </svg>
+                Filters
+                <span class="filter-active-badge" id="filterActiveBadge"></span>
+            </button>
 
-            <div class="filter-group">
-                <label class="filter-label">Category</label>
-                <select class="filter-select" id="categoryFilter" onchange="filterBooks()">
-                    <option value="">All Categories</option>
-                    <option value="Books">📖 Books</option>
-                    <option value="Notes">📝 Notes</option>
-                    <option value="Supplies">✏️ Supplies</option>
-                    <option value="Lab Equipment">🔬 Lab Equipment</option>
-                    <option value="Other">📦 Other</option>
-                </select>
+            <!-- Quick sort chips -->
+            <div class="quick-filters">
+                <div class="quick-chip active" id="chip-newest" onclick="quickSort('newest', this)">Newest</div>
+                <div class="quick-chip" id="chip-price_low" onclick="quickSort('price_low', this)">Price ↑</div>
+                <div class="quick-chip" id="chip-price_high" onclick="quickSort('price_high', this)">Price ↓</div>
             </div>
 
-            <div class="filter-group">
-                <label class="filter-label">Semester</label>
-                <select class="filter-select" id="semesterFilter" onchange="filterBooks()">
-                    <option value="">All Semesters</option>
-                    <option value="1">Semester 1</option>
-                    <option value="2">Semester 2</option>
-                    <option value="3">Semester 3</option>
-                    <option value="4">Semester 4</option>
-                    <option value="5">Semester 5</option>
-                    <option value="6">Semester 6</option>
-                    <option value="7">Semester 7</option>
-                    <option value="8">Semester 8</option>
-                </select>
-            </div>
+            <div class="products-count">Showing <strong id="showingCount">0</strong> items</div>
+        </div>
 
-            <div class="filter-group">
-                <label class="filter-label">Sort By</label>
-                <select class="filter-select" id="sortFilter" onchange="filterBooks()">
-                    <option value="newest">Newest First</option>
-                    <option value="price_low">Price: Low → High</option>
-                    <option value="price_high">Price: High → Low</option>
-                </select>
-            </div>
+        <!-- CONTENT ROW -->
+        <div class="content-row">
 
-            <div class="filter-group">
-                <label class="filter-label">Condition</label>
-                <div class="condition-pills" id="conditionFilters">
-                    <div class="condition-pill active" data-val="" onclick="setCondition(this, '')">
-                        <span class="condition-dot" style="background:#94A3B8"></span>Any
+            <!-- SIDEBAR (hidden by default) -->
+            <aside class="sidebar" id="filterSidebar">
+                <div class="sidebar-inner">
+                    <div class="sidebar-title">Filters</div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Category</label>
+                        <select class="filter-select" id="categoryFilter" onchange="filterBooks(); updateFilterBadge()">
+                            <option value="">All Categories</option>
+                            <option value="Books">Books</option>
+                            <option value="Notes">Notes</option>
+                            <option value="Supplies">Supplies</option>
+                            <option value="Lab Equipment">Lab Equipment</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
-                    <div class="condition-pill" data-val="Excellent" onclick="setCondition(this, 'Excellent')">
-                        <span class="condition-dot" style="background:#10B981"></span>Excellent
+
+                    <div class="filter-group">
+                        <label class="filter-label">Semester</label>
+                        <select class="filter-select" id="semesterFilter" onchange="filterBooks(); updateFilterBadge()">
+                            <option value="">All Semesters</option>
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                            <option value="3">Semester 3</option>
+                            <option value="4">Semester 4</option>
+                            <option value="5">Semester 5</option>
+                            <option value="6">Semester 6</option>
+                            <option value="7">Semester 7</option>
+                            <option value="8">Semester 8</option>
+                        </select>
                     </div>
-                    <div class="condition-pill" data-val="Good" onclick="setCondition(this, 'Good')">
-                        <span class="condition-dot" style="background:#3B82F6"></span>Good
+
+                    <div class="filter-group">
+                        <label class="filter-label">Sort By</label>
+                        <select class="filter-select" id="sortFilter" onchange="filterBooks()">
+                            <option value="newest">Newest First</option>
+                            <option value="price_low">Price: Low → High</option>
+                            <option value="price_high">Price: High → Low</option>
+                        </select>
                     </div>
-                    <div class="condition-pill" data-val="Fair" onclick="setCondition(this, 'Fair')">
-                        <span class="condition-dot" style="background:#F59E0B"></span>Fair
+
+                    <div class="filter-group">
+                        <label class="filter-label">Condition</label>
+                        <div class="condition-pills" id="conditionFilters">
+                            <div class="condition-pill active" data-val="" onclick="setCondition(this, ''); updateFilterBadge()">
+                                <span class="condition-dot" style="background:#94A3B8"></span>Any
+                            </div>
+                            <div class="condition-pill" data-val="Excellent" onclick="setCondition(this, 'Excellent'); updateFilterBadge()">
+                                <span class="condition-dot" style="background:#10B981"></span>Excellent
+                            </div>
+                            <div class="condition-pill" data-val="Good" onclick="setCondition(this, 'Good'); updateFilterBadge()">
+                                <span class="condition-dot" style="background:#3B82F6"></span>Good
+                            </div>
+                            <div class="condition-pill" data-val="Fair" onclick="setCondition(this, 'Fair'); updateFilterBadge()">
+                                <span class="condition-dot" style="background:#F59E0B"></span>Fair
+                            </div>
+                            <div class="condition-pill" data-val="Poor" onclick="setCondition(this, 'Poor'); updateFilterBadge()">
+                                <span class="condition-dot" style="background:#EF4444"></span>Poor
+                            </div>
+                        </div>
                     </div>
-                    <div class="condition-pill" data-val="Poor" onclick="setCondition(this, 'Poor')">
-                        <span class="condition-dot" style="background:#EF4444"></span>Poor
+
+                    <button class="reset-filters" onclick="resetFilters()">↺ Reset All Filters</button>
+                </div>
+            </aside>
+
+            <!-- PRODUCTS -->
+            <section class="products-section">
+                <div class="products-grid" id="productsGrid">
+                    <div class="state-placeholder">
+                        <div class="spinner"></div>
+                        <p style="color:var(--muted)">Loading listings…</p>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <button class="reset-filters" onclick="resetFilters()">↺ Reset Filters</button>
-        </aside>
-
-        <!-- PRODUCTS -->
-        <section class="products-section">
-            <div class="products-header">
-                <div class="products-count">Showing <strong id="showingCount">0</strong> items</div>
-            </div>
-            <div class="products-grid" id="productsGrid">
-                <div class="state-placeholder">
-                    <div class="spinner"></div>
-                    <p style="color:var(--muted)">Loading listings…</p>
-                </div>
-            </div>
-        </section>
+        </div>
     </div>
 
     <!-- MY LISTINGS PANEL -->
@@ -4040,6 +4029,60 @@
         }
 
         // ── FILTERS ─────────────────────────────────────────────────────────
+        // ── FILTER TOGGLE ────────────────────────────────────────────────────
+        let filterOpen = false;
+
+        function toggleFilters() {
+            filterOpen = !filterOpen;
+            const sidebar  = document.getElementById('filterSidebar');
+            const btn      = document.getElementById('filterToggleBtn');
+            const isMobile = window.innerWidth <= 768;
+
+            if (filterOpen) {
+                sidebar.classList.add('open');
+                btn.classList.add('active');
+
+                // Mobile: show overlay
+                if (isMobile) {
+                    let overlay = document.getElementById('filterMobileOverlay');
+                    if (!overlay) {
+                        overlay = document.createElement('div');
+                        overlay.id = 'filterMobileOverlay';
+                        overlay.className = 'filter-mobile-overlay';
+                        overlay.onclick = toggleFilters;
+                        document.body.appendChild(overlay);
+                    }
+                    setTimeout(() => overlay.classList.add('show'), 10);
+                }
+            } else {
+                sidebar.classList.remove('open');
+                btn.classList.remove('active');
+
+                // Mobile: hide overlay
+                const overlay = document.getElementById('filterMobileOverlay');
+                if (overlay) overlay.classList.remove('show');
+            }
+        }
+
+        function quickSort(val, el) {
+            // Sync with hidden sort select
+            document.getElementById('sortFilter').value = val;
+            // Update chip styles
+            document.querySelectorAll('.quick-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            filterBooks();
+        }
+
+        function updateFilterBadge() {
+            const cat  = document.getElementById('categoryFilter').value;
+            const sem  = document.getElementById('semesterFilter').value;
+            const cond = document.querySelector('.condition-pill.active')?.dataset.val || '';
+            const count = [cat, sem, cond].filter(Boolean).length;
+            const badge = document.getElementById('filterActiveBadge');
+            if (count > 0) { badge.textContent = count; badge.classList.add('show'); }
+            else { badge.classList.remove('show'); }
+        }
+
         function filterBooks() { applyFilters(); }
         function handleSearch() { applyFilters(); }
 
@@ -4054,8 +4097,12 @@
             document.getElementById('categoryFilter').value = '';
             document.getElementById('semesterFilter').value = '';
             document.getElementById('sortFilter').value = 'newest';
-            document.getElementById('searchInput').value = '';
-            setCondition(document.querySelector('.condition-pill[data-val=""]'), '');
+            document.querySelectorAll('.condition-pill').forEach(p => p.classList.remove('active'));
+            document.querySelector('.condition-pill[data-val=""]').classList.add('active');
+            document.querySelectorAll('.quick-chip').forEach(c => c.classList.remove('active'));
+            document.getElementById('chip-newest').classList.add('active');
+            document.getElementById('filterActiveBadge').classList.remove('show');
+            applyFilters();
         }
 
         // ── DELETE ──────────────────────────────────────────────────────────
