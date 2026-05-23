@@ -5027,10 +5027,11 @@ ${url}`;
         async function buyerCancelDeal(reqId, bookId) {
             if (!confirm("Cancel this deal? The seller will be notified and the waiting list will be restored.")) return;
             try {
+                // Delete the request
                 const { error } = await db.from('requests').delete().eq('id', reqId).eq('buyer_id', ME);
                 if (error) throw error;
 
-                // Wipe chat messages
+                // Wipe chat messages for this book
                 await db.from('messages').delete().eq('book_id', bookId);
 
                 // Restore waiting list back to pending
@@ -5039,8 +5040,21 @@ ${url}`;
                     .eq('book_id', bookId)
                     .eq('status', 'waiting');
 
+                // Remove card from UI immediately without waiting for reload
+                const card = document.getElementById(`buyerreqcard-${reqId}`);
+                if (card) card.remove();
+
+                // Check if panel is now empty
+                const body = document.getElementById('buyerNotifBody');
+                if (body && !body.querySelector('.req-card')) {
+                    body.innerHTML = `<div class="notif-empty">
+                        <div class="icon">🛒</div>
+                        <h3>No active requests</h3>
+                        <p>Browse listings and request items you want to buy.</p>
+                    </div>`;
+                }
+
                 showToast('↩️ Deal cancelled. Seller can now choose from the waiting list.', 'success');
-                await loadBuyerNotifs();
                 await loadBooks();
                 await refreshNotifBadges();
             } catch (e) {
