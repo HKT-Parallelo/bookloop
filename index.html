@@ -5406,77 +5406,102 @@ ${url}`;
 
 <script>
 // ── MOBILE BACK BUTTON HANDLER ─────────────────────────────────────────────
-// Push an initial state so the back button has a "page" to pop to first.
-// On each popstate, close whatever is open instead of leaving the page.
-
 (function() {
-    // Push a base state on load so back button always has one step to pop
     history.replaceState({ page: 'index' }, '', window.location.href);
     history.pushState({ page: 'index' }, '', window.location.href);
 
-    function somethingIsOpen() {
-        // Check all panels / modals / overlays for visible state
-        const checks = [
-            () => document.getElementById('guestModalOverlay')?.classList.contains('open') ||
-                  document.getElementById('guestModalOverlay')?.style.display === 'flex',
-            () => document.querySelector('.notif-panel-overlay.open'),
-            () => document.querySelector('.my-listings-overlay.open'),
-            () => document.querySelector('.modal-overlay.open') ||
-                  document.querySelector('.modal-overlay')?.style.display === 'flex',
-            () => document.querySelector('.filter-mobile-overlay.show'),
-            () => document.querySelector('.user-dropdown.open'),
-            () => document.querySelector('.scan-overlay') &&
-                  document.querySelector('.scan-overlay').style.display !== 'none',
-            () => document.querySelector('.chat-popup') &&
-                  document.querySelector('.chat-popup').style.display !== 'none',
-        ];
-        return checks.some(fn => { try { return !!fn(); } catch(e) { return false; } });
-    }
+    function getOpenLayer() {
+        // Returns the name of the topmost open layer, or null if nothing open.
+        // Checked in reverse priority (highest z-index first).
 
-    function closeTopmost() {
-        // Close in priority order: modals first, then panels, then dropdowns
-        const guestOverlay = document.getElementById('guestModalOverlay');
-        if (guestOverlay && (guestOverlay.classList.contains('open') || guestOverlay.style.display === 'flex')) {
-            if (typeof closeGuestModal === 'function') closeGuestModal();
-            return;
-        }
+        // Scan overlay / QR modal (z-index 10000) — dynamically appended to body
+        if (document.querySelector('.scan-overlay')) return 'scan';
+
+        // Report modal (z-index ~500)
+        if (document.getElementById('reportOverlay')?.classList.contains('open')) return 'report';
+
         // Book detail modal
-        const modalOverlay = document.querySelector('.modal-overlay');
-        if (modalOverlay && (modalOverlay.classList.contains('open') || modalOverlay.style.display === 'flex')) {
-            if (typeof closeModal === 'function') closeModal();
-            return;
-        }
-        // Notifications / my listings panels
-        if (document.querySelector('.notif-panel-overlay.open')) {
-            const closeBtns = document.querySelectorAll('.notif-panel-overlay .panel-close, .notif-panel-close');
-            if (closeBtns.length) { closeBtns[0].click(); return; }
-        }
-        if (document.querySelector('.my-listings-overlay.open')) {
-            if (typeof closeMyListings === 'function') { closeMyListings(); return; }
-        }
+        if (document.getElementById('modalOverlay')?.classList.contains('open')) return 'modal';
+
+        // Guest sign-in modal
+        if (document.getElementById('guestModalOverlay')?.classList.contains('open')) return 'guest';
+
+        // My Listings panel
+        if (document.getElementById('myListingsOverlay')?.classList.contains('open')) return 'mylistings';
+
+        // Seller notifications panel
+        if (document.getElementById('sellerNotifOverlay')?.classList.contains('open')) return 'sellernotif';
+
+        // Buyer notifications panel
+        if (document.getElementById('buyerNotifOverlay')?.classList.contains('open')) return 'buyernotif';
+
+        // Watchlist panel (uses style.right, not .open class)
+        const wl = document.getElementById('watchlistPanel');
+        if (wl && wl.style.right === '0px') return 'watchlist';
+
         // Filter sidebar
-        const filterOverlay = document.querySelector('.filter-mobile-overlay.show');
-        if (filterOverlay) {
-            filterOverlay.classList.remove('show');
-            document.querySelector('.sidebar')?.classList.remove('open');
-            return;
-        }
-        // User dropdown
-        const dropdown = document.querySelector('.user-dropdown.open');
-        if (dropdown) { dropdown.classList.remove('open'); return; }
-        // Chat popup
-        const chat = document.querySelector('.chat-popup');
-        if (chat && chat.style.display !== 'none') { chat.style.display = 'none'; return; }
+        if (document.querySelector('.filter-mobile-overlay.show')) return 'filter';
+
+        // User account dropdown
+        if (document.getElementById('userDropdown')?.classList.contains('open')) return 'dropdown';
+
+        // Chat popup (dynamically created, removed from DOM when closed)
+        if (document.querySelector('.chat-popup')) return 'chat';
+
+        return null;
     }
 
-    window.addEventListener('popstate', function(e) {
-        if (somethingIsOpen()) {
-            // Close the topmost layer and push a fresh state so back still works
-            closeTopmost();
+    function closeTopLayer(layer) {
+        switch (layer) {
+            case 'scan':
+                // Try both close functions — one is for QR modal, one for scanner
+                if (typeof closeQRModal === 'function') closeQRModal();
+                if (typeof closeScanOverlay === 'function') closeScanOverlay();
+                // Fallback: just remove the element
+                document.querySelector('.scan-overlay')?.remove();
+                break;
+            case 'report':
+                if (typeof closeReportModal === 'function') closeReportModal();
+                break;
+            case 'modal':
+                if (typeof closeModal === 'function') closeModal();
+                break;
+            case 'guest':
+                if (typeof closeGuestModal === 'function') closeGuestModal();
+                break;
+            case 'mylistings':
+                if (typeof closeMyListings === 'function') closeMyListings();
+                break;
+            case 'sellernotif':
+                if (typeof closeSellerNotifs === 'function') closeSellerNotifs();
+                break;
+            case 'buyernotif':
+                if (typeof closeBuyerNotifs === 'function') closeBuyerNotifs();
+                break;
+            case 'watchlist':
+                if (typeof closeWatchlistPanel === 'function') closeWatchlistPanel();
+                break;
+            case 'filter':
+                document.querySelector('.filter-mobile-overlay')?.classList.remove('show');
+                document.querySelector('.sidebar')?.classList.remove('open');
+                break;
+            case 'dropdown':
+                document.getElementById('userDropdown')?.classList.remove('open');
+                break;
+            case 'chat':
+                document.querySelector('.chat-popup')?.remove();
+                break;
+        }
+    }
+
+    window.addEventListener('popstate', function() {
+        const layer = getOpenLayer();
+        if (layer) {
+            closeTopLayer(layer);
+            // Re-push a state so the next back press also works
             history.pushState({ page: 'index' }, '', window.location.href);
         }
-        // If nothing is open, the browser's natural back behaviour is fine
-        // (it will go to the actual previous page in history, or exit if none)
+        // If nothing is open, let natural browser back behaviour take over
     });
 })();
 </script>
