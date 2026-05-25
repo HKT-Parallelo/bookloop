@@ -2624,6 +2624,9 @@
 
     <!-- HERO -->
     <!-- ══ AD BANNER ══ -->
+    <!-- ANNOUNCEMENT BANNER -->
+    <div id="announcementBanner" style="display:none"></div>
+
     <div class="ad-banner-wrap" id="adBannerWrap" style="display:none">
         <div class="ad-slider" id="adSlider">
             <!-- slides injected by JS -->
@@ -2897,16 +2900,28 @@
             const { data: { session } } = await db.auth.getSession();
 
             if (!session) {
-                // Guest mode — show login button instead of avatar
                 document.getElementById('guestBtns').style.display = 'flex';
                 document.getElementById('userMenuWrap').style.display = 'none';
                 document.getElementById('sellerBellBtn').style.display = 'none';
                 document.getElementById('buyerBellBtn').style.display = 'none';
+                loadAnnouncements();
                 return false;
             }
 
             currentUser = session.user;
             ME = currentUser.id;
+
+            // Check if user is banned
+            const { data: banData } = await db.from('banned_users').select('id').eq('user_id', ME).maybeSingle();
+            if (banData) {
+                await db.auth.signOut();
+                document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;padding:32px">
+                    <div style="font-size:3rem;margin-bottom:16px">🚫</div>
+                    <h2 style="color:#DC2626;margin-bottom:8px">Account Suspended</h2>
+                    <p style="color:#64748B;max-width:360px">Your account has been suspended for violating BookLoop's community guidelines. Contact your admin if you think this is a mistake.</p>
+                </div>`;
+                return false;
+            }
 
             // Populate user UI
             const name = currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Student';
@@ -2965,6 +2980,7 @@
             const authed = await initAuth();
             await checkSchema();
             await loadAds();
+            await loadAnnouncements();
             await loadBooks();
             if (authed) {
                 await loadMyListingsBadge();
@@ -5115,6 +5131,30 @@ ${url}`;
                 showToast('❤️ Saved to watchlist!', 'success');
             }
             updateWatchlistBtn(bookId);
+        }
+
+        // ── ANNOUNCEMENTS ────────────────────────────────────────────────────
+        async function loadAnnouncements() {
+            try {
+                const { data } = await db.from('announcements').select('*').eq('active', true).order('created_at', { ascending: false });
+                if (!data || !data.length) return;
+                const typeStyles = {
+                    info:    { bg: '#EFF6FF', border: '#BFDBFE', color: '#1D4ED8', icon: 'ℹ️' },
+                    success: { bg: '#F0FDF4', border: '#BBF7D0', color: '#15803D', icon: '🎉' },
+                    warning: { bg: '#FFFBEB', border: '#FDE68A', color: '#B45309', icon: '⚠️' },
+                    error:   { bg: '#FEF2F2', border: '#FECACA', color: '#DC2626', icon: '🚨' }
+                };
+                const banner = document.getElementById('announcementBanner');
+                banner.style.display = 'block';
+                banner.innerHTML = data.map(a => {
+                    const s = typeStyles[a.type] || typeStyles.info;
+                    return `<div style="background:${s.bg};border-bottom:2px solid ${s.border};padding:10px 20px;display:flex;align-items:center;gap:10px;font-family:'Satoshi',sans-serif;font-size:0.88rem;font-weight:600;color:${s.color}">
+                        <span>${s.icon}</span>
+                        <span style="flex:1">${a.message}</span>
+                        <button onclick="this.closest('div').remove()" style="background:transparent;border:none;cursor:pointer;color:${s.color};font-size:1rem;opacity:0.6;padding:0 4px">×</button>
+                    </div>`;
+                }).join('');
+            } catch(e) { console.log('Announcements:', e); }
         }
 
         function showToast(msg, type = 'success') {
