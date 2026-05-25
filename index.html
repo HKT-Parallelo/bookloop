@@ -2911,14 +2911,23 @@
             currentUser = session.user;
             ME = currentUser.id;
 
-            // Check if user is banned
-            const { data: banData } = await db.from('banned_users').select('id').eq('user_id', ME).maybeSingle();
-            if (banData) {
+            // Check if user is banned — check by both user_id AND email
+            const { data: banByUserId } = await db.from('banned_users')
+                .select('id')
+                .eq('user_id', ME)
+                .maybeSingle();
+
+            const { data: banByEmail } = await db.from('banned_users')
+                .select('id')
+                .eq('email', currentUser.email)
+                .maybeSingle();
+
+            if (banByUserId || banByEmail) {
                 await db.auth.signOut();
-                document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;padding:32px">
-                    <div style="font-size:3rem;margin-bottom:16px">🚫</div>
-                    <h2 style="color:#DC2626;margin-bottom:8px">Account Suspended</h2>
-                    <p style="color:#64748B;max-width:360px">Your account has been suspended for violating BookLoop's community guidelines. Contact your admin if you think this is a mistake.</p>
+                document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;padding:32px;background:#0D1117">
+                    <div style="font-size:4rem;margin-bottom:20px">🚫</div>
+                    <h2 style="color:#DC2626;margin-bottom:10px;font-size:1.5rem">Account Suspended</h2>
+                    <p style="color:#94A3B8;max-width:380px;line-height:1.7">Your account has been suspended for violating BookLoop's community guidelines.<br><br>Contact your college admin if you think this is a mistake.</p>
                 </div>`;
                 return false;
             }
