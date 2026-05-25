@@ -81,11 +81,26 @@
         .topbar-inner {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 32px;
-            height: 72px;
+            padding: 10px 32px 8px;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        /* Row 1: logo + right actions */
+        .topbar-row1 {
             display: flex;
             align-items: center;
-            gap: 24px;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        /* Row 2: full-width search */
+        .topbar-row2 {
+            display: flex;
+            width: 100%;
         }
 
         .logo-wrap {
@@ -187,9 +202,9 @@
 
         .search-wrap {
             flex: 1;
-            max-width: 520px;
+            max-width: 100%;
             position: relative;
-            margin-left: 16px;
+            margin-left: 0;
         }
 
         .search-wrap svg {
@@ -1730,7 +1745,7 @@
 
         /* ── LARGE PHONE (max 768px) ─────────────── */
         @media (max-width: 768px) {
-            .topbar-inner { padding: 0 14px; height: 60px; gap: 10px; }
+            .topbar-inner { padding: 8px 14px 6px; }
             .badge-count { display: none; }
             .search-input { height: 38px; font-size: 0.85rem; }
             .sell-btn span { display: none; }
@@ -1791,12 +1806,10 @@
 
         /* ── SMALL PHONE (max 480px) ─────────────── */
         @media (max-width: 480px) {
-            .topbar-inner { padding: 0 10px; height: 56px; gap: 8px; }
+            .topbar-inner { padding: 8px 10px 6px; }
             .logo-tagline { display: none; }
-            .search-wrap { margin-left: 8px; }
             .category-nav { padding: 0 8px; }
             .logo-wrap img { height: 30px; }
-            .search-wrap { flex: 1; }
             .search-input { height: 36px; font-size: 0.8rem; padding-left: 36px; }
             .notif-btn { width: 36px; height: 36px; border-radius: 10px; }
             .hero-strip { padding: 22px 14px; }
@@ -2598,6 +2611,8 @@
     <!-- TOPBAR -->
     <nav class="topbar">
         <div class="topbar-inner">
+            <!-- Row 1: Logo + Actions -->
+            <div class="topbar-row1">
             <a class="logo-wrap" href="#">
                 <div class="logo-icon">📚</div>
                 <div class="logo-text">
@@ -2605,14 +2620,6 @@
                     <span class="logo-tagline">Student Marketplace</span>
                 </div>
             </a>
-
-            <div class="search-wrap">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                </svg>
-                <input class="search-input" id="searchInput" placeholder="Search books, notes, supplies…"
-                    oninput="handleSearch(this.value)">
-            </div>
 
             <div class="topbar-right">
                 <!-- Guest buttons (shown when not logged in) -->
@@ -2694,6 +2701,18 @@
                     </div>
                 </div>
             </div>
+            </div><!-- /topbar-row1 -->
+
+            <!-- Row 2: Search Bar (full width on mobile) -->
+            <div class="topbar-row2">
+            <div class="search-wrap">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input class="search-input" id="searchInput" placeholder="Search books, notes, supplies…"
+                    oninput="handleSearch(this.value)">
+            </div>
+            </div><!-- /topbar-row2 -->
         </div>
     </nav>
 
