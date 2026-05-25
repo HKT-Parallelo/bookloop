@@ -5403,5 +5403,82 @@ ${url}`;
     </div>
 
 <script>if(window.lucide) lucide.createIcons();</script>
+
+<script>
+// ── MOBILE BACK BUTTON HANDLER ─────────────────────────────────────────────
+// Push an initial state so the back button has a "page" to pop to first.
+// On each popstate, close whatever is open instead of leaving the page.
+
+(function() {
+    // Push a base state on load so back button always has one step to pop
+    history.replaceState({ page: 'index' }, '', window.location.href);
+    history.pushState({ page: 'index' }, '', window.location.href);
+
+    function somethingIsOpen() {
+        // Check all panels / modals / overlays for visible state
+        const checks = [
+            () => document.getElementById('guestModalOverlay')?.classList.contains('open') ||
+                  document.getElementById('guestModalOverlay')?.style.display === 'flex',
+            () => document.querySelector('.notif-panel-overlay.open'),
+            () => document.querySelector('.my-listings-overlay.open'),
+            () => document.querySelector('.modal-overlay.open') ||
+                  document.querySelector('.modal-overlay')?.style.display === 'flex',
+            () => document.querySelector('.filter-mobile-overlay.show'),
+            () => document.querySelector('.user-dropdown.open'),
+            () => document.querySelector('.scan-overlay') &&
+                  document.querySelector('.scan-overlay').style.display !== 'none',
+            () => document.querySelector('.chat-popup') &&
+                  document.querySelector('.chat-popup').style.display !== 'none',
+        ];
+        return checks.some(fn => { try { return !!fn(); } catch(e) { return false; } });
+    }
+
+    function closeTopmost() {
+        // Close in priority order: modals first, then panels, then dropdowns
+        const guestOverlay = document.getElementById('guestModalOverlay');
+        if (guestOverlay && (guestOverlay.classList.contains('open') || guestOverlay.style.display === 'flex')) {
+            if (typeof closeGuestModal === 'function') closeGuestModal();
+            return;
+        }
+        // Book detail modal
+        const modalOverlay = document.querySelector('.modal-overlay');
+        if (modalOverlay && (modalOverlay.classList.contains('open') || modalOverlay.style.display === 'flex')) {
+            if (typeof closeModal === 'function') closeModal();
+            return;
+        }
+        // Notifications / my listings panels
+        if (document.querySelector('.notif-panel-overlay.open')) {
+            const closeBtns = document.querySelectorAll('.notif-panel-overlay .panel-close, .notif-panel-close');
+            if (closeBtns.length) { closeBtns[0].click(); return; }
+        }
+        if (document.querySelector('.my-listings-overlay.open')) {
+            if (typeof closeMyListings === 'function') { closeMyListings(); return; }
+        }
+        // Filter sidebar
+        const filterOverlay = document.querySelector('.filter-mobile-overlay.show');
+        if (filterOverlay) {
+            filterOverlay.classList.remove('show');
+            document.querySelector('.sidebar')?.classList.remove('open');
+            return;
+        }
+        // User dropdown
+        const dropdown = document.querySelector('.user-dropdown.open');
+        if (dropdown) { dropdown.classList.remove('open'); return; }
+        // Chat popup
+        const chat = document.querySelector('.chat-popup');
+        if (chat && chat.style.display !== 'none') { chat.style.display = 'none'; return; }
+    }
+
+    window.addEventListener('popstate', function(e) {
+        if (somethingIsOpen()) {
+            // Close the topmost layer and push a fresh state so back still works
+            closeTopmost();
+            history.pushState({ page: 'index' }, '', window.location.href);
+        }
+        // If nothing is open, the browser's natural back behaviour is fine
+        // (it will go to the actual previous page in history, or exit if none)
+    });
+})();
+</script>
 </body>
 </html>
