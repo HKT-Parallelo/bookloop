@@ -1037,6 +1037,12 @@
             document.getElementById('condition').value = 'Excellent';
             document.querySelectorAll('.cond-btn').forEach((b, i) => b.classList.toggle('selected', i === 0));
         }
+
+        // Mobile back button — go to marketplace not auth
+        history.pushState({ page: 'sell' }, '', window.location.pathname);
+        window.addEventListener('popstate', () => {
+            window.location.href = 'index.html';
+        });
     </script>
 </body>
 </html>

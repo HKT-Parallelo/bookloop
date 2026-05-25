@@ -2563,6 +2563,11 @@
                     Sell Item
                 </a>
 
+                <!-- Watchlist Button -->
+                <button class="notif-btn" onclick="if(!ME){showGuestModal();}else{openWatchlistPanel();}" title="My Watchlist" style="font-size:1.1rem;">
+                    🤍
+                </button>
+
                 <!-- Seller Bell — purchase requests -->
                 <button class="notif-btn" id="sellerBellBtn" onclick="if(!ME){showGuestModal();}else{openSellerNotifs();}" title="Purchase Requests" style="display:none">
                     <svg height="20" width="20" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve">
@@ -4066,8 +4071,10 @@
                     }
 
                     const showDismissX = r.status === 'approved' && r.item_received;
+                    const showUnsendX  = r.status === 'pending' || r.status === 'waiting' || r.status === 'declined';
                     return `<div class="req-card" id="buyerreqcard-${r.id}" style="position:relative">
                         ${showDismissX ? `<button onclick="dismissReceivedNotif(${r.id})" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface-2);color:var(--muted);font-size:0.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;z-index:2;transition:all 0.15s" onmouseover="this.style.background='var(--red)';this.style.color='white';this.style.borderColor='var(--red)'" onmouseout="this.style.background='var(--surface-2)';this.style.color='var(--muted)';this.style.borderColor='var(--border)'">×</button>` : ''}
+                        ${showUnsendX ? `<button onclick="unsendRequestFromNotif(${r.id}, ${r.book_id})" title="Unsend request" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface-2);color:var(--muted);font-size:0.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;z-index:2;transition:all 0.15s" onmouseover="this.style.background='var(--red)';this.style.color='white';this.style.borderColor='var(--red)'" onmouseout="this.style.background='var(--surface-2)';this.style.color='var(--muted)';this.style.borderColor='var(--border)'">×</button>` : ''}
                         <div class="req-card-top">
                             <div class="req-avatar" style="background:var(--lime-dark)">🛒</div>
                             <div class="req-info">
@@ -5041,6 +5048,30 @@ ${url}`;
         }
 
         // ── UNSEND REQUEST ────────────────────────────────────────────────────
+        async function unsendRequestFromNotif(reqId, bookId) {
+            if (!confirm('Unsend this request?')) return;
+            try {
+                const { error } = await db.from('requests').delete().eq('id', reqId).eq('buyer_id', ME);
+                if (error) throw error;
+                // Remove card instantly from UI
+                const card = document.getElementById(`buyerreqcard-${reqId}`);
+                if (card) card.remove();
+                // Check if panel empty
+                const body = document.getElementById('buyerNotifBody');
+                if (body && !body.querySelector('.req-card')) {
+                    body.innerHTML = `<div class="notif-empty">
+                        <div class="icon">🛒</div>
+                        <h3>No active requests</h3>
+                        <p>Browse listings and request items you want to buy.</p>
+                    </div>`;
+                }
+                showToast('↩️ Request unsent.', 'success');
+                await refreshNotifBadges();
+            } catch(e) {
+                showToast('Could not unsend: ' + e.message, 'error');
+            }
+        }
+
         async function unsendRequest(reqId, bookId) {
             if (!confirm('Unsend your request? The seller will no longer see it.')) return;
             try {
