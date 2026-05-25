@@ -5411,13 +5411,12 @@ ${url}`;
     history.pushState({ page: 'index' }, '', window.location.href);
 
     function getOpenLayer() {
-        // Returns the name of the topmost open layer, or null if nothing open.
-        // Checked in reverse priority (highest z-index first).
+        // Checked highest z-index first
 
-        // Scan overlay / QR modal (z-index 10000) — dynamically appended to body
+        // Scan overlay / QR modal — dynamically appended, just existing = open
         if (document.querySelector('.scan-overlay')) return 'scan';
 
-        // Report modal (z-index ~500)
+        // Report modal
         if (document.getElementById('reportOverlay')?.classList.contains('open')) return 'report';
 
         // Book detail modal
@@ -5432,20 +5431,23 @@ ${url}`;
         // Seller notifications panel
         if (document.getElementById('sellerNotifOverlay')?.classList.contains('open')) return 'sellernotif';
 
-        // Buyer notifications panel
+        // Buyer notifications / My Requests panel
         if (document.getElementById('buyerNotifOverlay')?.classList.contains('open')) return 'buyernotif';
 
-        // Watchlist panel (uses style.right, not .open class)
+        // Watchlist panel — JS sets style.right='0' (no 'px'), so check both
         const wl = document.getElementById('watchlistPanel');
-        if (wl && wl.style.right === '0px') return 'watchlist';
+        if (wl) {
+            const r = wl.style.right;
+            if (r === '0' || r === '0px') return 'watchlist';
+        }
 
         // Filter sidebar
         if (document.querySelector('.filter-mobile-overlay.show')) return 'filter';
 
-        // User account dropdown
+        // Account dropdown
         if (document.getElementById('userDropdown')?.classList.contains('open')) return 'dropdown';
 
-        // Chat popup (dynamically created, removed from DOM when closed)
+        // Chat popup — removed from DOM when closed, so existing = open
         if (document.querySelector('.chat-popup')) return 'chat';
 
         return null;
@@ -5454,10 +5456,8 @@ ${url}`;
     function closeTopLayer(layer) {
         switch (layer) {
             case 'scan':
-                // Try both close functions — one is for QR modal, one for scanner
                 if (typeof closeQRModal === 'function') closeQRModal();
                 if (typeof closeScanOverlay === 'function') closeScanOverlay();
-                // Fallback: just remove the element
                 document.querySelector('.scan-overlay')?.remove();
                 break;
             case 'report':
@@ -5498,10 +5498,8 @@ ${url}`;
         const layer = getOpenLayer();
         if (layer) {
             closeTopLayer(layer);
-            // Re-push a state so the next back press also works
             history.pushState({ page: 'index' }, '', window.location.href);
         }
-        // If nothing is open, let natural browser back behaviour take over
     });
 })();
 </script>
