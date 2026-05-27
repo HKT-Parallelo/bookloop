@@ -909,7 +909,7 @@
 
         .card-img {
             width: 100%;
-            height: 200px;
+            height: 150px;
             overflow: hidden;
             background: var(--surface-3);
             position: relative;
@@ -2533,13 +2533,106 @@
         .nav-signup-btn:hover { background: var(--green-dark); }
 
 
+        /* ══ RECENTLY VIEWED ════════════════════════════════════════════ */
+        .recently-viewed-section {
+            padding: 12px 16px 0;
+            display: none;
+        }
+        @media (min-width: 768px) {
+            .recently-viewed-section { padding: 14px 32px 0; }
+        }
+        .rv-box {
+            background: linear-gradient(to bottom, #FEF08A, #FEFCE8);
+            border: 1.5px solid #FDE047;
+            border-radius: 16px;
+            padding: 14px 16px 16px;
+        }
+        .rv-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .rv-title {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--ink);
+        }
+        .rv-clear {
+            font-size: 0.75rem;
+            color: var(--muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: 'Satoshi', sans-serif;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.15s, color 0.15s;
+        }
+        .rv-clear:hover { background: #FEF08A; color: var(--ink); }
+        .rv-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding-bottom: 4px;
+        }
+        .rv-scroll::-webkit-scrollbar { display: none; }
+        .rv-card {
+            flex-shrink: 0;
+            width: 110px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .rv-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .rv-card-img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            display: block;
+            background: var(--surface-3);
+        }
+        .rv-card-body {
+            padding: 6px 8px 8px;
+        }
+        .rv-card-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--ink);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+        .rv-card-price {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 900;
+            font-size: 0.82rem;
+            color: var(--lime-dark);
+        }
+
         /* ══ AD BANNER ══════════════════════════════════════════════════ */
+        .ad-banner-outer {
+            padding: 12px 16px 0;
+        }
+        @media (min-width: 768px) {
+            .ad-banner-outer { padding: 16px 32px 0; }
+        }
         .ad-banner-wrap {
             position: relative;
             width: 100%;
             overflow: hidden;
             background: #111722;
             line-height: 0;
+            border-radius: 18px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
         .ad-slider {
             display: flex;
@@ -2556,11 +2649,13 @@
         }
         .ad-slide img {
             width: 100%;
-            height: auto;
-            max-height: 400px;
-            object-fit: contain;
+            height: 180px;
+            object-fit: cover;
             display: block;
             background: #111722;
+        }
+        @media (min-width: 768px) {
+            .ad-slide img { height: 260px; }
         }
         .ad-slide-placeholder {
             width: 100%;
@@ -2728,7 +2823,8 @@
     <!-- ANNOUNCEMENT BANNER -->
     <div id="announcementBanner" style="display:none"></div>
 
-    <div class="ad-banner-wrap" id="adBannerWrap" style="display:none">
+    <div class="ad-banner-outer" id="adBannerOuter" style="display:none">
+    <div class="ad-banner-wrap" id="adBannerWrap">
         <div class="ad-slider" id="adSlider">
             <!-- slides injected by JS -->
         </div>
@@ -2739,6 +2835,18 @@
         <button class="ad-arrow ad-next" onclick="adSlide(1)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
         </button>
+    </div>
+    </div>
+
+    <!-- RECENTLY VIEWED -->
+    <div class="recently-viewed-section" id="recentlyViewedSection">
+        <div class="rv-box">
+        <div class="rv-header">
+            <div class="rv-title">👀 Recently Viewed</div>
+            <button class="rv-clear" onclick="clearRecentlyViewed()">Clear</button>
+        </div>
+        <div class="rv-scroll" id="rvScroll"></div>
+        </div>
     </div>
 
     <!-- CATEGORY NAV -->
@@ -3141,6 +3249,7 @@
             await loadAds();
             await loadAnnouncements();
             await loadBooks();
+            renderRecentlyViewed();
             if (authed) {
                 await loadMyListingsBadge();
                 await refreshNotifBadges();
@@ -3431,6 +3540,8 @@
                     return;
                 }
             }
+            // Track recently viewed now that we have the full book object
+            trackRecentlyViewed(book);
 
             const isMine = ME === (book.seller_id || book.seller);
             const initials = (book.seller || 'S').charAt(0).toUpperCase();
@@ -3717,6 +3828,8 @@
                 `).join('');
 
                 wrap.style.display = 'block';
+                const outer = document.getElementById('adBannerOuter');
+                if (outer) outer.style.display = 'block';
                 startAdTimer();
             } catch(e) {}
         }
@@ -5327,6 +5440,41 @@ ${url}`;
                     </div>`;
                 }).join('');
             } catch(e) { console.log('Announcements:', e); }
+        }
+
+        /* ── RECENTLY VIEWED ─────────────────────────────────────────── */
+        function trackRecentlyViewed(book) {
+            if (!book || !book.id) return;
+            let rv = JSON.parse(localStorage.getItem('bl_rv') || '[]');
+            rv = rv.filter(item => item.id !== book.id);
+            rv.unshift({ id: book.id, title: book.title, price: book.price, image: book.image });
+            rv = rv.slice(0, 6);
+            localStorage.setItem('bl_rv', JSON.stringify(rv));
+            renderRecentlyViewed();
+        }
+
+        function renderRecentlyViewed() {
+            const rv = JSON.parse(localStorage.getItem('bl_rv') || '[]');
+            const section = document.getElementById('recentlyViewedSection');
+            const scroll = document.getElementById('rvScroll');
+            if (!rv.length || !section || !scroll) return;
+            section.style.display = 'block';
+            scroll.innerHTML = rv.map(item => `
+                <div class="rv-card" onclick="openModal(${item.id})">
+                    <img class="rv-card-img" src="${item.image || 'https://placehold.co/110x80/F1F5F9/94A3B8?text=📦'}"
+                         onerror="this.src='https://placehold.co/110x80/F1F5F9/94A3B8?text=📦'" alt="${item.title}" loading="lazy">
+                    <div class="rv-card-body">
+                        <div class="rv-card-title">${item.title}</div>
+                        <div class="rv-card-price">₹${item.price}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function clearRecentlyViewed() {
+            localStorage.removeItem('bl_rv');
+            const section = document.getElementById('recentlyViewedSection');
+            if (section) section.style.display = 'none';
         }
 
         function showToast(msg, type = 'success') {
