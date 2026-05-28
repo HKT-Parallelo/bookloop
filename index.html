@@ -875,7 +875,6 @@
                         box-shadow 0.3s ease,
                         border-color 0.2s ease;
             position: relative;
-            backdrop-filter: blur(10px);
             /* Stagger entrance animation */
             opacity: 0;
             animation: cardEntrance 0.5s cubic-bezier(0.34,1.2,0.64,1) forwards;
@@ -944,14 +943,14 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.3px;
-            backdrop-filter: blur(8px);
+            backdrop-filter: none;
             z-index: 2;
         }
 
-        .cond-excellent { background: rgba(209,250,229,0.9); color: #065F46; }
-        .cond-good      { background: rgba(219,234,254,0.9); color: #1E40AF; }
-        .cond-fair      { background: rgba(254,243,199,0.9); color: #92400E; }
-        .cond-poor      { background: rgba(254,226,226,0.9); color: #991B1B; }
+        .cond-excellent { background: #D1FAE5; color: #065F46; }
+        .cond-good      { background: #DBEAFE; color: #1E40AF; }
+        .cond-fair      { background: #FEF3C7; color: #92400E; }
+        .cond-poor      { background: #FEE2E2; color: #991B1B; }
 
         .card-delete {
             position: absolute;
@@ -959,8 +958,7 @@
             right: 10px;
             width: 30px;
             height: 30px;
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(8px);
+            background: rgba(255,255,255,0.95);
             border: none;
             border-radius: 7px;
             cursor: pointer;
@@ -983,8 +981,7 @@
             right: 10px;
             height: 30px;
             padding: 0 10px;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(8px);
+            background: rgba(255,255,255,0.97);
             border: none;
             border-radius: 7px;
             cursor: pointer;
@@ -3383,28 +3380,27 @@
         // ── LOAD & DISPLAY ──────────────────────────────────────────────────
         async function loadBooks() {
             try {
-                const { data, error } = await db
-                    .from('books')
-                    .select('*')
-                    .or("status.is.null,status.neq.sold")
-                    .order('created_at', { ascending: false });
-                if (error) throw error;
+                // Fire all 3 DB calls in parallel instead of sequentially
+                const [booksResult, ratingsResult, queueResult] = await Promise.all([
+                    db.from('books')
+                        .select('*')
+                        .or("status.is.null,status.neq.sold")
+                        .order('created_at', { ascending: false }),
+                    db.from('seller_ratings').select('*'),
+                    db.from('requests').select('book_id').in('status', ['approved', 'waiting'])
+                ]);
 
-                // Fetch seller ratings and attach to books
-                const { data: ratingData } = await db.from('seller_ratings').select('*');
+                if (booksResult.error) throw booksResult.error;
+
                 const ratingsMap = {};
-                (ratingData || []).forEach(r => ratingsMap[r.seller_id] = r);
+                (ratingsResult.data || []).forEach(r => ratingsMap[r.seller_id] = r);
 
-                // Fetch queue counts (approved + waiting) per book
-                const { data: queueData } = await db.from('requests')
-                    .select('book_id')
-                    .in('status', ['approved', 'waiting']);
                 const queueMap = {};
-                (queueData || []).forEach(r => {
+                (queueResult.data || []).forEach(r => {
                     queueMap[r.book_id] = (queueMap[r.book_id] || 0) + 1;
                 });
 
-                allBooks = (data || []).map(b => ({
+                allBooks = (booksResult.data || []).map(b => ({
                     ...b,
                     _rating: ratingsMap[b.seller_id] || null,
                     _queueCount: queueMap[b.id] || 0
@@ -3484,7 +3480,8 @@
                 ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;background:#EDE9FE;color:#5B21B6;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;margin-left:6px">${queueCount} in queue</span>`
                 : '';
 
-            return `<div class="product-card" onclick="openModal(${b.id})" style="${isSold ? 'opacity:0.72;' : ''}animation-delay:${index * 55}ms">
+            const animStyle = index < 8 ? 'animation-delay:' + (index * 55) + 'ms' : 'animation:none;opacity:1';
+            return `<div class="product-card" onclick="openModal(${b.id})" style="${isSold ? 'opacity:0.72;' : ''}${animStyle}">
                 <div class="card-img">
                     <img src="${b.image || 'https://placehold.co/240x190/F1F5F9/94A3B8?text=No+Image'}"
                          alt="${b.title}" loading="lazy"
@@ -3547,6 +3544,18 @@
             const initials = (book.seller || 'S').charAt(0).toUpperCase();
             const isSold = book.deal_completed === true || book.status === 'sold';
 
+            // Fire buyer request check + seller expiry check in parallel (not sequential)
+            const [existingReqResult, sellerReqResult] = await Promise.all([
+                (!isMine && ME)
+                    ? (async () => { try { return await db.from('requests').select('*, ratings(id, role, stars, rater_id)').eq('book_id', book.id).eq('buyer_id', ME).single(); } catch { return { data: null }; } })()
+                    : Promise.resolve({ data: null }),
+                (isMine && hasMessages)
+                    ? (async () => { try { return await db.from('requests').select('approved_at').eq('book_id', book.id).eq('status', 'approved').single(); } catch { return { data: null }; } })()
+                    : Promise.resolve({ data: null })
+            ]);
+            const existingReq = existingReqResult?.data || null;
+            const sellerReq = sellerReqResult?.data || null;
+
             const availStatusHtml = isSold
                 ? `<span style="display:inline-flex;align-items:center;gap:6px;background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;padding:4px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;margin-bottom:12px">
                        <span style="width:7px;height:7px;border-radius:50%;background:#EF4444;flex-shrink:0"></span>Item Sold
@@ -3554,19 +3563,6 @@
                 : `<span style="display:inline-flex;align-items:center;gap:6px;background:#D1FAE5;color:#065F46;border:1px solid #A7F3D0;padding:4px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;margin-bottom:12px">
                        <span style="width:7px;height:7px;border-radius:50%;background:#10B981;flex-shrink:0"></span>Available Now
                    </span>`;
-
-            // Check if buyer already sent a request for this item
-            let existingReq = null;
-            if (!isMine) {
-                try {
-                    const { data } = await db.from('requests')
-                        .select('*, ratings(id, role, stars, rater_id)')
-                        .eq('book_id', book.id)
-                        .eq('buyer_id', ME)
-                        .single();
-                    existingReq = data;
-                } catch {}
-            }
 
             // Only show chat if request is approved (even if sold) — approved buyer can still chat
             const showChat = hasMessages && (isMine || existingReq?.status === 'approved');
@@ -3583,20 +3579,17 @@
                     chatExpiryHtml = `<div style="background:#F0FDF4;border:1px solid #BBF7D0;color:#166534;padding:6px 12px;border-radius:8px;font-size:0.78rem;font-weight:600;margin-bottom:8px">🕐 Chat available for ${daysLeft} more day${daysLeft !== 1 ? 's' : ''}</div>`;
                 }
             } else if (showChat && isMine) {
-                // seller view — fetch their approved request
-                try {
-                    const { data: sellerReq } = await db.from('requests').select('approved_at').eq('book_id', book.id).eq('status', 'approved').single();
-                    if (sellerReq?.approved_at) {
-                        const approvedAt = new Date(sellerReq.approved_at);
-                        const expiresAt = new Date(approvedAt.getTime() + 15 * 24 * 60 * 60 * 1000);
-                        const daysLeft = Math.ceil((expiresAt - Date.now()) / (1000 * 60 * 60 * 24));
-                        if (daysLeft <= 3) {
-                            chatExpiryHtml = `<div style="background:#FEF3C7;border:1px solid #FDE68A;color:#92400E;padding:6px 12px;border-radius:8px;font-size:0.78rem;font-weight:600;margin-bottom:8px">⚠️ Chat closes in ${daysLeft} day${daysLeft !== 1 ? 's' : ''} — listing will be removed after that</div>`;
-                        } else if (daysLeft > 0) {
-                            chatExpiryHtml = `<div style="background:#F0FDF4;border:1px solid #BBF7D0;color:#166534;padding:6px 12px;border-radius:8px;font-size:0.78rem;font-weight:600;margin-bottom:8px">🕐 Chat available for ${daysLeft} more day${daysLeft !== 1 ? 's' : ''}</div>`;
-                        }
+                // seller view — use pre-fetched sellerReq from Promise.all
+                if (sellerReq?.approved_at) {
+                    const approvedAt = new Date(sellerReq.approved_at);
+                    const expiresAt = new Date(approvedAt.getTime() + 15 * 24 * 60 * 60 * 1000);
+                    const daysLeft = Math.ceil((expiresAt - Date.now()) / (1000 * 60 * 60 * 24));
+                    if (daysLeft <= 3) {
+                        chatExpiryHtml = `<div style="background:#FEF3C7;border:1px solid #FDE68A;color:#92400E;padding:6px 12px;border-radius:8px;font-size:0.78rem;font-weight:600;margin-bottom:8px">⚠️ Chat closes in ${daysLeft} day${daysLeft !== 1 ? 's' : ''} — listing will be removed after that</div>`;
+                    } else if (daysLeft > 0) {
+                        chatExpiryHtml = `<div style="background:#F0FDF4;border:1px solid #BBF7D0;color:#166534;padding:6px 12px;border-radius:8px;font-size:0.78rem;font-weight:600;margin-bottom:8px">🕐 Chat available for ${daysLeft} more day${daysLeft !== 1 ? 's' : ''}</div>`;
                     }
-                } catch {}
+                }
             }
 
             // Build buyer action section
@@ -5444,31 +5437,35 @@ ${url}`;
 
         /* ── RECENTLY VIEWED ─────────────────────────────────────────── */
         function trackRecentlyViewed(book) {
-            if (!book || !book.id) return;
-            let rv = JSON.parse(localStorage.getItem('bl_rv') || '[]');
-            rv = rv.filter(item => item.id !== book.id);
-            rv.unshift({ id: book.id, title: book.title, price: book.price, image: book.image });
-            rv = rv.slice(0, 6);
-            localStorage.setItem('bl_rv', JSON.stringify(rv));
-            renderRecentlyViewed();
+            if (!ME || !book || !book.id) return;
+            try {
+                let rv = JSON.parse(localStorage.getItem('bl_rv') || '[]');
+                rv = rv.filter(item => item.id !== book.id);
+                rv.unshift({ id: book.id, title: book.title || '', price: book.price || 0, image: book.image || '' });
+                rv = rv.slice(0, 6);
+                localStorage.setItem('bl_rv', JSON.stringify(rv));
+                renderRecentlyViewed();
+            } catch(e) { /* never crash openModal */ }
         }
 
         function renderRecentlyViewed() {
-            const rv = JSON.parse(localStorage.getItem('bl_rv') || '[]');
-            const section = document.getElementById('recentlyViewedSection');
-            const scroll = document.getElementById('rvScroll');
-            if (!rv.length || !section || !scroll) return;
-            section.style.display = 'block';
-            scroll.innerHTML = rv.map(item => `
-                <div class="rv-card" onclick="openModal(${item.id})">
-                    <img class="rv-card-img" src="${item.image || 'https://placehold.co/110x80/F1F5F9/94A3B8?text=📦'}"
-                         onerror="this.src='https://placehold.co/110x80/F1F5F9/94A3B8?text=📦'" alt="${item.title}" loading="lazy">
-                    <div class="rv-card-body">
-                        <div class="rv-card-title">${item.title}</div>
-                        <div class="rv-card-price">₹${item.price}</div>
+            try {
+                const rv = JSON.parse(localStorage.getItem('bl_rv') || '[]');
+                const section = document.getElementById('recentlyViewedSection');
+                const scroll = document.getElementById('rvScroll');
+                if (!rv.length || !section || !scroll) return;
+                section.style.display = 'block';
+                scroll.innerHTML = rv.map(item => `
+                    <div class="rv-card" onclick="openModal(${item.id})">
+                        <img class="rv-card-img" src="${item.image || 'https://placehold.co/110x80/F1F5F9/94A3B8?text=📦'}"
+                             onerror="this.src='https://placehold.co/110x80/F1F5F9/94A3B8?text=📦'" alt="${item.title}" loading="lazy">
+                        <div class="rv-card-body">
+                            <div class="rv-card-title">${item.title}</div>
+                            <div class="rv-card-price">₹${item.price}</div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } catch(e) { /* silent fail */ }
         }
 
         function clearRecentlyViewed() {
