@@ -2547,8 +2547,8 @@
             .recently-viewed-section { padding: 14px 32px 0; }
         }
         .rv-box {
-            background: linear-gradient(to bottom, hsl(53, 100%, 65%), hsl(55, 97%, 73%));
-            border: 1.5px solid hsl(50, 98%, 53%);
+            background: linear-gradient(to bottom, #FEF08A, #FEFCE8);
+            border: 1.5px solid #FDE047;
             border-radius: 16px;
             padding: 14px 16px 16px;
         }
@@ -2886,7 +2886,7 @@
     <div class="recently-viewed-section" id="recentlyViewedSection">
         <div class="rv-box">
         <div class="rv-header">
-            <div class="rv-title">👀 Still Looking For These?</div>
+            <div class="rv-title">👀 Recently Viewed</div>
             <button class="rv-clear" onclick="clearRecentlyViewed()">Clear</button>
         </div>
         <div class="rv-scroll" id="rvScroll"></div>
@@ -3403,6 +3403,14 @@
             // So new messages show as popup even when modal is closed
             await subscribeToMyChats();
 
+            // Handle browser back button closing modal
+            window.addEventListener('popstate', () => {
+                const overlay = document.getElementById('modalOverlay');
+                if (overlay && overlay.classList.contains('open')) {
+                    closeModal();
+                }
+            });
+
             // Auto-open item if ?item=ID in URL (from share link)
             const urlParams = new URLSearchParams(window.location.search);
             const sharedItemId = urlParams.get('item');
@@ -3571,7 +3579,10 @@
             </div>`;
         }
 
+        let _savedScrollY = 0;
+
         async function openModal(id) {
+            _savedScrollY = window.scrollY;
             let book = allBooks.find(b => Number(b.id) === Number(id));
             if (!book) {
                 // Book may be sold/filtered out of allBooks — fetch directly from DB
@@ -3803,6 +3814,8 @@
             updateWatchlistBtn(book.id);
 
             document.getElementById('modalOverlay').classList.add('open');
+            // Push state so back button closes modal instead of leaving page
+            window.history.pushState({ modal: true, id }, '', window.location.pathname);
 
             if (showChat) {
                 await loadChat(id);
@@ -4503,6 +4516,10 @@
             }
             window._openChatBookId = null;
             window._currentModalBook = null;
+            // Restore scroll position
+            requestAnimationFrame(() => {
+                window.scrollTo({ top: _savedScrollY, behavior: 'instant' });
+            });
         }
 
         function handleOverlayClick(e) {
