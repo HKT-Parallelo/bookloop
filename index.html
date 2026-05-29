@@ -68,10 +68,10 @@
 
         /* ─── TOPBAR ─────────────────────────────── */
         .topbar {
-            background: linear-gradient(to bottom, rgba(101,163,13,0.85), rgba(247,254,231,0.75));
+            background: linear-gradient(to bottom, rgba(101,163,13,1), rgba(220,252,231,1));
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(132,204,22,0.25);
+            border-bottom: 1px solid rgba(132,204,22,0.35);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -81,8 +81,8 @@
         }
 
         .topbar.scrolled {
-            background: linear-gradient(to bottom, rgba(101,163,13,0.92), rgba(247,254,231,0.88));
-            box-shadow: 0 4px 24px rgba(101,163,13,0.15);
+            background: linear-gradient(to bottom, rgba(101,163,13,1), rgba(220,252,231,1));
+            box-shadow: 0 4px 24px rgba(101,163,13,0.2);
         }
 
         .topbar-inner {
@@ -5202,9 +5202,12 @@
 
         async function markReceivedFromNotif(reqId, bookId) {
             try {
-                const { error } = await db.from('requests').update({ item_received: true }).eq('id', reqId);
+                const { error } = await db.from('requests').update({ item_received: true, item_received_at: new Date().toISOString() }).eq('id', reqId);
                 if (error) throw error;
+                // Mark book as sold
+                await db.from('books').update({ status: 'sold', sold_at: new Date().toISOString() }).eq('id', bookId);
                 showToast('📦 Marked as received! Please rate your seller.', 'success');
+                await loadBooks();
                 await loadBuyerNotifs();
             } catch (e) { showToast('Error: ' + e.message, 'error'); }
         }
@@ -5231,10 +5234,18 @@
         async function markReceived(reqId, bookId) {
             try {
                 const { error } = await db.from('requests')
-                    .update({ item_received: true })
+                    .update({ item_received: true, item_received_at: new Date().toISOString() })
                     .eq('id', reqId);
                 if (error) throw error;
+
+                // Mark the book as sold so it's removed from marketplace
+                const { error: bookError } = await db.from('books')
+                    .update({ status: 'sold', sold_at: new Date().toISOString() })
+                    .eq('id', bookId);
+                if (bookError) throw bookError;
+
                 showToast('📦 Marked as received! Please rate your seller.', 'success');
+                await loadBooks(); // refresh the grid
                 await openModal(bookId); // refresh modal to show rating box
             } catch (e) {
                 showToast('Could not mark as received: ' + e.message, 'error');
