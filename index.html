@@ -1994,27 +1994,95 @@
         }
 
         .my-listing-card {
-            display: flex;
-            gap: 12px;
-            padding: 14px;
             border: 1.5px solid var(--border);
             border-radius: var(--r-md);
             margin-bottom: 10px;
             background: white;
             transition: border-color 0.2s, box-shadow 0.15s;
-            position: relative;
+            overflow: hidden;
         }
 
         .my-listing-card:hover { border-color: var(--lime-dark); box-shadow: var(--shadow-sm); }
-
         .my-listing-card.is-sold { opacity: 0.65; }
 
-        .my-listing-img {
-            width: 72px;
-            height: 72px;
+        /* Top row - always visible, clickable to expand */
+        .mlcard-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            cursor: pointer;
+        }
+
+        /* 3-dot menu */
+        .ml-dots-wrap { position: relative; flex-shrink: 0; }
+        .ml-dots-btn {
+            width: 28px; height: 28px;
+            border-radius: 6px;
+            border: 1.5px solid var(--border);
+            background: var(--surface-2);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--muted);
+            font-size: 0.85rem; font-weight: 900;
+            transition: all 0.15s;
+            letter-spacing: 1px;
+            padding: 0;
+        }
+        .ml-dots-btn:hover { background: var(--surface-3); color: var(--ink); border-color: var(--border-2); }
+        .ml-dots-menu {
+            position: fixed;
+            background: white;
+            border: 1.5px solid var(--border);
             border-radius: 10px;
-            object-fit: cover;
-            flex-shrink: 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            z-index: 9999;
+            min-width: 140px;
+            overflow: hidden;
+            display: none;
+        }
+        .ml-dots-menu.open { display: block; }
+        .ml-dots-menu-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 14px;
+            font-size: 0.82rem; font-weight: 600;
+            cursor: pointer; color: var(--ink);
+            border: none; background: none; width: 100%; text-align: left;
+            transition: background 0.12s;
+        }
+        .ml-dots-menu-item:hover { background: var(--surface-2); }
+        .ml-dots-menu-item.danger { color: var(--red); }
+        .ml-dots-menu-item.danger:hover { background: #FEE2E2; }
+
+        /* Expand arrow */
+        .mlcard-arrow {
+            font-size: 0.7rem; color: var(--muted);
+            transition: transform 0.25s; flex-shrink: 0;
+        }
+        .mlcard-arrow.open { transform: rotate(180deg); }
+
+        /* Requests section */
+        .mlcard-requests {
+            display: none;
+            border-top: 1.5px dashed var(--border);
+            padding: 12px;
+            background: var(--surface-2);
+        }
+        .mlcard-requests.open { display: block; }
+        .mlcard-req-label {
+            font-size: 0.7rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            color: var(--muted); margin-bottom: 8px;
+        }
+        .mlcard-no-reqs {
+            text-align: center; padding: 14px 10px;
+            color: var(--muted); font-size: 0.8rem;
+        }
+
+        .my-listing-img {
+            width: 56px; height: 56px;
+            border-radius: 10px;
+            object-fit: cover; flex-shrink: 0;
             background: var(--surface-3);
         }
 
@@ -2623,7 +2691,201 @@
             color: var(--lime-dark);
         }
 
-        /* ══ AD BANNER ══════════════════════════════════════════════════ */
+        /* ══ LISTING REQUESTS DIALOG ═══════════════════════════════════ */
+        .lr-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(13,17,23,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 1200;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .lr-overlay.open { display: flex; }
+
+        .lr-dialog {
+            background: #f8fafc;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 900px;
+            height: 88vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 32px 100px rgba(0,0,0,0.35);
+            overflow: hidden;
+            animation: lrSlideUp 0.3s cubic-bezier(0.34,1.2,0.64,1);
+        }
+
+        @media (max-width: 600px) {
+            .lr-overlay { padding: 0; align-items: flex-end; }
+            .lr-dialog { border-radius: 20px 20px 0 0; height: 93vh; max-width: 100%; }
+        }
+
+        @keyframes lrSlideUp {
+            from { opacity:0; transform: translateY(40px) scale(0.97); }
+            to   { opacity:1; transform: translateY(0) scale(1); }
+        }
+
+        /* Top section: image + details */
+        .lr-top {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 0;
+            background: white;
+            border-bottom: 1.5px solid var(--border);
+            flex-shrink: 0;
+            position: relative;
+            min-height: 220px;
+        }
+        @media (max-width: 600px) {
+            .lr-top { grid-template-columns: 130px 1fr; min-height: 140px; }
+        }
+
+        .lr-img-box {
+            background: var(--surface-3);
+            overflow: hidden;
+            border-radius: 20px 0 0 0;
+        }
+        .lr-img-box img {
+            width: 100%; height: 100%;
+            object-fit: cover; display: block;
+        }
+
+        .lr-details-box {
+            padding: 20px 56px 20px 20px;
+            display: flex; flex-direction: column; justify-content: center; gap: 8px;
+        }
+        @media (max-width: 600px) { .lr-details-box { padding: 12px 44px 12px 12px; } }
+
+        .lr-details-title {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 900; font-size: 1.3rem; color: var(--ink);
+            line-height: 1.2;
+        }
+        @media (max-width: 600px) { .lr-details-title { font-size: 1rem; } }
+
+        .lr-details-price {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 900; font-size: 1.5rem; color: var(--lime-dark);
+        }
+        @media (max-width: 600px) { .lr-details-price { font-size: 1.1rem; } }
+
+        .lr-details-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+        .lr-detail-badge {
+            font-size: 0.72rem; font-weight: 700;
+            padding: 3px 10px; border-radius: 20px;
+        }
+        .lr-detail-badge.active { background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
+        .lr-detail-badge.sold   { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+
+        .lr-close-btn {
+            position: absolute; top: 14px; right: 14px;
+            width: 34px; height: 34px; border-radius: 50%;
+            background: var(--surface-2); border: 1.5px solid var(--border);
+            color: var(--muted); font-size: 1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s; z-index: 10;
+        }
+        .lr-close-btn:hover { background: #FEE2E2; color: var(--red); border-color: #FECACA; }
+
+        /* Tabs */
+        .lr-tabs {
+            display: flex; gap: 0;
+            border-bottom: 1.5px solid var(--border);
+            background: white; padding: 0 20px;
+            flex-shrink: 0;
+        }
+        .lr-tab {
+            padding: 11px 18px;
+            font-size: 0.82rem; font-weight: 700; color: var(--muted);
+            border: none; background: none; cursor: pointer;
+            border-bottom: 2.5px solid transparent; margin-bottom: -1.5px;
+            transition: all 0.15s; white-space: nowrap;
+        }
+        .lr-tab.active { color: var(--lime-dark); border-bottom-color: var(--lime-dark); }
+
+        /* Requests list */
+        .lr-body {
+            flex: 1; overflow-y: auto; padding: 16px 20px;
+        }
+
+        /* Each request row — matches the sketch */
+        .lr-req-card {
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            display: grid;
+            grid-template-columns: 200px 1fr auto;
+            gap: 16px;
+            align-items: center;
+            transition: box-shadow 0.15s;
+        }
+        .lr-req-card:hover { box-shadow: var(--shadow-md); }
+        .lr-req-card.approved { border-color: #A7F3D0; background: #F0FDF4; }
+
+        @media (max-width: 600px) {
+            .lr-req-card { grid-template-columns: 1fr; gap: 10px; }
+        }
+
+        /* Buyer info cell */
+        .lr-buyer-cell { display: flex; align-items: center; gap: 10px; }
+        .lr-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--lime-dark); color: white;
+            font-size: 1rem; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .lr-buyer-name { font-size: 0.88rem; font-weight: 700; color: var(--ink); }
+        .lr-buyer-rating { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+        .lr-buyer-time { font-size: 0.7rem; color: var(--muted-2); margin-top: 2px; }
+
+        /* Message cell */
+        .lr-msg-cell {
+            font-size: 0.82rem; color: var(--muted);
+            font-style: italic;
+            background: var(--surface-2);
+            border-radius: 8px; padding: 8px 12px;
+            border: 1px solid var(--border);
+            min-height: 40px;
+            display: flex; align-items: center;
+        }
+
+        /* Actions cell */
+        .lr-actions-cell { display: flex; gap: 8px; flex-shrink: 0; }
+        .lr-btn {
+            padding: 9px 18px;
+            border-radius: 9px;
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.8rem; font-weight: 700;
+            cursor: pointer; border: 1.5px solid transparent;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+            transition: all 0.15s; white-space: nowrap;
+        }
+        .lr-btn-approve { background: var(--lime-dark); color: white; border-color: var(--lime-dark); }
+        .lr-btn-approve:hover { background: #4D7C0F; }
+        .lr-btn-decline { background: #FEE2E2; color: var(--red); border-color: #FECACA; }
+        .lr-btn-decline:hover { background: var(--red); color: white; border-color: var(--red); }
+        .lr-btn-chat { background: var(--ink); color: white; }
+        .lr-btn-qr { background: var(--lime-dark); color: white; }
+        .lr-btn-neutral { background: var(--surface-2); color: var(--ink); border-color: var(--border); }
+
+        .lr-empty {
+            text-align: center; padding: 60px 20px; color: var(--muted);
+        }
+        .lr-empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+        /* Footer */
+        .lr-footer {
+            padding: 14px 20px;
+            border-top: 1.5px solid var(--border);
+            background: white;
+            display: flex; gap: 10px; flex-shrink: 0;
+        }
         .ad-banner-outer {
             padding: 0;
         }
@@ -2796,7 +3058,7 @@
                 </button>
 
                 <!-- Seller Bell — purchase requests -->
-                <button class="notif-btn" id="sellerBellBtn" onclick="if(!ME){showGuestModal();}else{openSellerNotifs();}" title="Purchase Requests" style="display:none">
+                <button class="notif-btn" id="sellerBellBtn" onclick="if(!ME){showGuestModal();}else{openMyListings();}" title="Purchase Requests" style="display:none">
                     <svg height="20" width="20" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve">
                         <g>
                             <path style="fill:#F6E96F;" d="M453.481,402.747c-28.353-17.478-41.329-72.613-41.329-90.987v-77.245 c0-84.141-60.354-154.138-140.122-169.171c2.114-2.739,3.914-5.743,5.283-8.997c2.064-4.853,3.197-10.223,3.197-15.786 c0.007-8.359-2.559-16.23-6.932-22.682c-4.373-6.474-10.539-11.592-17.829-14.682C250.89,1.133,245.52,0,239.957,0 c-8.352,0-16.223,2.566-22.682,6.939c-6.467,4.366-11.592,10.539-14.682,17.829c-2.058,4.861-3.19,10.223-3.19,15.793 c-0.007,8.344,2.566,16.223,6.932,22.682c0.487,0.717,1.004,1.42,1.542,2.101c-79.76,15.04-140.115,85.037-140.115,169.171v77.245 c0,18.374-12.976,73.509-41.332,90.987C-62.877,457.789,90.723,512,239.957,512S542.791,457.789,453.481,402.747z"/>
@@ -2834,7 +3096,7 @@
                             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
-                            My Listings
+                            My Activity
                             <span id="myListingsBadge" style="display:none;margin-left:auto;background:var(--lime-dark);color:white;font-size:0.7rem;font-weight:800;padding:1px 7px;border-radius:20px;"></span>
                         </button>
                         <button class="dropdown-item danger" onclick="logout()">
@@ -3109,6 +3371,31 @@
         </div>
     </div>
 
+    <!-- LISTING REQUESTS DIALOG -->
+    <div class="lr-overlay" id="lrOverlay" onclick="if(event.target===this)closeLRDialog()">
+        <div class="lr-dialog" id="lrDialog">
+            <!-- TOP: image + details -->
+            <div class="lr-top">
+                <div class="lr-img-box">
+                    <img id="lrItemImg" src="" alt="">
+                </div>
+                <div class="lr-details-box">
+                    <div class="lr-details-title" id="lrItemTitle"></div>
+                    <div class="lr-details-price" id="lrItemPrice"></div>
+                    <div class="lr-details-badges" id="lrItemBadges"></div>
+                    <div id="lrItemExtra" style="font-size:0.82rem;color:var(--muted);margin-top:4px"></div>
+                </div>
+                <button class="lr-close-btn" onclick="closeLRDialog()">×</button>
+            </div>
+            <!-- TABS -->
+            <div class="lr-tabs" id="lrTabs"></div>
+            <!-- REQUESTS BODY -->
+            <div class="lr-body" id="lrBody"></div>
+            <!-- FOOTER -->
+            <div class="lr-footer" id="lrFooter"></div>
+        </div>
+    </div>
+
     <!-- SELLER NOTIFICATIONS PANEL -->
     <div class="notif-panel-overlay" id="sellerNotifOverlay" onclick="closeSellerNotifs()"></div>
     <div class="notif-panel" id="sellerNotifPanel">
@@ -3343,7 +3630,7 @@
                     showToast(`🔔 New request from ${buyerName}!`, 'success');
                     await refreshNotifBadges();
                     if (document.getElementById('sellerNotifPanel').classList.contains('open')) {
-                        await loadSellerNotifs();
+                        await loadMyListings();
                     }
                 })
                 .on('postgres_changes', {
@@ -3357,7 +3644,7 @@
                     }
                     await refreshNotifBadges();
                     if (document.getElementById('sellerNotifPanel').classList.contains('open')) {
-                        await loadSellerNotifs();
+                        await loadMyListings();
                     }
                 })
                 .on('postgres_changes', {
@@ -4066,11 +4353,11 @@
         }
 
         // ── SELLER NOTIFICATIONS ─────────────────────────────────────────────
-        async function openSellerNotifs() {
+        async function openMyListings() {
             document.getElementById('sellerNotifOverlay').classList.add('open');
             document.getElementById('sellerNotifPanel').classList.add('open');
             document.body.style.overflow = 'hidden';
-            await loadSellerNotifs();
+            await loadMyListings();
         }
 
         function closeSellerNotifs() {
@@ -4273,7 +4560,7 @@
 
                     if (activeDeals && activeDeals.length > 0) {
                         showToast('You already have an active deal for this item! Revoke it first before approving someone else.', 'error');
-                        await loadSellerNotifs();
+                        await loadMyListings();
                         return;
                     }
 
@@ -4322,7 +4609,7 @@
                     showToast('Request declined.', 'success');
                 }
 
-                await loadSellerNotifs();
+                await loadMyListings();
                 await refreshNotifBadges();
             } catch (e) {
                 showToast('Error: ' + e.message, 'error');
@@ -4718,87 +5005,236 @@
 
         async function loadMyListings() {
             const body = document.getElementById('myListingsBody');
-            body.innerHTML = `<div class="panel-loader">⏳ Loading your listings…</div>`;
+            body.innerHTML = `<div class="panel-loader">⏳ Loading your activity…</div>`;
 
             try {
-                const { data, error } = await db
-                    .from('books')
-                    .select('*')
-                    .eq('seller_id', ME)
-                    .order('created_at', { ascending: false });
+                // Fetch listings + requests in parallel
+                const [{ data: booksData, error: booksErr }, { data: reqsData, error: reqsErr }] = await Promise.all([
+                    db.from('books').select('*').eq('seller_id', ME).order('created_at', { ascending: false }),
+                    db.from('requests').select('*').eq('seller_id', ME).not('status', 'eq', 'declined').order('created_at', { ascending: true })
+                ]);
 
-                if (error) throw error;
-                myListings = data || [];
+                if (booksErr) throw booksErr;
+                myListings = booksData || [];
+                const allReqs = reqsData || [];
+
+                // Group requests by book_id
+                const reqsByBook = {};
+                allReqs.forEach(r => {
+                    if (!reqsByBook[r.book_id]) reqsByBook[r.book_id] = [];
+                    reqsByBook[r.book_id].push(r);
+                });
 
                 // Update stats
                 const total  = myListings.length;
                 const sold   = myListings.filter(b => b.deal_completed === true || b.status === 'sold').length;
                 const active = total - sold;
+                const pendingTotal = allReqs.filter(r => r.status === 'pending').length;
 
                 document.getElementById('statTotal').textContent  = total;
                 document.getElementById('statActive').textContent = active;
                 document.getElementById('statSold').textContent   = sold;
-                document.getElementById('panelSubtitle').textContent = `${total} item${total !== 1 ? 's' : ''} listed by you`;
+                document.getElementById('panelSubtitle').textContent = `${total} listing${total !== 1 ? 's' : ''}${pendingTotal > 0 ? ` · ${pendingTotal} new request${pendingTotal > 1 ? 's' : ''}` : ''}`;
 
-                // Update badge in dropdown
+                // Update badge
                 const badge = document.getElementById('myListingsBadge');
-                if (active > 0) { badge.textContent = active; badge.style.display = 'inline'; }
+                if (pendingTotal > 0) { badge.textContent = pendingTotal; badge.style.display = 'inline'; }
+                else if (active > 0) { badge.textContent = active; badge.style.display = 'inline'; }
                 else { badge.style.display = 'none'; }
 
                 if (!myListings.length) {
                     body.innerHTML = `
                         <div class="panel-empty">
-                            <div class="icon"><svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+                            <div class="icon"><svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
                             <h3>No listings yet</h3>
-                            <p>You haven't listed anything for sale. Click "List a New Item" below to get started!</p>
+                            <p>List your first item to get started!</p>
                         </div>`;
                     return;
                 }
 
-                body.innerHTML = myListings.map(b => buildMyListingCard(b)).join('');
+                body.innerHTML = myListings.map(b => buildMyListingCard(b, reqsByBook[b.id] || [])).join('');
 
             } catch (e) {
-                body.innerHTML = `<div class="panel-empty"><div class="icon"><svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><h3>Could not load</h3><p>${e.message}</p></div>`;
+                body.innerHTML = `<div class="panel-empty"><h3>Could not load</h3><p>${e.message}</p></div>`;
             }
         }
 
-        function buildMyListingCard(b) {
+        function buildMyListingCard(b, reqs) {
             const isSold = b.deal_completed === true || b.status === 'sold';
-            const condColors = { Excellent:'#065F46', Good:'#1E40AF', Fair:'#92400E', Poor:'#991B1B' };
             const date = b.created_at ? new Date(b.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short' }) : '';
+            const pendingCount = (reqs || []).filter(r => r.status === 'pending').length;
+            const totalReqs = (reqs || []).length;
+            const hasActive = (reqs || []).some(r => r.status === 'approved');
 
-            return `<div class="my-listing-card ${isSold ? 'is-sold' : ''}" id="mlcard-${b.id}">
-                <img class="my-listing-img"
-                     src="${b.image || 'https://placehold.co/72x72/F1F5F9/94A3B8?text=📚'}"
-                     onerror="this.src='https://placehold.co/72x72/F1F5F9/94A3B8?text=📚'"
-                     alt="${b.title}">
-                <div class="my-listing-info">
-                    <div class="my-listing-title" title="${b.title}">${s(b.title)}</div>
-                    <div class="my-listing-meta">
-                        <span class="my-listing-price">₹${b.price}</span>
-                        <span class="my-listing-badge ${isSold ? 'sold' : 'available'}">
-                            ${isSold ? '🔴 Sold' : '🟢 Active'}
-                        </span>
-                        ${b.category ? `<span style="font-size:0.72rem;color:var(--muted)">${b.category}</span>` : ''}
-                        ${date ? `<span style="font-size:0.72rem;color:var(--muted-2);margin-left:auto">${date}</span>` : ''}
+            return `<div class="my-listing-card ${isSold ? 'is-sold' : ''}" id="mlcard-${b.id}" onclick="openLRDialog(${b.id})" style="cursor:pointer">
+                <div class="mlcard-top">
+                    <img class="my-listing-img"
+                         src="${b.image || 'https://placehold.co/56x56/F1F5F9/94A3B8?text=📚'}"
+                         onerror="this.src='https://placehold.co/56x56/F1F5F9/94A3B8?text=📚'"
+                         alt="${b.title}">
+                    <div class="my-listing-info">
+                        <div class="my-listing-title" title="${b.title}">${s(b.title)}</div>
+                        <div class="my-listing-meta">
+                            <span class="my-listing-price">₹${b.price}</span>
+                            <span class="my-listing-badge ${isSold ? 'sold' : 'available'}">${isSold ? '🔴 Sold' : '🟢 Active'}</span>
+                            ${hasActive ? `<span style="font-size:0.7rem;font-weight:700;background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:20px;border:1px solid #A7F3D0">Deal Active</span>` : ''}
+                            ${date ? `<span style="font-size:0.7rem;color:var(--muted-2)">${date}</span>` : ''}
+                        </div>
                     </div>
-                    <div class="my-listing-actions">
-                        ${!isSold ? `<button class="ml-btn" style="background:var(--surface-2);border:1.5px solid var(--border);color:var(--ink-3)"
-                                onclick="window.location.href='sell_item_fixed.html?edit=${b.id}'">
-                            ✏️ Edit
-                        </button>` : ''}
-                        <button class="ml-btn ml-btn-sold ${isSold ? 'already-sold' : ''}"
-                                onclick="toggleSoldStatus(${b.id}, ${isSold})">
-                            ${isSold ? '↩️ Mark Available' : '✅ Mark as Sold'}
-                        </button>
-                        <button class="ml-btn ml-btn-delete"
-                                onclick="deleteMyListing(${b.id})">
-                            🗑️ Remove
-                        </button>
+                    <!-- Bell + 3-dot -->
+                    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0" onclick="event.stopPropagation()">
+                        <!-- Bell icon with count -->
+                        <div style="position:relative;cursor:pointer" onclick="openLRDialog(${b.id})">
+                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="${pendingCount > 0 ? 'var(--lime-dark)' : 'var(--muted)'}" stroke-width="2">
+                                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                <path d="M13.73 21a2 2 0 01-3.46 0"/>
+                            </svg>
+                            ${pendingCount > 0 ? `<span style="position:absolute;top:-5px;right:-5px;background:var(--lime-dark);color:white;font-size:0.6rem;font-weight:900;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid white">${pendingCount}</span>` : 
+                            totalReqs > 0 ? `<span style="position:absolute;top:-5px;right:-5px;background:var(--muted);color:white;font-size:0.6rem;font-weight:900;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid white">${totalReqs}</span>` : ''}
+                        </div>
+                        <!-- 3-dot menu -->
+                        <div class="ml-dots-wrap">
+                            <button class="ml-dots-btn" onclick="toggleDotsMenu(${b.id}, this)" title="Options">•••</button>
+                            <div class="ml-dots-menu" id="dotsmenu-${b.id}">
+                                ${!isSold ? `<button class="ml-dots-menu-item" onclick="closeDotsMenu(${b.id});window.location.href='sell_item_fixed.html?edit=${b.id}'">✏️ Edit</button>` : ''}
+                                <button class="ml-dots-menu-item" onclick="closeDotsMenu(${b.id});toggleSoldStatus(${b.id}, ${isSold})">${isSold ? '↩️ Mark Available' : '✅ Mark as Sold'}</button>
+                                <button class="ml-dots-menu-item danger" onclick="closeDotsMenu(${b.id});deleteMyListing(${b.id})">🗑️ Remove</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>`;
         }
+
+        let _lrReqs = [];
+        let _lrBookId = null;
+
+        function lrRenderTab(key) {
+            document.querySelectorAll('.lr-tab').forEach(t => t.classList.toggle('active', t.dataset.key === key));
+            const groups = {
+                pending:  _lrReqs.filter(r => r.status === 'pending'),
+                approved: _lrReqs.filter(r => r.status === 'approved'),
+                waiting:  _lrReqs.filter(r => r.status === 'waiting'),
+            };
+            const list = groups[key] || [];
+            if (!list.length) {
+                document.getElementById('lrBody').innerHTML = `<div class="lr-empty"><div class="lr-empty-icon">📭</div><p>No ${key} requests yet</p></div>`;
+                return;
+            }
+            document.getElementById('lrBody').innerHTML = list.map(r => {
+                const initial = (r.buyer_name || 'S').charAt(0).toUpperCase();
+                const time = timeAgo(r.created_at);
+                const stars = r.seller_rating ? '⭐'.repeat(Math.round(r.seller_rating)) : '';
+                let actions = '';
+                if (r.status === 'pending' || r.status === 'waiting') {
+                    actions = `
+                        <button class="lr-btn lr-btn-approve" onclick="respondRequest(${r.id},'approved');closeLRDialog()">✓ Approve</button>
+                        <button class="lr-btn lr-btn-decline" onclick="respondRequest(${r.id},'declined');closeLRDialog()">✕ Decline</button>`;
+                } else if (r.status === 'approved') {
+                    actions = !r.item_received
+                        ? `<button class="lr-btn lr-btn-chat" onclick="closeLRDialog();closeMyListings();openModal(${_lrBookId})">💬 Chat</button>
+                           <button class="lr-btn lr-btn-qr" onclick="generateQR(${r.id},'${_lrBookId}')">🔲 QR</button>
+                           <button class="lr-btn lr-btn-decline" onclick="if(confirm('Cancel deal?')){respondRequest(${r.id},'declined');closeLRDialog();}">🚫</button>`
+                        : `<span style="color:var(--emerald);font-weight:700;font-size:0.82rem;white-space:nowrap">✅ Received</span>`;
+                }
+                return `<div class="lr-req-card ${r.status === 'approved' ? 'approved' : ''}">
+                    <!-- Buyer cell -->
+                    <div class="lr-buyer-cell">
+                        <div class="lr-avatar">${initial}</div>
+                        <div>
+                            <div class="lr-buyer-name">${s(r.buyer_name || 'Student')}</div>
+                            ${stars ? `<div class="lr-buyer-rating">${stars}</div>` : ''}
+                            <div class="lr-buyer-time">${time}</div>
+                        </div>
+                    </div>
+                    <!-- Message cell -->
+                    <div class="lr-msg-cell">
+                        ${r.buyer_message ? `"${s(r.buyer_message)}"` : '<span style="color:var(--muted-2);font-style:normal">No message</span>'}
+                    </div>
+                    <!-- Actions cell -->
+                    <div class="lr-actions-cell">${actions}</div>
+                </div>`;
+            }).join('');
+        }
+
+        async function openLRDialog(bookId) {
+            const book = myListings.find(b => Number(b.id) === Number(bookId));
+            if (!book) return;
+            _lrBookId = bookId;
+            const isSold = book.deal_completed === true || book.status === 'sold';
+
+            document.getElementById('lrItemImg').src = book.image || 'https://placehold.co/280x220/F1F5F9/94A3B8?text=📚';
+            document.getElementById('lrItemTitle').textContent = book.title;
+            document.getElementById('lrItemPrice').textContent = `₹${book.price}`;
+            document.getElementById('lrItemBadges').innerHTML = `
+                <span class="lr-detail-badge ${isSold ? 'sold' : 'active'}">${isSold ? '🔴 Sold' : '🟢 Active'}</span>
+                ${book.category ? `<span class="lr-detail-badge active" style="background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE">${book.category}</span>` : ''}
+                ${book.condition ? `<span class="lr-detail-badge active" style="background:#FFF7ED;color:#C2410C;border-color:#FED7AA">${book.condition}</span>` : ''}
+            `;
+            document.getElementById('lrItemExtra').textContent = book.description ? book.description.slice(0, 100) + (book.description.length > 100 ? '…' : '') : '';
+
+            document.getElementById('lrFooter').innerHTML = `
+                <button class="lr-btn lr-btn-neutral" style="flex:1" onclick="closeLRDialog();openModal(${book.id})">👁️ View Item</button>
+                ${!isSold ? `<a href="sell_item_fixed.html?edit=${book.id}" class="lr-btn lr-btn-approve" style="text-decoration:none;flex:1">✏️ Edit Listing</a>` : ''}
+                <button class="lr-btn lr-btn-decline" style="flex:0" onclick="closeLRDialog();deleteMyListing(${book.id})">🗑️</button>
+            `;
+
+            document.getElementById('lrBody').innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">⏳ Loading…</div>`;
+            document.getElementById('lrTabs').innerHTML = '';
+            document.getElementById('lrOverlay').classList.add('open');
+
+            try {
+                const { data, error } = await db.from('requests')
+                    .select('*').eq('book_id', bookId).eq('seller_id', ME)
+                    .not('status', 'eq', 'declined')
+                    .order('created_at', { ascending: true });
+                if (error) throw error;
+                _lrReqs = data || [];
+
+                const pending  = _lrReqs.filter(r => r.status === 'pending').length;
+                const approved = _lrReqs.filter(r => r.status === 'approved').length;
+                const waiting  = _lrReqs.filter(r => r.status === 'waiting').length;
+                const activeTab = pending > 0 ? 'pending' : approved > 0 ? 'approved' : 'waiting';
+
+                document.getElementById('lrTabs').innerHTML = [
+                    { key: 'pending',  label: `🔔 New (${pending})` },
+                    { key: 'approved', label: `✅ Active (${approved})` },
+                    { key: 'waiting',  label: `⏳ Waiting (${waiting})` },
+                ].map(t => `<button class="lr-tab ${t.key === activeTab ? 'active' : ''}" data-key="${t.key}" onclick="lrRenderTab('${t.key}')">${t.label}</button>`).join('');
+
+                lrRenderTab(activeTab);
+            } catch(e) {
+                document.getElementById('lrBody').innerHTML = `<div class="lr-empty"><p>Error: ${e.message}</p></div>`;
+            }
+        }
+
+        function closeLRDialog() {
+            document.getElementById('lrOverlay').classList.remove('open');
+        }
+
+        function toggleDotsMenu(bookId, btn) {
+            const menu = document.getElementById(`dotsmenu-${bookId}`);
+            if (!menu) return;
+            const isOpen = menu.classList.contains('open');
+            // Close all other menus first
+            document.querySelectorAll('.ml-dots-menu.open').forEach(m => m.classList.remove('open'));
+            if (!isOpen) {
+                const rect = btn.getBoundingClientRect();
+                menu.style.top = (rect.bottom + 4) + 'px';
+                menu.style.right = (window.innerWidth - rect.right) + 'px';
+                menu.classList.add('open');
+            }
+        }
+
+        function closeDotsMenu(bookId) {
+            const menu = document.getElementById(`dotsmenu-${bookId}`);
+            if (menu) menu.classList.remove('open');
+        }
+
+        // Close dots menus when clicking outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.ml-dots-menu.open').forEach(m => m.classList.remove('open'));
+        });
 
         async function toggleSoldStatus(id, currentlySold) {
             try {
@@ -5073,7 +5509,7 @@
                         closeQRModal();
                         await db.removeChannel(ch);
                         showToast('✅ Buyer scanned the QR! Item marked as received.', 'success');
-                        await loadSellerNotifs();
+                        await loadMyListings();
                     }
                 }).subscribe();
         }
@@ -5277,7 +5713,7 @@
                 if (role === 'buyer') {
                     await openModal(bookId);
                 } else {
-                    await loadSellerNotifs();
+                    await loadMyListings();
                 }
                 await loadBooks(); // refresh cards with updated ratings
             } catch (e) {
@@ -5391,7 +5827,7 @@ ${url}`;
             try {
                 await db.from('requests').delete().eq('id', reqId).eq('seller_id', ME);
                 showToast('Notification dismissed', 'success');
-                await loadSellerNotifs();
+                await loadMyListings();
                 await refreshNotifBadges();
             } catch (e) {
                 showToast('Could not dismiss: ' + e.message, 'error');
@@ -5602,7 +6038,7 @@ ${url}`;
         </a>
 
         <!-- Notifications (seller) -->
-        <button class="bottom-nav-item" onclick="openSellerNotifs()" id="bottomSellerBtn">
+        <button class="bottom-nav-item" onclick="openMyListings()" id="bottomSellerBtn">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
             </svg>
