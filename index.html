@@ -1881,8 +1881,7 @@
         .filter-mobile-overlay {
             display: none;
             position: fixed; inset: 0;
-            background: rgba(13,17,23,0.5);
-            backdrop-filter: blur(4px);
+            background: rgba(13,17,23,0.4);
             z-index: 1050;
         }
         .filter-mobile-overlay.show { display: block; }
@@ -3692,6 +3691,11 @@
 
             // Handle browser back button closing modal
             window.addEventListener('popstate', () => {
+                const lrOverlay = document.getElementById('lrOverlay');
+                if (lrOverlay && lrOverlay.classList.contains('open')) {
+                    closeLRDialog();
+                    return;
+                }
                 const overlay = document.getElementById('modalOverlay');
                 if (overlay && overlay.classList.contains('open')) {
                     closeModal();
@@ -5085,12 +5089,12 @@
                     <div style="display:flex;align-items:center;gap:6px;flex-shrink:0" onclick="event.stopPropagation()">
                         <!-- Bell icon with count -->
                         <div style="position:relative;cursor:pointer" onclick="openLRDialog(${b.id})">
-                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="${pendingCount > 0 ? 'var(--lime-dark)' : 'var(--muted)'}" stroke-width="2">
+                            <svg width="20" height="20" fill="${pendingCount > 0 ? '#EAB308' : totalReqs > 0 ? '#EAB308' : 'var(--muted)'}" viewBox="0 0 24 24" stroke="${pendingCount > 0 ? '#CA8A04' : totalReqs > 0 ? '#CA8A04' : 'var(--muted)'}" stroke-width="1.5">
                                 <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                                 <path d="M13.73 21a2 2 0 01-3.46 0"/>
                             </svg>
-                            ${pendingCount > 0 ? `<span style="position:absolute;top:-5px;right:-5px;background:var(--lime-dark);color:white;font-size:0.6rem;font-weight:900;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid white">${pendingCount}</span>` : 
-                            totalReqs > 0 ? `<span style="position:absolute;top:-5px;right:-5px;background:var(--muted);color:white;font-size:0.6rem;font-weight:900;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid white">${totalReqs}</span>` : ''}
+                            ${pendingCount > 0 ? `<span style="position:absolute;top:-5px;right:-5px;background:#EF4444;color:white;font-size:0.6rem;font-weight:900;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid white">${pendingCount}</span>` : 
+                            totalReqs > 0 ? `<span style="position:absolute;top:-5px;right:-5px;background:#EF4444;color:white;font-size:0.6rem;font-weight:900;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid white">${totalReqs}</span>` : ''}
                         </div>
                         <!-- 3-dot menu -->
                         <div class="ml-dots-wrap">
@@ -5182,6 +5186,7 @@
             document.getElementById('lrBody').innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">⏳ Loading…</div>`;
             document.getElementById('lrTabs').innerHTML = '';
             document.getElementById('lrOverlay').classList.add('open');
+            window.history.pushState({ lrDialog: true, bookId }, '', window.location.pathname);
 
             try {
                 const { data, error } = await db.from('requests')
