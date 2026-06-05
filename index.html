@@ -5194,11 +5194,11 @@
                 const pending  = _lrReqs.filter(r => r.status === 'pending').length;
                 const approved = _lrReqs.filter(r => r.status === 'approved').length;
                 const waiting  = _lrReqs.filter(r => r.status === 'waiting').length;
-                const activeTab = pending > 0 ? 'pending' : approved > 0 ? 'approved' : 'waiting';
+                const activeTab = approved > 0 ? 'approved' : pending > 0 ? 'pending' : 'waiting';
 
                 document.getElementById('lrTabs').innerHTML = [
-                    { key: 'pending',  label: `🔔 New (${pending})` },
                     { key: 'approved', label: `✅ Active (${approved})` },
+                    { key: 'pending',  label: `🔔 New (${pending})` },
                     { key: 'waiting',  label: `⏳ Waiting (${waiting})` },
                 ].map(t => `<button class="lr-tab ${t.key === activeTab ? 'active' : ''}" data-key="${t.key}" onclick="lrRenderTab('${t.key}')">${t.label}</button>`).join('');
 
