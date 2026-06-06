@@ -888,14 +888,14 @@
         }
 
         .product-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-6px);
             box-shadow: 0 16px 40px rgba(0,0,0,0.12);
             border-color: var(--lime-dark);
         }
 
         .card-img {
             width: 100%;
-            height: 130px;
+            height: 170px;
             overflow: hidden;
             background: #F8FAFC;
             position: relative;
@@ -911,10 +911,10 @@
 
         .card-condition {
             position: absolute;
-            top: 8px; left: 8px;
-            padding: 2px 6px;
-            border-radius: 5px;
-            font-size: 0.62rem;
+            top: 10px; left: 10px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.68rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.3px;
@@ -975,42 +975,42 @@
         .card-report:hover { background: #FEF2F2; color: var(--red); }
 
         .card-body {
-            padding: 9px 11px 11px;
+            padding: 12px 14px 14px;
             background: white;
         }
 
         .card-category {
-            font-size: 0.63rem;
+            font-size: 0.68rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: var(--lime-dark);
-            margin-bottom: 3px;
+            margin-bottom: 4px;
         }
 
         .card-title {
             font-family: 'Cabinet Grotesk', sans-serif;
             font-weight: 800;
-            font-size: 0.82rem;
+            font-size: 0.95rem;
             color: var(--ink);
             line-height: 1.3;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            min-height: 2.2em;
+            min-height: 2.5em;
         }
 
         .card-price-row {
-            display: flex; align-items: baseline; gap: 5px;
-            margin-bottom: 4px;
+            display: flex; align-items: baseline; gap: 6px;
+            margin-bottom: 6px;
         }
 
         .card-price {
             font-family: 'Cabinet Grotesk', sans-serif;
             font-weight: 900;
-            font-size: 1rem;
+            font-size: 1.2rem;
             color: var(--ink);
         }
 
@@ -1033,28 +1033,28 @@
         .card-footer {
             display: flex; align-items: center;
             justify-content: space-between;
-            padding-top: 6px;
-            margin-top: 6px;
+            padding-top: 8px;
+            margin-top: 8px;
             border-top: 1px solid #F1F5F9;
-            gap: 5px;
+            gap: 6px;
         }
 
         .card-seller {
-            font-size: 0.65rem; color: var(--muted);
+            font-size: 0.72rem; color: var(--muted);
             display: flex; align-items: center; gap: 4px;
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
 
         .card-time {
-            font-size: 0.62rem; color: var(--muted-2);
+            font-size: 0.68rem; color: var(--muted-2);
             white-space: nowrap; flex-shrink: 0;
         }
 
         .card-sem {
             background: #F1F5F9;
             border-radius: 4px;
-            padding: 1px 5px;
-            font-size: 0.62rem;
+            padding: 1px 6px;
+            font-size: 0.68rem;
             font-weight: 600;
             color: var(--muted);
         }
@@ -1063,10 +1063,10 @@
         .availability-badge {
             display: inline-flex;
             align-items: center;
-            gap: 3px;
-            font-size: 0.62rem;
+            gap: 4px;
+            font-size: 0.68rem;
             font-weight: 700;
-            padding: 1px 6px;
+            padding: 2px 8px;
             border-radius: 4px;
         }
 
@@ -1767,10 +1767,10 @@
             .sidebar-inner { width: 280px; }
 
             .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .card-img { height: 120px; }
+            .card-img { height: 140px; }
             .card-body { padding: 10px 10px 12px; }
-            .card-title { font-size: 0.8rem; min-height: 2.1em; }
-            .card-price { font-size: 0.92rem; }
+            .card-title { font-size: 0.85rem; min-height: 2.4em; }
+            .card-price { font-size: 1.05rem; }
             .card-seller { font-size: 0.68rem; }
             .card-delete { opacity: 1; width: 26px; height: 26px; }
             .modal-overlay { padding: 0; align-items: flex-end; }
@@ -1800,10 +1800,10 @@
             .hero-text p  { font-size: 0.82rem; }
             .page-body { padding: 10px; }
             .products-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-            .card-img { height: 110px; }
+            .card-img { height: 130px; }
             .card-body { padding: 8px; }
-            .card-title { font-size: 0.78rem; }
-            .card-price { font-size: 0.88rem; }
+            .card-title { font-size: 0.82rem; }
+            .card-price { font-size: 1rem; }
             .modal-img { height: 180px; }
             .modal-info { padding: 14px; }
             .modal-title { font-size: 1.15rem; }
@@ -3700,6 +3700,7 @@
                     .from('books')
                     .select('*')
                     .or("status.is.null,status.neq.sold")
+                    .neq("deal_completed", true)
                     .order('created_at', { ascending: false });
                 if (error) throw error;
 
@@ -3740,7 +3741,7 @@
             const sort = document.getElementById('sortFilter').value;
             const search = document.getElementById('searchInput').value.trim().toLowerCase();
 
-            let books = [...allBooks];
+            let books = [...allBooks].filter(b => !b.deal_completed && b.status !== 'sold');
             if (cat)  books = books.filter(b => b.category === cat);
             if (sem)  books = books.filter(b => String(b.semester) === sem);
             if (activeCondition) books = books.filter(b => b.condition === activeCondition);
@@ -3823,11 +3824,11 @@
                 <div class="card-body">
                     ${b.category ? `<div class="card-category">${b.category}</div>` : ''}
                     <div class="card-title">${s(b.title)}</div>
-                    <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;flex-wrap:wrap">
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;flex-wrap:wrap">
                         ${isSold
                             ? `<span class="availability-badge sold"><span class="availability-dot"></span>Sold</span>`
                             : `<span class="availability-badge available"><span class="availability-dot"></span>Available</span>`}
-                        ${!isSold && queueCount > 0 ? `<span style="font-size:0.62rem;font-weight:700;background:#EDE9FE;color:#5B21B6;padding:1px 6px;border-radius:4px">${queueCount} in queue</span>` : ''}
+                        ${!isSold && queueCount > 0 ? `<span style="font-size:0.68rem;font-weight:700;background:#EDE9FE;color:#5B21B6;padding:2px 7px;border-radius:4px">${queueCount} in queue</span>` : ''}
                         ${b.semester ? `<span class="card-sem">Sem ${b.semester}</span>` : ''}
                     </div>
                     <div class="card-price-row">
@@ -4019,29 +4020,20 @@
                         ${book.description ? `<p class="modal-desc">${book.description}</p>` : '<p class="modal-desc">No description provided.</p>'}
                         <div class="seller-row">
                             <div class="seller-avatar">${initials}</div>
-                            <div style="flex:1">
+                            <div>
                                 <div class="seller-name">${s(book.seller || 'Student')}</div>
-                                ${book._rating
-                                    ? `<div class="modal-seller-stars">
-                                        ${[1,2,3,4,5].map(n => `<span class="modal-star${n <= Math.round(book._rating.avg_stars) ? '' : ' empty'}">★</span>`).join('')}
-                                        <span class="modal-rating-text">${book._rating.avg_stars} · ${book._rating.total_ratings} deal${book._rating.total_ratings > 1 ? 's' : ''}</span>
-                                       </div>`
-                                    : `<div style="font-size:0.72rem;color:var(--muted-2);margin-top:2px">No ratings yet</div>`}
+                                <div class="seller-meta">BookLoop Member</div>
+                                ${book._rating ? `<div class="rating-display" style="margin-top:4px"><span class="stars-filled">⭐</span> ${book._rating.avg_stars} <span class="rating-count">(${book._rating.total_ratings} rating${book._rating.total_ratings > 1 ? 's' : ''})</span></div>` : `<div style="font-size:0.75rem;color:var(--muted-2);margin-top:2px">No ratings yet</div>`}
                             </div>
                         </div>
-                        <div class="modal-actions" style="flex-direction:column;gap:8px;">
-                            <div style="display:flex;gap:8px;align-items:stretch;">
-                                <div style="flex:1">${buyerActionHtml}</div>
-                                <div style="display:flex;gap:6px;flex-shrink:0;">
-                                    <button class="btn-share" title="Share this listing" onclick="shareItem(${book.id}, '${s(book.title)}', ${book.price})">
-                                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                                    </button>
-                                    ${!isMine ? `<button class="btn-report" title="Report listing" onclick="openReportModal(${book.id})" style="display:inline-flex;align-items:center;justify-content:center;padding:10px;">
-                                        <svg width="14" height="14" viewBox="0 0 340 340" fill="#EF4444" xmlns="http://www.w3.org/2000/svg"><path style="fill-rule:evenodd;clip-rule:evenodd;" d="M331.783,266.645L215.865,28.675C207.316,11.131,189.51,0,170,0s-37.316,11.131-45.865,28.675L8.217,266.645c-7.703,15.81-6.71,34.473,2.61,49.386C20.148,330.944,36.497,340,54.08,340h231.84c17.583,0,33.933-9.056,43.252-23.969C338.493,301.118,339.486,282.455,331.783,266.645z M170,284.167c-10.396,0-18.818-8.424-18.818-18.817c0-10.394,8.423-18.817,18.818-18.817c10.395,0,18.818,8.423,18.818,18.817C188.818,275.743,180.395,284.167,170,284.167z M186.448,223.357c-0.515,8.598-7.912,15.271-16.45,15.323c-8.532-0.054-15.942-6.723-16.445-15.323c-1.655-35.015-3.304-70.033-4.955-105.052c-0.18-13.54,12.115-21.198,21.399-21.138c9.291-0.062,21.581,7.598,21.405,21.138C189.749,153.325,188.091,188.339,186.448,223.357z"/></svg>
-                                    </button>` : ''}
-                                    ${isMine ? `<button class="btn-approve" title="Remove listing" onclick="deleteBook(${book.id})" style="display:inline-flex;align-items:center;justify-content:center;padding:10px;"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>` : ''}
-                                </div>
-                            </div>
+                        <div class="modal-actions">
+                            ${buyerActionHtml}
+                            ${!isMine ? `<button class="btn-report" onclick="openReportModal(${book.id})" style="display:inline-flex;align-items:center;gap:6px;">
+                                <svg width="14" height="14" viewBox="0 0 340 340" fill="#ff0000" xmlns="http://www.w3.org/2000/svg">
+                                    <path style="fill-rule:evenodd;clip-rule:evenodd;" d="M331.783,266.645L215.865,28.675C207.316,11.131,189.51,0,170,0 s-37.316,11.131-45.865,28.675L8.217,266.645c-7.703,15.81-6.71,34.473,2.61,49.386C20.148,330.944,36.497,340,54.08,340h231.84 c17.583,0,33.933-9.056,43.252-23.969C338.493,301.118,339.486,282.455,331.783,266.645z M170,284.167 c-10.396,0-18.818-8.424-18.818-18.817c0-10.394,8.423-18.817,18.818-18.817c10.395,0,18.818,8.423,18.818,18.817 C188.818,275.743,180.395,284.167,170,284.167z M186.448,223.357c-0.515,8.598-7.912,15.271-16.45,15.323 c-8.532-0.054-15.942-6.723-16.445-15.323c-1.655-35.015-3.304-70.033-4.955-105.052c-0.18-13.54,12.115-21.198,21.399-21.138 c9.291-0.062,21.581,7.598,21.405,21.138C189.749,153.325,188.091,188.339,186.448,223.357z"/>
+                                </svg> Report
+                            </button>` : ''}
+                            ${isMine ? `<button class="btn-approve" onclick="deleteBook(${book.id})"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Remove Listing</button>` : ''}
                         </div>
                     </div>
                     ${showChat ? `
@@ -4734,28 +4726,6 @@
             }
         }
 
-
-        // ── SHARE ITEM ───────────────────────────────────────────────────────
-        async function shareItem(bookId, title, price) {
-            const url = `${window.location.origin}${window.location.pathname}?item=${bookId}`;
-            const text = `Check out "${title}" for ₹${price} on BookLoop!`;
-
-            if (navigator.share) {
-                try {
-                    await navigator.share({ title: `BookLoop — ${title}`, text, url });
-                    return;
-                } catch {}
-            }
-            // Fallback: copy link to clipboard
-            try {
-                await navigator.clipboard.writeText(url);
-                showToast('Link copied to clipboard!', 'success');
-            } catch {
-                // Last resort: prompt
-                prompt('Copy this link:', url);
-            }
-        }
-
         // ── REFRESH BELL BADGES ──────────────────────────────────────────────
         async function refreshNotifBadges() {
             try {
@@ -5259,7 +5229,10 @@
                 const newStatus = !currentlySold;
                 const { error } = await db
                     .from('books')
-                    .update({ deal_completed: newStatus })
+                    .update({
+                        deal_completed: newStatus,
+                        status: newStatus ? 'sold' : 'available'
+                    })
                     .eq('id', id);
                 if (error) throw error;
                 showToast(newStatus ? '✅ Marked as Sold' : '✅ Marked as Available', 'success');
@@ -5633,8 +5606,12 @@
                     .eq('id', reqId);
                 if (updateErr) throw updateErr;
 
-                // Set sold_at on the book too
-                await db.from('books').update({ sold_at: now }).eq('id', bookId);
+                // Mark book as sold and remove from marketplace
+                await db.from('books').update({
+                    sold_at: now,
+                    status: 'sold',
+                    deal_completed: true
+                }).eq('id', bookId);
 
                 // Cleanup: delete all waiting/pending requests for this book (deal is done)
                 await db.from('requests')
