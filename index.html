@@ -3699,8 +3699,8 @@
                 const { data, error } = await db
                     .from('books')
                     .select('*')
-                    .or("status.is.null,status.neq.sold")
-                    .neq("deal_completed", true)
+                    .neq('status', 'sold')
+                    .neq('deal_completed', true)
                     .order('created_at', { ascending: false });
                 if (error) throw error;
 
@@ -5613,6 +5613,10 @@
                     deal_completed: true
                 }).eq('id', bookId);
 
+                // Immediately remove from in-memory list so grid updates without waiting for refetch
+                allBooks = allBooks.filter(b => b.id !== bookId);
+                applyFilters();
+
                 // Cleanup: delete all waiting/pending requests for this book (deal is done)
                 await db.from('requests')
                     .delete()
@@ -5637,6 +5641,8 @@
                 if (error) throw error;
                 // Mark book as sold
                 await db.from('books').update({ status: 'sold', sold_at: new Date().toISOString() }).eq('id', bookId);
+                allBooks = allBooks.filter(b => b.id !== bookId);
+                applyFilters();
                 showToast('📦 Marked as received! Please rate your seller.', 'success');
                 await loadBooks();
                 await loadBuyerNotifs();
@@ -5674,6 +5680,9 @@
                     .update({ status: 'sold', sold_at: new Date().toISOString() })
                     .eq('id', bookId);
                 if (bookError) throw bookError;
+
+                allBooks = allBooks.filter(b => b.id !== bookId);
+                applyFilters();
 
                 showToast('📦 Marked as received! Please rate your seller.', 'success');
                 await loadBooks(); // refresh the grid
