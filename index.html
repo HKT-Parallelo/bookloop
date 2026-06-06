@@ -888,14 +888,14 @@
         }
 
         .product-card:hover {
-            transform: translateY(-6px);
+            transform: translateY(-4px);
             box-shadow: 0 16px 40px rgba(0,0,0,0.12);
             border-color: var(--lime-dark);
         }
 
         .card-img {
             width: 100%;
-            height: 170px;
+            height: 130px;
             overflow: hidden;
             background: #F8FAFC;
             position: relative;
@@ -911,10 +911,10 @@
 
         .card-condition {
             position: absolute;
-            top: 10px; left: 10px;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 0.68rem;
+            top: 8px; left: 8px;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-size: 0.62rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.3px;
@@ -975,42 +975,42 @@
         .card-report:hover { background: #FEF2F2; color: var(--red); }
 
         .card-body {
-            padding: 12px 14px 14px;
+            padding: 9px 11px 11px;
             background: white;
         }
 
         .card-category {
-            font-size: 0.68rem;
+            font-size: 0.63rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: var(--lime-dark);
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .card-title {
             font-family: 'Cabinet Grotesk', sans-serif;
             font-weight: 800;
-            font-size: 0.95rem;
+            font-size: 0.82rem;
             color: var(--ink);
             line-height: 1.3;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            min-height: 2.5em;
+            min-height: 2.2em;
         }
 
         .card-price-row {
-            display: flex; align-items: baseline; gap: 6px;
-            margin-bottom: 6px;
+            display: flex; align-items: baseline; gap: 5px;
+            margin-bottom: 4px;
         }
 
         .card-price {
             font-family: 'Cabinet Grotesk', sans-serif;
             font-weight: 900;
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: var(--ink);
         }
 
@@ -1033,28 +1033,28 @@
         .card-footer {
             display: flex; align-items: center;
             justify-content: space-between;
-            padding-top: 8px;
-            margin-top: 8px;
+            padding-top: 6px;
+            margin-top: 6px;
             border-top: 1px solid #F1F5F9;
-            gap: 6px;
+            gap: 5px;
         }
 
         .card-seller {
-            font-size: 0.72rem; color: var(--muted);
+            font-size: 0.65rem; color: var(--muted);
             display: flex; align-items: center; gap: 4px;
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
 
         .card-time {
-            font-size: 0.68rem; color: var(--muted-2);
+            font-size: 0.62rem; color: var(--muted-2);
             white-space: nowrap; flex-shrink: 0;
         }
 
         .card-sem {
             background: #F1F5F9;
             border-radius: 4px;
-            padding: 1px 6px;
-            font-size: 0.68rem;
+            padding: 1px 5px;
+            font-size: 0.62rem;
             font-weight: 600;
             color: var(--muted);
         }
@@ -1063,10 +1063,10 @@
         .availability-badge {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            font-size: 0.68rem;
+            gap: 3px;
+            font-size: 0.62rem;
             font-weight: 700;
-            padding: 2px 8px;
+            padding: 1px 6px;
             border-radius: 4px;
         }
 
@@ -1767,10 +1767,10 @@
             .sidebar-inner { width: 280px; }
 
             .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .card-img { height: 140px; }
+            .card-img { height: 120px; }
             .card-body { padding: 10px 10px 12px; }
-            .card-title { font-size: 0.85rem; min-height: 2.4em; }
-            .card-price { font-size: 1.05rem; }
+            .card-title { font-size: 0.8rem; min-height: 2.1em; }
+            .card-price { font-size: 0.92rem; }
             .card-seller { font-size: 0.68rem; }
             .card-delete { opacity: 1; width: 26px; height: 26px; }
             .modal-overlay { padding: 0; align-items: flex-end; }
@@ -1800,10 +1800,10 @@
             .hero-text p  { font-size: 0.82rem; }
             .page-body { padding: 10px; }
             .products-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-            .card-img { height: 130px; }
+            .card-img { height: 110px; }
             .card-body { padding: 8px; }
-            .card-title { font-size: 0.82rem; }
-            .card-price { font-size: 1rem; }
+            .card-title { font-size: 0.78rem; }
+            .card-price { font-size: 0.88rem; }
             .modal-img { height: 180px; }
             .modal-info { padding: 14px; }
             .modal-title { font-size: 1.15rem; }
@@ -3823,11 +3823,11 @@
                 <div class="card-body">
                     ${b.category ? `<div class="card-category">${b.category}</div>` : ''}
                     <div class="card-title">${s(b.title)}</div>
-                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;flex-wrap:wrap">
+                    <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;flex-wrap:wrap">
                         ${isSold
                             ? `<span class="availability-badge sold"><span class="availability-dot"></span>Sold</span>`
                             : `<span class="availability-badge available"><span class="availability-dot"></span>Available</span>`}
-                        ${!isSold && queueCount > 0 ? `<span style="font-size:0.68rem;font-weight:700;background:#EDE9FE;color:#5B21B6;padding:2px 7px;border-radius:4px">${queueCount} in queue</span>` : ''}
+                        ${!isSold && queueCount > 0 ? `<span style="font-size:0.62rem;font-weight:700;background:#EDE9FE;color:#5B21B6;padding:1px 6px;border-radius:4px">${queueCount} in queue</span>` : ''}
                         ${b.semester ? `<span class="card-sem">Sem ${b.semester}</span>` : ''}
                     </div>
                     <div class="card-price-row">
@@ -4019,20 +4019,29 @@
                         ${book.description ? `<p class="modal-desc">${book.description}</p>` : '<p class="modal-desc">No description provided.</p>'}
                         <div class="seller-row">
                             <div class="seller-avatar">${initials}</div>
-                            <div>
+                            <div style="flex:1">
                                 <div class="seller-name">${s(book.seller || 'Student')}</div>
-                                <div class="seller-meta">BookLoop Member</div>
-                                ${book._rating ? `<div class="rating-display" style="margin-top:4px"><span class="stars-filled">⭐</span> ${book._rating.avg_stars} <span class="rating-count">(${book._rating.total_ratings} rating${book._rating.total_ratings > 1 ? 's' : ''})</span></div>` : `<div style="font-size:0.75rem;color:var(--muted-2);margin-top:2px">No ratings yet</div>`}
+                                ${book._rating
+                                    ? `<div class="modal-seller-stars">
+                                        ${[1,2,3,4,5].map(n => `<span class="modal-star${n <= Math.round(book._rating.avg_stars) ? '' : ' empty'}">★</span>`).join('')}
+                                        <span class="modal-rating-text">${book._rating.avg_stars} · ${book._rating.total_ratings} deal${book._rating.total_ratings > 1 ? 's' : ''}</span>
+                                       </div>`
+                                    : `<div style="font-size:0.72rem;color:var(--muted-2);margin-top:2px">No ratings yet</div>`}
                             </div>
                         </div>
-                        <div class="modal-actions">
-                            ${buyerActionHtml}
-                            ${!isMine ? `<button class="btn-report" onclick="openReportModal(${book.id})" style="display:inline-flex;align-items:center;gap:6px;">
-                                <svg width="14" height="14" viewBox="0 0 340 340" fill="#ff0000" xmlns="http://www.w3.org/2000/svg">
-                                    <path style="fill-rule:evenodd;clip-rule:evenodd;" d="M331.783,266.645L215.865,28.675C207.316,11.131,189.51,0,170,0 s-37.316,11.131-45.865,28.675L8.217,266.645c-7.703,15.81-6.71,34.473,2.61,49.386C20.148,330.944,36.497,340,54.08,340h231.84 c17.583,0,33.933-9.056,43.252-23.969C338.493,301.118,339.486,282.455,331.783,266.645z M170,284.167 c-10.396,0-18.818-8.424-18.818-18.817c0-10.394,8.423-18.817,18.818-18.817c10.395,0,18.818,8.423,18.818,18.817 C188.818,275.743,180.395,284.167,170,284.167z M186.448,223.357c-0.515,8.598-7.912,15.271-16.45,15.323 c-8.532-0.054-15.942-6.723-16.445-15.323c-1.655-35.015-3.304-70.033-4.955-105.052c-0.18-13.54,12.115-21.198,21.399-21.138 c9.291-0.062,21.581,7.598,21.405,21.138C189.749,153.325,188.091,188.339,186.448,223.357z"/>
-                                </svg> Report
-                            </button>` : ''}
-                            ${isMine ? `<button class="btn-approve" onclick="deleteBook(${book.id})"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Remove Listing</button>` : ''}
+                        <div class="modal-actions" style="flex-direction:column;gap:8px;">
+                            <div style="display:flex;gap:8px;align-items:stretch;">
+                                <div style="flex:1">${buyerActionHtml}</div>
+                                <div style="display:flex;gap:6px;flex-shrink:0;">
+                                    <button class="btn-share" title="Share this listing" onclick="shareItem(${book.id}, '${s(book.title)}', ${book.price})">
+                                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                                    </button>
+                                    ${!isMine ? `<button class="btn-report" title="Report listing" onclick="openReportModal(${book.id})" style="display:inline-flex;align-items:center;justify-content:center;padding:10px;">
+                                        <svg width="14" height="14" viewBox="0 0 340 340" fill="#EF4444" xmlns="http://www.w3.org/2000/svg"><path style="fill-rule:evenodd;clip-rule:evenodd;" d="M331.783,266.645L215.865,28.675C207.316,11.131,189.51,0,170,0s-37.316,11.131-45.865,28.675L8.217,266.645c-7.703,15.81-6.71,34.473,2.61,49.386C20.148,330.944,36.497,340,54.08,340h231.84c17.583,0,33.933-9.056,43.252-23.969C338.493,301.118,339.486,282.455,331.783,266.645z M170,284.167c-10.396,0-18.818-8.424-18.818-18.817c0-10.394,8.423-18.817,18.818-18.817c10.395,0,18.818,8.423,18.818,18.817C188.818,275.743,180.395,284.167,170,284.167z M186.448,223.357c-0.515,8.598-7.912,15.271-16.45,15.323c-8.532-0.054-15.942-6.723-16.445-15.323c-1.655-35.015-3.304-70.033-4.955-105.052c-0.18-13.54,12.115-21.198,21.399-21.138c9.291-0.062,21.581,7.598,21.405,21.138C189.749,153.325,188.091,188.339,186.448,223.357z"/></svg>
+                                    </button>` : ''}
+                                    ${isMine ? `<button class="btn-approve" title="Remove listing" onclick="deleteBook(${book.id})" style="display:inline-flex;align-items:center;justify-content:center;padding:10px;"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>` : ''}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     ${showChat ? `
@@ -4722,6 +4731,28 @@
                 }).join('');
             } catch (e) {
                 body.innerHTML = `<div class="notif-empty"><div class="icon"><svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><h3>Error</h3><p>${e.message}</p></div>`;
+            }
+        }
+
+
+        // ── SHARE ITEM ───────────────────────────────────────────────────────
+        async function shareItem(bookId, title, price) {
+            const url = `${window.location.origin}${window.location.pathname}?item=${bookId}`;
+            const text = `Check out "${title}" for ₹${price} on BookLoop!`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: `BookLoop — ${title}`, text, url });
+                    return;
+                } catch {}
+            }
+            // Fallback: copy link to clipboard
+            try {
+                await navigator.clipboard.writeText(url);
+                showToast('Link copied to clipboard!', 'success');
+            } catch {
+                // Last resort: prompt
+                prompt('Copy this link:', url);
             }
         }
 
