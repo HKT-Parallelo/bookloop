@@ -865,118 +865,91 @@
 
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 18px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
         }
 
         /* ─── PRODUCT CARD ───────────────────────── */
         .product-card {
-            background: rgba(255,255,255,0.9);
-            border: 1px solid rgba(226,232,240,0.8);
-            border-radius: var(--r-md);
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
             overflow: hidden;
             cursor: pointer;
-            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1),
-                        box-shadow 0.3s ease,
-                        border-color 0.2s ease;
+            transition: transform 0.25s cubic-bezier(0.34,1.2,0.64,1), box-shadow 0.25s ease;
             position: relative;
-            backdrop-filter: blur(10px);
-            /* Stagger entrance animation */
             opacity: 0;
-            animation: cardEntrance 0.5s cubic-bezier(0.34,1.2,0.64,1) forwards;
+            animation: cardEntrance 0.45s cubic-bezier(0.34,1.2,0.64,1) forwards;
         }
 
         @keyframes cardEntrance {
-            from { opacity: 0; transform: translateY(24px) scale(0.97); }
-            to   { opacity: 1; transform: translateY(0) scale(1); }
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .product-card:hover {
-            transform: translateY(-8px) scale(1.01);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 0 0 2px var(--lime-dark);
+            transform: translateY(-6px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.12);
             border-color: var(--lime-dark);
         }
 
-        /* Lime glow on hover */
-        .product-card::before {
-            content: '';
-            position: absolute;
-            inset: -1px;
-            border-radius: var(--r-md);
-            background: linear-gradient(135deg, var(--lime-dark), transparent, transparent);
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .product-card:hover::before { opacity: 0.08; }
-
         .card-img {
             width: 100%;
-            height: 150px;
+            height: 170px;
             overflow: hidden;
-            background: var(--surface-3);
+            background: #F8FAFC;
             position: relative;
         }
 
         .card-img img {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             object-fit: cover;
-            transition: transform 0.5s cubic-bezier(0.34,1.2,0.64,1);
+            transition: transform 0.4s ease;
         }
 
-        .product-card:hover .card-img img { transform: scale(1.08); }
-
-        /* Gradient overlay on image bottom */
-        .card-img::after {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            height: 60px;
-            background: linear-gradient(transparent, rgba(13,17,23,0.15));
-            pointer-events: none;
-        }
+        .product-card:hover .card-img img { transform: scale(1.06); }
 
         .card-condition {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            padding: 3px 9px;
-            border-radius: 20px;
-            font-size: 0.72rem;
-            font-weight: 700;
+            top: 10px; left: 10px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.68rem;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.3px;
-            backdrop-filter: blur(8px);
             z-index: 2;
         }
 
-        .cond-excellent { background: rgba(209,250,229,0.9); color: #065F46; }
-        .cond-good      { background: rgba(219,234,254,0.9); color: #1E40AF; }
-        .cond-fair      { background: rgba(254,243,199,0.9); color: #92400E; }
-        .cond-poor      { background: rgba(254,226,226,0.9); color: #991B1B; }
+        .cond-excellent { background: #D1FAE5; color: #065F46; }
+        .cond-good      { background: #DBEAFE; color: #1E40AF; }
+        .cond-fair      { background: #FEF3C7; color: #92400E; }
+        .cond-poor      { background: #FEE2E2; color: #991B1B; }
+
+        .card-discount-badge {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: #FF6161;
+            color: white;
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            z-index: 2;
+        }
 
         .card-delete {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 30px;
-            height: 30px;
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(8px);
-            border: none;
-            border-radius: 7px;
+            top: 10px; right: 10px;
+            width: 28px; height: 28px;
+            background: rgba(255,255,255,0.95);
+            border: none; border-radius: 6px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             color: var(--muted);
             transition: all 0.2s;
-            box-shadow: var(--shadow-sm);
-            opacity: 0;
-            z-index: 2;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            opacity: 0; z-index: 3;
         }
 
         .product-card:hover .card-delete { opacity: 1; }
@@ -984,97 +957,104 @@
 
         .card-report {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            height: 30px;
-            padding: 0 10px;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(8px);
-            border: none;
-            border-radius: 7px;
+            top: 10px; right: 10px;
+            height: 28px; padding: 0 10px;
+            background: rgba(255,255,255,0.95);
+            border: none; border-radius: 6px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
             color: var(--muted);
             font-family: 'Satoshi', sans-serif;
-            font-size: 0.75rem;
-            font-weight: 700;
+            font-size: 0.72rem; font-weight: 700;
             transition: all 0.2s;
-            box-shadow: var(--shadow-sm);
-            opacity: 0;
-            z-index: 2;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            opacity: 0; z-index: 3;
         }
 
         .product-card:hover .card-report { opacity: 1; }
         .card-report:hover { background: #FEF2F2; color: var(--red); }
 
         .card-body {
-            padding: 16px;
-            position: relative;
-            z-index: 1;
+            padding: 12px 14px 14px;
             background: white;
         }
 
         .card-category {
-            font-size: 0.73rem;
+            font-size: 0.68rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: var(--lime-dark);
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .card-title {
             font-family: 'Cabinet Grotesk', sans-serif;
             font-weight: 800;
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: var(--ink);
-            line-height: 1.25;
-            margin-bottom: 10px;
+            line-height: 1.3;
+            margin-bottom: 6px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            min-height: 2.5em;
         }
 
-        .card-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--surface-3);
+        .card-price-row {
+            display: flex; align-items: baseline; gap: 6px;
+            margin-bottom: 6px;
         }
 
         .card-price {
             font-family: 'Cabinet Grotesk', sans-serif;
             font-weight: 900;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: var(--ink);
         }
 
         .card-price span {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             color: var(--muted);
             font-family: 'Satoshi', sans-serif;
         }
 
+        .card-price-off {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #16A34A;
+            background: #F0FDF4;
+            padding: 1px 6px;
+            border-radius: 4px;
+        }
+
+        .card-footer {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding-top: 8px;
+            margin-top: 8px;
+            border-top: 1px solid #F1F5F9;
+            gap: 6px;
+        }
+
         .card-seller {
-            font-size: 0.78rem;
-            color: var(--muted);
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            font-size: 0.72rem; color: var(--muted);
+            display: flex; align-items: center; gap: 4px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+
+        .card-time {
+            font-size: 0.68rem; color: var(--muted-2);
+            white-space: nowrap; flex-shrink: 0;
         }
 
         .card-sem {
-            background: var(--surface-3);
-            border-radius: 5px;
-            padding: 2px 7px;
-            font-size: 0.72rem;
+            background: #F1F5F9;
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 0.68rem;
             font-weight: 600;
             color: var(--muted);
         }
@@ -1083,25 +1063,15 @@
         .availability-badge {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            font-size: 0.72rem;
+            gap: 4px;
+            font-size: 0.68rem;
             font-weight: 700;
-            padding: 3px 9px;
-            border-radius: 20px;
-            margin-top: 6px;
+            padding: 2px 8px;
+            border-radius: 4px;
         }
 
-        .availability-badge.available {
-            background: #D1FAE5;
-            color: #065F46;
-            border: 1px solid #A7F3D0;
-        }
-
-        .availability-badge.sold {
-            background: #FEE2E2;
-            color: #991B1B;
-            border: 1px solid #FECACA;
-        }
+        .availability-badge.available { background: #D1FAE5; color: #065F46; }
+        .availability-badge.sold { background: #FEE2E2; color: #991B1B; }
 
         .availability-dot {
             width: 6px; height: 6px;
@@ -1797,11 +1767,11 @@
             .sidebar-inner { width: 280px; }
 
             .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .card-img { height: 150px; }
-            .card-body { padding: 10px; }
-            .card-title { font-size: 0.88rem; }
-            .card-price { font-size: 1.1rem; }
-            .card-seller { display: none; }
+            .card-img { height: 140px; }
+            .card-body { padding: 10px 10px 12px; }
+            .card-title { font-size: 0.85rem; min-height: 2.4em; }
+            .card-price { font-size: 1.05rem; }
+            .card-seller { font-size: 0.68rem; }
             .card-delete { opacity: 1; width: 26px; height: 26px; }
             .modal-overlay { padding: 0; align-items: flex-end; }
             .modal-box { border-radius: 24px 24px 0 0; max-height: 92vh; width: 100%; animation: modalInMobile 0.35s cubic-bezier(0.34,1.2,0.64,1); }
@@ -3827,20 +3797,25 @@
                 ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;background:#EDE9FE;color:#5B21B6;padding:3px 9px;border-radius:20px;border:1px solid #DDD6FE;margin-left:6px">${queueCount} in queue</span>`
                 : '';
 
-            return `<div class="product-card" onclick="openModal(${b.id})" style="${isSold ? 'opacity:0.72;' : ''}animation-delay:${index * 55}ms">
+            const discountPct = (!isSold && b.mrp && b.mrp > b.price) ? Math.round(((b.mrp - b.price) / b.mrp) * 100) : null;
+            const discountBadge = discountPct ? `<span class="card-discount-badge">${discountPct}% off</span>` : '';
+            const timePosted = b.created_at ? `<span class="card-time">${timeAgo(b.created_at)}</span>` : '';
+
+            return `<div class="product-card" onclick="openModal(${b.id})" style="${isSold ? 'opacity:0.75;' : ''}animation-delay:${index * 55}ms">
                 <div class="card-img">
-                    <img src="${b.image || 'https://placehold.co/240x190/F1F5F9/94A3B8?text=No+Image'}"
+                    <img src="${b.image || 'https://placehold.co/240x170/F8FAFC/94A3B8?text=No+Image'}"
                          alt="${b.title}" loading="lazy"
-                         onerror="this.src='https://placehold.co/240x190/F1F5F9/94A3B8?text=No+Image'">
+                         onerror="this.src='https://placehold.co/240x170/F8FAFC/94A3B8?text=No+Image'">
                     ${b.condition ? `<span class="card-condition ${condClass}">${b.condition}</span>` : ''}
+                    ${!isSold ? discountBadge : ''}
                     ${isSold ? `<div class="card-sold-overlay"><span class="sold-stamp">SOLD</span></div>` : ''}
                     ${!isMine ? `<button class="card-report" onclick="event.stopPropagation();openReportModal(${b.id})" title="Report listing">
-                        <svg width="13" height="13" viewBox="0 0 340 340" fill="#ff0000" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-                            <path style="fill-rule:evenodd;clip-rule:evenodd;" d="M331.783,266.645L215.865,28.675C207.316,11.131,189.51,0,170,0 s-37.316,11.131-45.865,28.675L8.217,266.645c-7.703,15.81-6.71,34.473,2.61,49.386C20.148,330.944,36.497,340,54.08,340h231.84 c17.583,0,33.933-9.056,43.252-23.969C338.493,301.118,339.486,282.455,331.783,266.645z M170,284.167 c-10.396,0-18.818-8.424-18.818-18.817c0-10.394,8.423-18.817,18.818-18.817c10.395,0,18.818,8.423,18.818,18.817 C188.818,275.743,180.395,284.167,170,284.167z M186.448,223.357c-0.515,8.598-7.912,15.271-16.45,15.323 c-8.532-0.054-15.942-6.723-16.445-15.323c-1.655-35.015-3.304-70.033-4.955-105.052c-0.18-13.54,12.115-21.198,21.399-21.138 c9.291-0.062,21.581,7.598,21.405,21.138C189.749,153.325,188.091,188.339,186.448,223.357z"/>
+                        <svg width="12" height="12" viewBox="0 0 340 340" fill="#ff0000" xmlns="http://www.w3.org/2000/svg">
+                            <path style="fill-rule:evenodd;clip-rule:evenodd;" d="M331.783,266.645L215.865,28.675C207.316,11.131,189.51,0,170,0s-37.316,11.131-45.865,28.675L8.217,266.645c-7.703,15.81-6.71,34.473,2.61,49.386C20.148,330.944,36.497,340,54.08,340h231.84c17.583,0,33.933-9.056,43.252-23.969C338.493,301.118,339.486,282.455,331.783,266.645z M170,284.167c-10.396,0-18.818-8.424-18.818-18.817c0-10.394,8.423-18.817,18.818-18.817c10.395,0,18.818,8.423,18.818,18.817C188.818,275.743,180.395,284.167,170,284.167z M186.448,223.357c-0.515,8.598-7.912,15.271-16.45,15.323c-8.532-0.054-15.942-6.723-16.445-15.323c-1.655-35.015-3.304-70.033-4.955-105.052c-0.18-13.54,12.115-21.198,21.399-21.138c9.291-0.062,21.581,7.598,21.405,21.138C189.749,153.325,188.091,188.339,186.448,223.357z"/>
                         </svg> Report
                     </button>` : ''}
-                    ${isMine ? `<button class="card-delete" onclick="event.stopPropagation();deleteBook(${b.id})" title="Delete listing">
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    ${isMine ? `<button class="card-delete" onclick="event.stopPropagation();deleteBook(${b.id})" title="Delete">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
                         </svg>
                     </button>` : ''}
@@ -3848,23 +3823,25 @@
                 <div class="card-body">
                     ${b.category ? `<div class="card-category">${b.category}</div>` : ''}
                     <div class="card-title">${s(b.title)}</div>
-                    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px">
-                        ${availBadge}${queueBadge}
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;flex-wrap:wrap">
+                        ${isSold
+                            ? `<span class="availability-badge sold"><span class="availability-dot"></span>Sold</span>`
+                            : `<span class="availability-badge available"><span class="availability-dot"></span>Available</span>`}
+                        ${!isSold && queueCount > 0 ? `<span style="font-size:0.68rem;font-weight:700;background:#EDE9FE;color:#5B21B6;padding:2px 7px;border-radius:4px">${queueCount} in queue</span>` : ''}
+                        ${b.semester ? `<span class="card-sem">Sem ${b.semester}</span>` : ''}
                     </div>
+                    <div class="card-price-row">
+                        <span class="card-price">₹${b.price}</span>
+                        ${b.mrp && b.mrp > b.price ? `<span style="font-size:0.75rem;color:var(--muted);text-decoration:line-through">₹${b.mrp}</span>` : ''}
+                        ${discountPct ? `<span class="card-price-off">${discountPct}% off</span>` : `<span class="card-price span"></span>`}
+                    </div>
+                    ${b._rating ? `<div style="font-size:0.72rem;color:#F59E0B;margin-bottom:4px">⭐ ${b._rating.avg_stars} <span style="color:var(--muted)">(${b._rating.total_ratings})</span></div>` : ''}
                     <div class="card-footer">
-                        <div>
-                            <div class="card-price">₹${b.price} <span>/ used</span></div>
+                        <div class="card-seller">
+                            <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg>
+                            ${b.seller || 'Student'}
                         </div>
-                        <div style="text-align:right">
-                            <div class="card-seller">
-                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
-                                </svg>
-                                ${b.seller || 'Student'}
-                            </div>
-                            ${b._rating ? `<div class="rating-display"><span class="stars-filled">⭐</span>${b._rating.avg_stars} <span class="rating-count">(${b._rating.total_ratings})</span></div>` : ''}
-                            ${b.semester ? `<div class="card-sem">Sem ${b.semester}</div>` : ''}
-                        </div>
+                        ${timePosted}
                     </div>
                 </div>
             </div>`;
@@ -4026,13 +4003,18 @@
                         <div class="modal-price-row">
                             <span class="modal-price">₹${book.price}</span>
                             <span class="modal-price-sub">used price</span>
-                            <span class="modal-savings">≈ 50% off retail</span>
+                            ${book.mrp && book.mrp > book.price
+                                ? `<span style="text-decoration:line-through;color:var(--muted);font-size:0.9rem">₹${book.mrp}</span>
+                                   <span class="modal-savings">${Math.round(((book.mrp - book.price) / book.mrp) * 100)}% off retail</span>`
+                                : `<span class="modal-savings">≈ 50% off retail</span>`}
                         </div>
                         ${book._queueCount > 0 ? `<div style="display:inline-flex;align-items:center;gap:5px;font-size:0.82rem;font-weight:700;background:#EDE9FE;color:#5B21B6;padding:5px 12px;border-radius:20px;border:1px solid #DDD6FE;margin-bottom:10px">${book._queueCount} already in queue — you can still join!</div>` : ''}
                         <div class="meta-chips">
                             ${book.condition ? `<span class="meta-chip"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> ${book.condition}</span>` : ''}
                             ${book.semester ? `<span class="meta-chip"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Sem ${book.semester}</span>` : ''}
                             ${book.category ? `<span class="meta-chip"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> ${book.category}</span>` : ''}
+                            ${book.meeting_venue ? `<span class="meta-chip">📍 ${book.meeting_venue}</span>` : ''}
+                            ${book.contact_number ? `<span class="meta-chip">📞 ${book.contact_number}</span>` : ''}
                         </div>
                         ${book.description ? `<p class="modal-desc">${book.description}</p>` : '<p class="modal-desc">No description provided.</p>'}
                         <div class="seller-row">
