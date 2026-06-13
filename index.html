@@ -1328,20 +1328,32 @@
 
         .modal-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 320px 1fr;
+            grid-template-rows: 380px;
             gap: 0;
+        }
+        .modal-grid.no-image {
+            grid-template-columns: 1fr !important;
+        }
+        .modal-grid.no-image .modal-info {
+            border-radius: var(--r-xl) !important;
         }
 
         .modal-img {
             height: 380px;
+            min-height: 380px;
             overflow: hidden;
             border-radius: var(--r-xl) 0 0 var(--r-xl);
+            background: #F1F5F9;
         }
 
         .modal-img img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
+        }
+            background: var(--surface-3);
         }
 
         .modal-info {
@@ -1777,7 +1789,7 @@
             .modal-box { border-radius: 24px 24px 0 0; max-height: 92vh; width: 100%; animation: modalInMobile 0.35s cubic-bezier(0.34,1.2,0.64,1); }
             @keyframes modalInMobile { from { transform: translateY(100%); } to { transform: translateY(0); } }
             .modal-grid { grid-template-columns: 1fr; }
-            .modal-img { border-radius: 24px 24px 0 0; height: 220px; }
+            .modal-img { border-radius: 24px 24px 0 0; height: 240px; min-height: 240px; }
             .modal-info { padding: 18px; }
             .modal-title { font-size: 1.3rem; }
             .modal-close { top: 12px; right: 12px; }
@@ -2713,13 +2725,18 @@
         }
 
         .lr-img-box {
-            background: var(--surface-3);
+            background: #F1F5F9;
             overflow: hidden;
             border-radius: 20px 0 0 0;
+            min-height: 180px;
+            height: 100%;
         }
         .lr-img-box img {
-            width: 100%; height: 100%;
-            object-fit: cover; display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            min-height: 180px;
         }
 
         .lr-details-box {
@@ -3027,16 +3044,8 @@
                 </button>
 
                 <!-- Seller Bell — purchase requests -->
-                <button class="notif-btn" id="sellerBellBtn" onclick="if(!ME){showGuestModal();}else{openMyListings();}" title="Purchase Requests" style="display:none">
-                    <svg height="20" width="20" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve">
-                        <g>
-                            <path style="fill:#F6E96F;" d="M453.481,402.747c-28.353-17.478-41.329-72.613-41.329-90.987v-77.245 c0-84.141-60.354-154.138-140.122-169.171c2.114-2.739,3.914-5.743,5.283-8.997c2.064-4.853,3.197-10.223,3.197-15.786 c0.007-8.359-2.559-16.23-6.932-22.682c-4.373-6.474-10.539-11.592-17.829-14.682C250.89,1.133,245.52,0,239.957,0 c-8.352,0-16.223,2.566-22.682,6.939c-6.467,4.366-11.592,10.539-14.682,17.829c-2.058,4.861-3.19,10.223-3.19,15.793 c-0.007,8.344,2.566,16.223,6.932,22.682c0.487,0.717,1.004,1.42,1.542,2.101c-79.76,15.04-140.115,85.037-140.115,169.171v77.245 c0,18.374-12.976,73.509-41.332,90.987C-62.877,457.789,90.723,512,239.957,512S542.791,457.789,453.481,402.747z"/>
-                            <path style="fill:#EBD75C;" d="M476.393,444.247c0,37.414-106.55,67.753-237.999,67.753c-131.44,0-237.988-30.339-237.988-67.753 c0-37.414,106.548-67.753,237.988-67.753C369.843,376.494,476.393,406.833,476.393,444.247z"/>
-                            <path style="fill:#EDC953;" d="M295.337,424.841c0,29.657-24.044,53.702-53.688,53.702c-29.643,0-53.68-24.044-53.68-53.702 c0-9.943,2.71-19.263,7.427-27.242c14.223-0.674,28.941-1.018,44.002-1.018c16.718,0,32.977,0.424,48.633,1.248 C292.684,405.757,295.337,414.998,295.337,424.841z"/>
-                            <circle style="fill:#FFFFFF;" cx="222.329" cy="448.799" r="11.047"/>
-                            <path style="fill:#ffffff;" d="M114.499,218.615c0.007-25.005,7.947-48.11,21.474-67.058 c13.52-18.933,32.625-33.657,54.834-41.715c5.262-1.914,7.979-7.721,6.072-12.99c-1.915-5.262-7.729-7.972-12.99-6.058 c-26.145,9.484-48.54,26.747-64.423,48.984c-15.882,22.224-25.256,49.494-25.248,78.836c0,5.592,4.541,10.13,10.136,10.13 C109.957,228.744,114.499,224.206,114.499,218.615z"/>
-                        </g>
-                    </svg>
+                <button class="notif-btn" id="sellerBellBtn" onclick="if(!ME){showGuestModal();}else{openMyListings();}" title="My Activity" style="display:none">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                     <span class="notif-dot" id="sellerBellDot"></span>
                 </button>
 
@@ -3609,7 +3618,14 @@
                     filter: `seller_id=eq.${ME}`
                 }, async (payload) => {
                     if (payload.new.item_received && !payload.old.item_received) {
-                        showToast('Item marked as received!', 'success');
+                        showToast('✅ Buyer confirmed receipt! Deal complete.', 'success');
+                        // Remove sold book from marketplace immediately
+                        const soldBookId = payload.new.book_id;
+                        if (soldBookId) {
+                            allBooks = allBooks.filter(b => b.id !== soldBookId);
+                            applyFilters();
+                        }
+                        await loadBooks();
                     }
                     await refreshNotifBadges();
                     if (document.getElementById('sellerNotifPanel').classList.contains('open')) {
@@ -3700,7 +3716,7 @@
                     .from('books')
                     .select('*')
                     .neq('status', 'sold')
-                    .neq('deal_completed', true)
+                    .or('deal_completed.is.null,deal_completed.eq.false')
                     .order('created_at', { ascending: false });
                 if (error) throw error;
 
@@ -3741,7 +3757,7 @@
             const sort = document.getElementById('sortFilter').value;
             const search = document.getElementById('searchInput').value.trim().toLowerCase();
 
-            let books = [...allBooks].filter(b => !b.deal_completed && b.status !== 'sold');
+            let books = [...allBooks].filter(b => b.deal_completed !== true && b.status !== 'sold');
             if (cat)  books = books.filter(b => b.category === cat);
             if (sem)  books = books.filter(b => String(b.semester) === sem);
             if (activeCondition) books = books.filter(b => b.condition === activeCondition);
@@ -3993,9 +4009,9 @@
             document.getElementById('modalContent').innerHTML = `
                 <div class="modal-grid">
                     <div class="modal-img">
-                        <img src="${book.image || 'https://placehold.co/450x380/F1F5F9/94A3B8?text=No+Image'}"
-                             alt="${book.title}"
-                             onerror="this.src='https://placehold.co/450x380/F1F5F9/94A3B8?text=No+Image'">
+                        <img src="${book.image || ''}" alt="${book.title}"
+                             style="width:100%;height:100%;object-fit:contain;display:${book.image ? 'block' : 'none'}">
+                        ${!book.image ? `<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#94A3B8"><span style="font-size:3rem">📷</span><span style="font-size:0.8rem;font-weight:600">No Image</span></div>` : ''}
                     </div>
                     <div class="modal-info">
                         ${book.category ? `<div class="modal-category">${book.category}</div>` : ''}
@@ -4340,11 +4356,11 @@
         }
 
         // ── SELLER NOTIFICATIONS ─────────────────────────────────────────────
-        async function openMyListings() {
+        async function openSellerNotifs() {
             document.getElementById('sellerNotifOverlay').classList.add('open');
             document.getElementById('sellerNotifPanel').classList.add('open');
             document.body.style.overflow = 'hidden';
-            await loadMyListings();
+            await loadSellerNotifs();
         }
 
         function closeSellerNotifs() {
@@ -4643,12 +4659,12 @@
                 }
 
                 // Fetch existing buyer ratings to know if already rated
-                const approvedReqIds = reqs.filter(r => r.status === 'approved').map(r => r.id);
+                const ratedReqIds = reqs.filter(r => r.status === 'approved' || r.status === 'completed').map(r => r.id);
                 let alreadyRatedSet = new Set();
-                if (approvedReqIds.length) {
+                if (ratedReqIds.length) {
                     const { data: myRatings } = await db.from('ratings')
                         .select('request_id')
-                        .in('request_id', approvedReqIds)
+                        .in('request_id', ratedReqIds)
                         .eq('rater_id', ME)
                         .eq('role', 'buyer');
                     alreadyRatedSet = new Set((myRatings || []).map(r => r.request_id));
@@ -4660,51 +4676,44 @@
                     const time  = timeAgo(r.created_at);
 
                     const statusBadge = {
-                        pending:  `<span class="req-status-badge pending">⏳ Waiting for seller approval</span>`,
-                        approved: `<span class="req-status-badge approved"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Approved — chat is open!</span>`,
-                        waiting:  `<span class="req-status-badge waiting">🕐 In waiting list — seller has an active deal</span>`,
-                        declined: `<span class="req-status-badge declined">❌ Seller declined your request</span>`
+                        pending:   `<span class="req-status-badge pending">⏳ Waiting for seller approval</span>`,
+                        approved:  `<span class="req-status-badge approved"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Approved — chat is open!</span>`,
+                        waiting:   `<span class="req-status-badge waiting">🕐 In waiting list — seller has an active deal</span>`,
+                        declined:  `<span class="req-status-badge declined">❌ Seller declined your request</span>`,
+                        completed: `<span class="req-status-badge approved">✅ Deal complete!</span>`
                     }[r.status] || '';
 
                     let actions = '';
-                    if (r.status === 'approved') {
+                    if (r.status === 'completed' || (r.status === 'approved' && r.item_received)) {
                         const alreadyRated = alreadyRatedSet.has(r.id);
-                        if (r.item_received) {
-                            if (alreadyRated) {
-                                // Received + rated — just show dismiss as X on card
-                                actions = `<div class="req-actions">
-                                    <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
-                                    <span style="font-size:0.78rem;color:var(--emerald);font-weight:600;align-self:center">✅ Rated</span>
-                                </div>`;
-                            } else {
-                                // Received but not rated yet — show rating, X on card corner
-                                actions = `<div class="req-actions" style="margin-bottom:8px">
-                                    <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
-                                </div>
-                                <div class="rate-box">
-                                    <h5>⭐ Rate your seller</h5>
-                                    <p>How was your experience with <strong>${r.books?.seller || 'the seller'}</strong>?</p>
-                                    <div class="stars-row" id="starRow-${r.id}">
-                                        ${[1,2,3,4,5].map(n => `<button class="star-btn" data-val="${n}" onclick="selectBuyerStar('${r.id}',${n})" onmouseover="hoverBuyerStar('${r.id}',${n})" onmouseout="unhoverBuyerStar('${r.id}')">★</button>`).join('')}
-                                    </div>
-                                    <textarea class="rate-review" id="buyerRateReview-${r.id}" rows="2" placeholder="Leave a short review (optional)…"></textarea>
-                                    <button class="btn-received" onclick="submitBuyerRatingFromNotif(${r.id}, '${r.seller_id}', ${r.book_id})">Submit Rating ⭐</button>
-                                </div>`;
-                            }
-                        } else {
-                            // Active deal — not received yet
+                        if (alreadyRated) {
                             actions = `<div class="req-actions">
-                                <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
-                                <button class="btn-scan" style="width:auto;font-size:0.82rem;padding:8px 14px;margin-top:0" onclick="openQRScanner(${r.id}, ${r.book_id})">📷 Scan QR</button>
-                            </div>
-                            <button class="btn-unsend" style="margin-top:8px;width:100%;justify-content:center"
-                                onclick="buyerCancelDeal(${r.id}, ${r.book_id})">
-                                ❌ I don't want this anymore
-                            </button>`;
+                                <span style="font-size:0.78rem;color:var(--emerald);font-weight:600;align-self:center">✅ Received & Rated</span>
+                            </div>`;
+                        } else {
+                            actions = `<div class="rate-box">
+                                <h5>⭐ Rate your seller</h5>
+                                <p>How was your experience with <strong>${r.books?.seller || 'the seller'}</strong>?</p>
+                                <div class="stars-row" id="starRow-${r.id}">
+                                    ${[1,2,3,4,5].map(n => `<button class="star-btn" data-val="${n}" onclick="selectBuyerStar('${r.id}',${n})" onmouseover="hoverBuyerStar('${r.id}',${n})" onmouseout="unhoverBuyerStar('${r.id}')">★</button>`).join('')}
+                                </div>
+                                <textarea class="rate-review" id="buyerRateReview-${r.id}" rows="2" placeholder="Leave a short review (optional)…"></textarea>
+                                <button class="btn-received" onclick="submitBuyerRatingFromNotif(${r.id}, '${r.seller_id}', ${r.book_id})">Submit Rating ⭐</button>
+                            </div>`;
                         }
+                    } else if (r.status === 'approved') {
+                        // Active approved deal — not received yet
+                        actions = `<div class="req-actions">
+                            <button class="req-btn req-btn-chat" onclick="closeBuyerNotifs();openModal(${r.book_id})">💬 Open Chat</button>
+                            <button class="btn-scan" style="width:auto;font-size:0.82rem;padding:8px 14px;margin-top:0" onclick="openQRScanner(${r.id}, ${r.book_id})">📷 Scan QR</button>
+                        </div>
+                        <button class="btn-unsend" style="margin-top:8px;width:100%;justify-content:center"
+                            onclick="buyerCancelDeal(${r.id}, ${r.book_id})">
+                            ❌ I don't want this anymore
+                        </button>`;
                     }
 
-                    const showDismissX = r.status === 'approved' && r.item_received;
+                    const showDismissX = (r.status === 'completed') || (r.status === 'approved' && r.item_received);
                     const showUnsendX  = r.status === 'pending' || r.status === 'waiting' || r.status === 'declined';
                     return `<div class="req-card" id="buyerreqcard-${r.id}" style="position:relative">
                         ${showDismissX ? `<button onclick="dismissReceivedNotif(${r.id})" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface-2);color:var(--muted);font-size:0.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;z-index:2;transition:all 0.15s" onmouseover="this.style.background='var(--red)';this.style.color='white';this.style.borderColor='var(--red)'" onmouseout="this.style.background='var(--surface-2)';this.style.color='var(--muted)';this.style.borderColor='var(--border)'">×</button>` : ''}
@@ -5150,7 +5159,20 @@
             _lrBookId = bookId;
             const isSold = book.deal_completed === true || book.status === 'sold';
 
-            document.getElementById('lrItemImg').src = book.image || 'https://placehold.co/280x220/F1F5F9/94A3B8?text=📚';
+            const lrTop = document.querySelector('.lr-top');
+            const lrImgBox = document.querySelector('.lr-img-box');
+            if (book.image) {
+                document.getElementById('lrItemImg').src = book.image;
+                document.getElementById('lrItemImg').onerror = function() {
+                    lrImgBox.style.display = 'none';
+                    lrTop.style.gridTemplateColumns = '1fr';
+                };
+                lrImgBox.style.display = '';
+                lrTop.style.gridTemplateColumns = '';
+            } else {
+                lrImgBox.style.display = 'none';
+                lrTop.style.gridTemplateColumns = '1fr';
+            }
             document.getElementById('lrItemTitle').textContent = book.title;
             document.getElementById('lrItemPrice').textContent = `₹${book.price}`;
             document.getElementById('lrItemBadges').innerHTML = `
@@ -5602,31 +5624,35 @@
                 // Valid! Mark as received, clear token, set sold_at timestamp
                 const now = new Date().toISOString();
                 const { error: updateErr } = await db.from('requests')
-                    .update({ item_received: true, qr_token: null, qr_expires_at: null, sold_at: now })
+                    .update({ item_received: true, qr_token: null, qr_expires_at: null, sold_at: now, status: 'completed' })
                     .eq('id', reqId);
                 if (updateErr) throw updateErr;
 
                 // Mark book as sold and remove from marketplace
-                await db.from('books').update({
+                const { error: bookErr } = await db.from('books').update({
                     sold_at: now,
                     status: 'sold',
                     deal_completed: true
                 }).eq('id', bookId);
+                if (bookErr) throw bookErr;
 
-                // Immediately remove from in-memory list so grid updates without waiting for refetch
+                // Immediately remove from in-memory list so grid updates instantly
                 allBooks = allBooks.filter(b => b.id !== bookId);
                 applyFilters();
 
-                // Cleanup: delete all waiting/pending requests for this book (deal is done)
+                // Cleanup: delete all waiting/pending requests for this book
                 await db.from('requests')
                     .delete()
                     .eq('book_id', bookId)
                     .in('status', ['waiting', 'pending', 'declined']);
 
-                // Delete all chat messages (deal done, chat served its purpose)
+                // Delete all chat messages
                 await db.from('messages').delete().eq('book_id', bookId);
 
-                showToast('✅ Item received confirmed! Please rate your seller.', 'success');
+                showToast('✅ Item received! Please rate your seller.', 'success');
+
+                // Close modal if open, refresh buyer notifs
+                closeModal();
                 await loadBuyerNotifs();
                 await loadBooks();
 
