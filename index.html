@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookLoop — Student Marketplace</title>
+    <title>Retoss — Student Marketplace</title>
     <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Satoshi:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -1804,7 +1804,7 @@
             .topbar-inner { padding: 8px 10px 6px; }
             .logo-tagline { display: none; }
             .category-nav { padding: 0 8px; }
-            .logo-wrap img { height: 30px; }
+            .logo-wrap img { height: 58px; max-width: 180px; }
             .search-input { height: 36px; font-size: 0.8rem; padding-left: 36px; }
             .notif-btn { width: 36px; height: 36px; border-radius: 10px; }
             .hero-strip { padding: 22px 14px; }
@@ -2998,9 +2998,180 @@
             border-radius: 4px;
         }
 
+        /* ══ SPLASH SCREEN ══════════════════════════════════════════════ */
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: #ffffff;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #splash.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Logo fades in first */
+        .splash-logo {
+            width: 260px;
+            max-width: 75vw;
+            object-fit: contain;
+            animation: splashLogoIn 0.6s cubic-bezier(0.34,1.2,0.64,1) 0.1s forwards;
+            opacity: 0;
+        }
+        @keyframes splashLogoIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Coin toss container */
+        .splash-coin-stage {
+            position: relative;
+            width: 80px;
+            height: 120px;
+            margin-top: 8px;
+        }
+
+        /* The coin itself */
+        .splash-coin {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            /* Gold outer ring */
+            background: radial-gradient(circle at 35% 30%, #FFE066, #C8860A);
+            box-shadow:
+                0 4px 0 #7A5200,
+                0 6px 16px rgba(184,134,11,0.5),
+                inset 0 2px 6px rgba(255,255,255,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: coinToss 1.4s cubic-bezier(0.22,1,0.36,1) 0.7s forwards;
+            opacity: 0;
+        }
+
+        /* Silver inner face */
+        .splash-coin::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, #D8D8D8, #808080);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Rupee symbol */
+        .splash-coin-symbol {
+            position: relative;
+            z-index: 1;
+            font-size: 1.5rem;
+            color: white;
+            font-weight: 900;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            line-height: 1;
+        }
+
+        /* Coin shadow on ground */
+        .splash-coin-shadow {
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 10px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.2), transparent);
+            border-radius: 50%;
+            animation: shadowPulse 1.4s cubic-bezier(0.22,1,0.36,1) 0.7s forwards;
+            opacity: 0;
+        }
+
+        @keyframes coinToss {
+            0%   { opacity:0; transform: translateX(-50%) translateY(0) rotateY(0deg) scale(0.6); }
+            10%  { opacity:1; }
+            /* Goes up */
+            40%  { transform: translateX(-50%) translateY(-80px) rotateY(540deg) scale(1.1); }
+            /* Comes back down */
+            70%  { transform: translateX(-50%) translateY(-10px) rotateY(900deg) scale(1); }
+            /* Small bounce */
+            82%  { transform: translateX(-50%) translateY(-16px) rotateY(960deg) scale(0.95); }
+            90%  { transform: translateX(-50%) translateY(-4px) rotateY(1000deg) scale(1.02); }
+            /* Lands */
+            100% { opacity:1; transform: translateX(-50%) translateY(0) rotateY(1080deg) scale(1); }
+        }
+
+        @keyframes shadowPulse {
+            0%   { opacity:0; transform: translateX(-50%) scale(0.4); }
+            40%  { opacity:0.05; transform: translateX(-50%) scale(0.3); }
+            100% { opacity:1; transform: translateX(-50%) scale(1); }
+        }
+
+        /* Tagline */
+        .splash-tagline {
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            margin-top: 20px;
+            animation: splashTagIn 0.4s ease 0.6s forwards;
+            opacity: 0;
+        }
+        @keyframes splashTagIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dots */
+        .splash-dots {
+            display: flex; gap: 6px;
+            margin-top: 32px;
+            animation: splashTagIn 0.4s ease 2s forwards;
+            opacity: 0;
+        }
+        .splash-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #e2e8f0;
+            animation: dotPulse 1s ease-in-out infinite;
+        }
+        .splash-dot:nth-child(2) { animation-delay: 0.15s; }
+        .splash-dot:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes dotPulse {
+            0%,100% { background: #e2e8f0; transform: scale(1); }
+            50%      { background: #4CAF50; transform: scale(1.5); }
+        }
+
     </style>
 </head>
 <body>
+
+
+    <!-- SPLASH SCREEN -->
+    <div id="splash">
+        <img src="retoss-logo.png" alt="Retoss" class="splash-logo">
+        <div class="splash-tagline">Student Marketplace</div>
+        <div class="splash-coin-stage">
+            <div class="splash-coin-shadow"></div>
+            <div class="splash-coin">
+                <span class="splash-coin-symbol">₹</span>
+            </div>
+        </div>
+        <div class="splash-dots">
+            <div class="splash-dot"></div>
+            <div class="splash-dot"></div>
+            <div class="splash-dot"></div>
+        </div>
+    </div>
 
     <!-- TOPBAR -->
     <nav class="topbar">
@@ -3008,11 +3179,7 @@
             <!-- Row 1: Logo + Actions -->
             <div class="topbar-row1">
             <a class="logo-wrap" href="#">
-                <div class="logo-icon">📚</div>
-                <div class="logo-text">
-                    <span class="logo-main">Book<span>Loop</span></span>
-                    <span class="logo-tagline">Student Marketplace</span>
-                </div>
+                <img src="retoss-logo.png" alt="Retoss" style="height:48px;object-fit:contain;max-width:200px;transform:scale(2.2);transform-origin:left center">
             </a>
 
             <div class="topbar-right">
@@ -3424,7 +3591,7 @@
     <div class="modal-overlay" id="reportOverlay" onclick="handleReportOverlayClick(event)">
         <div class="report-modal" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
             <h3 id="reportTitle">Report listing</h3>
-            <p id="reportItemTitle">Tell us what looks wrong. Reports help keep BookLoop safe for students.</p>
+            <p id="reportItemTitle">Tell us what looks wrong. Reports help keep Retoss safe for students.</p>
             <div class="report-field">
                 <label for="reportReason">Reason</label>
                 <select id="reportReason">
@@ -3494,7 +3661,7 @@
                 document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;padding:32px">
                     <div style="font-size:3rem;margin-bottom:16px">🚫</div>
                     <h2 style="color:#DC2626;margin-bottom:8px">Account Suspended</h2>
-                    <p style="color:#64748B;max-width:360px">Your account has been suspended for violating BookLoop's community guidelines. Contact your admin if you think this is a mistake.</p>
+                    <p style="color:#64748B;max-width:360px">Your account has been suspended for violating Retoss's community guidelines. Contact your admin if you think this is a mistake.</p>
                 </div>`;
                 return false;
             }
@@ -3544,6 +3711,23 @@
         let hasEnhanced = false;
 
         // ── INIT ────────────────────────────────────────────────────────────
+        /* ── SPLASH SCREEN ────────────────────────────────────────────── */
+        (function() {
+            const splash = document.getElementById('splash');
+            if (!splash) return;
+            // Only show once per session
+            if (sessionStorage.getItem('retoss_splashed')) {
+                splash.style.display = 'none';
+                return;
+            }
+            sessionStorage.setItem('retoss_splashed', '1');
+            // Hide after 2.2 seconds
+            setTimeout(() => {
+                splash.classList.add('hide');
+                setTimeout(() => { splash.style.display = 'none'; }, 500);
+            }, 2200);
+        })();
+
         window.addEventListener('DOMContentLoaded', async () => {
 
             // ── TOPBAR SCROLL EFFECT ──────────────────────────────────────
@@ -4038,7 +4222,7 @@
                             <div class="seller-avatar">${initials}</div>
                             <div>
                                 <div class="seller-name">${s(book.seller || 'Student')}</div>
-                                <div class="seller-meta">BookLoop Member</div>
+                                <div class="seller-meta">Retoss Member</div>
                                 ${book._rating ? `<div class="rating-display" style="margin-top:4px"><span class="stars-filled">⭐</span> ${book._rating.avg_stars} <span class="rating-count">(${book._rating.total_ratings} rating${book._rating.total_ratings > 1 ? 's' : ''})</span></div>` : `<div style="font-size:0.75rem;color:var(--muted-2);margin-top:2px">No ratings yet</div>`}
                             </div>
                         </div>
@@ -4252,7 +4436,7 @@
             document.getElementById('reportDetails').value = '';
             document.getElementById('reportItemTitle').textContent = reportTargetBook.title
                 ? `Report "${reportTargetBook.title}" if it looks unsafe, fake, or inappropriate.`
-                : 'Tell us what looks wrong. Reports help keep BookLoop safe for students.';
+                : 'Tell us what looks wrong. Reports help keep Retoss safe for students.';
             document.getElementById('reportOverlay').classList.add('open');
             document.getElementById('reportReason').focus();
         }
@@ -4295,7 +4479,7 @@
                 if (error) throw error;
 
                 closeReportModal();
-                showToast('Report submitted. Thank you for helping keep BookLoop safe.', 'success');
+                showToast('Report submitted. Thank you for helping keep Retoss safe.', 'success');
             } catch (e) {
                 if (e.code === '23505') {
                     showToast('You already reported this listing. Thanks, it is in review.', 'success');
@@ -5762,7 +5946,7 @@
             const price = book?.price ? '₹' + book.price : '';
             const url   = `${window.location.origin}${window.location.pathname}?item=${bookId}`;
 
-            const text = `${title} ${price} — available on BookLoop!
+            const text = `${title} ${price} — available on Retoss!
 ${url}`;
 
             // Try native share (mobile) first
