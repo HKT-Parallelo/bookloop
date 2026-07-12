@@ -3151,6 +3151,220 @@
             50%      { background: #4CAF50; transform: scale(1.5); }
         }
 
+        /* ── FLOATING CHAT BUTTON ───────────────────────────────────────── */
+        .fcb-btn {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--lime-dark), var(--lime));
+            border: none;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(101,163,13,0.4);
+            z-index: 900;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .fcb-btn:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(101,163,13,0.5); }
+        .fcb-btn svg { color: white; }
+        .fcb-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 20px;
+            height: 20px;
+            background: var(--red);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 800;
+            border-radius: 20px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            padding: 0 4px;
+        }
+        .fcb-badge.show { display: flex; }
+
+        /* ── CHAT PANEL ── */
+        .fcb-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(13,17,23,0.4);
+            z-index: 901;
+        }
+        .fcb-overlay.open { display: block; }
+        .fcb-panel {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 380px;
+            max-width: 100vw;
+            height: 560px;
+            max-height: 90vh;
+            background: var(--surface);
+            border-radius: 24px 24px 0 0;
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.15);
+            z-index: 902;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.34,1.2,0.64,1);
+        }
+        .fcb-panel.open { transform: translateY(0); }
+
+        /* panel header */
+        .fcb-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .fcb-title {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .fcb-close {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: var(--surface-2);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--muted);
+            font-size: 1.1rem;
+            transition: all 0.15s;
+        }
+        .fcb-close:hover { background: var(--red); color: white; border-color: var(--red); }
+        .fcb-back {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: var(--surface-2);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            transition: all 0.15s;
+            margin-right: 8px;
+        }
+        .fcb-back:hover { background: var(--surface-3); color: var(--ink); }
+        .fcb-back.show { display: flex; }
+
+        /* deals list */
+        .fcb-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        .fcb-deal-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-bottom: 1px solid var(--border);
+        }
+        .fcb-deal-item:hover { background: var(--surface-2); }
+        .fcb-deal-avatar {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--lime-dark), var(--lime));
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 1rem; color: white;
+            flex-shrink: 0;
+        }
+        .fcb-deal-info { flex: 1; min-width: 0; }
+        .fcb-deal-name { font-size: 0.88rem; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+        .fcb-deal-title { font-size: 0.78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .fcb-deal-unread {
+            min-width: 20px; height: 20px;
+            background: var(--lime-dark); color: white;
+            font-size: 0.65rem; font-weight: 800;
+            border-radius: 20px;
+            display: none; align-items: center; justify-content: center;
+            padding: 0 5px;
+        }
+        .fcb-deal-unread.show { display: flex; }
+        .fcb-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 10px;
+            color: var(--muted);
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 20px;
+            text-align: center;
+        }
+        .fcb-empty span { font-size: 3rem; }
+
+        /* inline chat view inside panel */
+        .fcb-chat-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .fcb-chat-msgs {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px 16px;
+            background: var(--surface-2);
+        }
+        .fcb-chat-input-row {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .fcb-chat-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-sm);
+            font-family: 'Satoshi', sans-serif;
+            font-size: 0.88rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .fcb-chat-input:focus { border-color: var(--lime-dark); }
+        .fcb-send-btn {
+            padding: 10px 16px;
+            background: var(--lime-dark);
+            color: white;
+            border: none;
+            border-radius: var(--r-sm);
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .fcb-send-btn:hover { background: var(--lime); }
+        .fcb-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        @media (max-width: 768px) {
+            .fcb-btn { bottom: 76px; right: 16px; }
+            .fcb-panel { width: 100vw; height: 70vh; border-radius: 20px 20px 0 0; }
+        }
+
     </style>
 </head>
 <body>
@@ -3746,6 +3960,7 @@
             if (authed) {
                 await loadMyListingsBadge();
                 await refreshNotifBadges();
+                setTimeout(fcbInit, 1500);
             }
 
             // ── ANIMATE STAT COUNTERS ─────────────────────────────────────
@@ -4002,7 +4217,7 @@
             const discountBadge = discountPct ? `<span class="card-discount-badge">${discountPct}% off</span>` : '';
             const timePosted = b.created_at ? `<span class="card-time">${timeAgo(b.created_at)}</span>` : '';
 
-            return `<div class="product-card" onclick="openModal(${b.id})" style="${isSold ? 'opacity:0.75;' : ''}animation-delay:${index * 55}ms">
+            return `<div class="product-card" onclick="location.href='item.html?item=${b.id}'" style="${isSold ? 'opacity:0.75;' : ''}animation-delay:${index * 55}ms">
                 <div class="card-img">
                     <img src="${b.image || 'https://placehold.co/240x170/F8FAFC/94A3B8?text=No+Image'}"
                          alt="${b.title}" loading="lazy"
@@ -4269,7 +4484,7 @@
                     <h4><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Similar Items</h4>
                     <div class="similar-grid">
                         ${similar.map(sim => `
-                            <div class="similar-card" onclick="openModal(${sim.id})">
+                            <div class="similar-card" onclick="location.href='item.html?item=${sim.id}'">
                                 <img class="similar-img"
                                      src="${sim.image || 'https://placehold.co/160x80/F1F5F9/94A3B8?text=?'}"
                                      onerror="this.src='https://placehold.co/160x80/F1F5F9/94A3B8?text=?'">
@@ -4774,6 +4989,8 @@
                     showToast('<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Approved! Chat is open. Item stays on marketplace.', 'success');
                     await loadBooks();
                     await subscribeToMyChats();
+                    // Show floating chat button
+                    document.getElementById('fcbBtn').style.display = 'flex';
 
                 } else if (status === 'declined' && wasApproved) {
                     // REVOKE — reset book, wipe chat, restore waiting list to pending
@@ -5552,6 +5769,10 @@
                         // Don't show popup for own messages
                         if (msg.sender_id === ME) return;
 
+                        // Mark unread in floating chat button
+                        if (typeof fcbMarkUnread === 'function') fcbMarkUnread(bookId);
+                        if (typeof fcbInit === 'function') document.getElementById('fcbBtn').style.display = 'flex';
+
                         // If modal is already open on this book, just reload chat
                         if (window._openChatBookId === bookId) {
                             await loadChat(bookId);
@@ -6197,7 +6418,7 @@ ${url}`;
             if (!rv.length || !section || !scroll) return;
             section.style.display = 'block';
             scroll.innerHTML = rv.map(item => `
-                <div class="rv-card" onclick="openModal(${item.id})">
+                <div class="rv-card" onclick="location.href='item.html?item=${item.id}'">
                     <img class="rv-card-img" src="${item.image || 'https://placehold.co/110x80/F1F5F9/94A3B8?text=📦'}"
                          onerror="this.src='https://placehold.co/110x80/F1F5F9/94A3B8?text=📦'" alt="${item.title}" loading="lazy">
                     <div class="rv-card-body">
@@ -6388,5 +6609,234 @@ ${url}`;
     });
 })();
 </script>
+<!-- ── FLOATING CHAT BUTTON ── -->
+<button class="fcb-btn" id="fcbBtn" onclick="openFCB()" title="My Chats">
+    <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+    </svg>
+    <span class="fcb-badge" id="fcbBadge"></span>
+</button>
+
+<div class="fcb-overlay" id="fcbOverlay" onclick="closeFCB()"></div>
+<div class="fcb-panel" id="fcbPanel">
+    <div class="fcb-header">
+        <div style="display:flex;align-items:center">
+            <button class="fcb-back" id="fcbBack" onclick="fcbGoBack()">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            </button>
+            <div class="fcb-title" id="fcbTitle">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                My Chats
+            </div>
+        </div>
+        <button class="fcb-close" onclick="closeFCB()">×</button>
+    </div>
+
+    <!-- deals list view -->
+    <div class="fcb-list" id="fcbList"></div>
+
+    <!-- inline chat view (hidden by default) -->
+    <div class="fcb-chat-view" id="fcbChatView" style="display:none">
+        <div class="fcb-chat-msgs" id="fcbChatMsgs"></div>
+        <div class="fcb-chat-input-row">
+            <input class="fcb-chat-input" id="fcbChatInput" placeholder="Type a message…"
+                   onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();fcbSendMsg()}">
+            <button class="fcb-send-btn" id="fcbSendBtn" onclick="fcbSendMsg()">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── FLOATING CHAT BUTTON STATE ───────────────────────────────────────────
+let fcbDeals = [];          // [{req, bookId, otherName, bookTitle}]
+let fcbActiveBookId = null; // currently open chat
+let fcbUnreadMap = {};      // bookId -> unread count
+let fcbChatChannel = null;  // realtime channel for active chat
+
+function openFCB() {
+    if (!ME) { showGuestModal(); return; }
+    document.getElementById('fcbOverlay').classList.add('open');
+    document.getElementById('fcbPanel').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    fcbLoadDeals();
+}
+
+function closeFCB() {
+    document.getElementById('fcbOverlay').classList.remove('open');
+    document.getElementById('fcbPanel').classList.remove('open');
+    document.body.style.overflow = '';
+    fcbGoBack(); // reset to list view
+    if (fcbChatChannel) { db.removeChannel(fcbChatChannel); fcbChatChannel = null; }
+}
+
+function fcbGoBack() {
+    fcbActiveBookId = null;
+    document.getElementById('fcbList').style.display = 'block';
+    document.getElementById('fcbChatView').style.display = 'none';
+    document.getElementById('fcbBack').classList.remove('show');
+    document.getElementById('fcbTitle').innerHTML = `<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> My Chats`;
+    if (fcbChatChannel) { db.removeChannel(fcbChatChannel); fcbChatChannel = null; }
+}
+
+async function fcbLoadDeals() {
+    const list = document.getElementById('fcbList');
+    list.innerHTML = `<div class="fcb-empty"><span>⏳</span>Loading chats…</div>`;
+
+    const { data: reqs } = await db.from('requests')
+        .select('id, book_id, buyer_id, seller_id, buyer_name, buyer_email, books(title, seller, seller_id)')
+        .eq('status', 'approved')
+        .or(`buyer_id.eq.${ME},seller_id.eq.${ME}`);
+
+    fcbDeals = (reqs || []).map(req => {
+        const isBuyer = req.buyer_id === ME;
+        return {
+            req,
+            bookId: req.book_id,
+            otherName: isBuyer ? (req.books?.seller || 'Seller') : (req.buyer_name || 'Buyer'),
+            bookTitle: req.books?.title || 'Item'
+        };
+    });
+
+    if (!fcbDeals.length) {
+        list.innerHTML = `<div class="fcb-empty"><span>💬</span>No active chats yet.<br>Request an item to start chatting!</div>`;
+        return;
+    }
+
+    list.innerHTML = fcbDeals.map(d => `
+        <div class="fcb-deal-item" onclick="fcbOpenChat(${d.bookId}, '${d.otherName.replace(/'/g,"\\'")}', '${d.bookTitle.replace(/'/g,"\\'")}')">
+            <div class="fcb-deal-avatar">${d.otherName.charAt(0).toUpperCase()}</div>
+            <div class="fcb-deal-info">
+                <div class="fcb-deal-name">${d.otherName}</div>
+                <div class="fcb-deal-title">📦 ${d.bookTitle}</div>
+            </div>
+            <div class="fcb-deal-unread ${(fcbUnreadMap[d.bookId] || 0) > 0 ? 'show' : ''}" id="fcb-unread-${d.bookId}">
+                ${fcbUnreadMap[d.bookId] || ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+async function fcbOpenChat(bookId, otherName, bookTitle) {
+    fcbActiveBookId = bookId;
+
+    // Clear unread
+    fcbUnreadMap[bookId] = 0;
+    const unreadEl = document.getElementById(`fcb-unread-${bookId}`);
+    if (unreadEl) { unreadEl.classList.remove('show'); unreadEl.textContent = ''; }
+    fcbUpdateBadge();
+
+    // Show chat view
+    document.getElementById('fcbList').style.display = 'none';
+    document.getElementById('fcbChatView').style.display = 'flex';
+    document.getElementById('fcbBack').classList.add('show');
+    document.getElementById('fcbTitle').textContent = otherName;
+
+    // Load messages
+    await fcbLoadMsgs(bookId);
+
+    // Subscribe to new messages
+    if (fcbChatChannel) { db.removeChannel(fcbChatChannel); fcbChatChannel = null; }
+    fcbChatChannel = db.channel(`fcb-chat-${bookId}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `book_id=eq.${bookId}` },
+            async () => { await fcbLoadMsgs(bookId); })
+        .subscribe();
+
+    // Focus input
+    setTimeout(() => document.getElementById('fcbChatInput')?.focus(), 100);
+}
+
+async function fcbLoadMsgs(bookId) {
+    const box = document.getElementById('fcbChatMsgs');
+    if (!box) return;
+
+    const { data: msgs } = await db.from('messages')
+        .select('*')
+        .eq('book_id', bookId)
+        .order('created_at', { ascending: true });
+
+    if (!msgs?.length) {
+        box.innerHTML = `<p style="color:var(--muted);font-size:0.85rem;text-align:center;padding-top:20px">No messages yet. Say hello! 👋</p>`;
+        return;
+    }
+
+    box.innerHTML = msgs.map(m => {
+        const mine = m.sender_id === ME;
+        const text = m.content || m.message || '';
+        return `<div class="msg ${mine ? 'mine' : ''}">
+            <div class="msg-name">${mine ? 'You' : (m.sender_name || 'Student')}</div>
+            <div class="msg-bubble">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+        </div>`;
+    }).join('');
+
+    box.scrollTop = box.scrollHeight;
+}
+
+async function fcbSendMsg() {
+    if (!fcbActiveBookId || !ME) return;
+    const input = document.getElementById('fcbChatInput');
+    const text = input?.value.trim();
+    if (!text) return;
+    input.value = '';
+    const sendBtn = document.getElementById('fcbSendBtn');
+    if (sendBtn) sendBtn.disabled = true;
+
+    try {
+        const senderName = currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Student';
+        const { error } = await db.from('messages').insert([{
+            book_id: fcbActiveBookId,
+            sender_id: ME,
+            sender_name: senderName,
+            content: text
+        }]);
+        if (error) {
+            if (error.message?.includes('Daily message limit')) {
+                showToast('🚫 Daily limit of 50 messages reached', 'error');
+            } else throw error;
+        }
+        await fcbLoadMsgs(fcbActiveBookId);
+    } catch(e) {
+        showToast('Could not send: ' + e.message, 'error');
+        input.value = text; // restore
+    } finally {
+        if (sendBtn) sendBtn.disabled = false;
+        input.focus();
+    }
+}
+
+// Track unread messages from subscribeToMyChats
+function fcbMarkUnread(bookId) {
+    if (fcbActiveBookId === bookId) return; // already viewing
+    fcbUnreadMap[bookId] = (fcbUnreadMap[bookId] || 0) + 1;
+    const el = document.getElementById(`fcb-unread-${bookId}`);
+    if (el) { el.textContent = fcbUnreadMap[bookId]; el.classList.add('show'); }
+    fcbUpdateBadge();
+}
+
+function fcbUpdateBadge() {
+    const total = Object.values(fcbUnreadMap).reduce((a,b) => a + b, 0);
+    const badge = document.getElementById('fcbBadge');
+    if (badge) {
+        badge.textContent = total > 0 ? (total > 9 ? '9+' : total) : '';
+        badge.classList.toggle('show', total > 0);
+    }
+}
+
+// Show the FCB button only when user is logged in and has approved deals
+async function fcbInit() {
+    if (!ME) return;
+    const { data } = await db.from('requests')
+        .select('id, book_id')
+        .eq('status', 'approved')
+        .or(`buyer_id.eq.${ME},seller_id.eq.${ME}`)
+        .limit(1);
+
+    if (data?.length) {
+        document.getElementById('fcbBtn').style.display = 'flex';
+    }
+}
+</script>
+
 </body>
 </html>

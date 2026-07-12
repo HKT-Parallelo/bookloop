@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookLoop — Item</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Satoshi:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --ink: #0D1117;
+    --ink-2: #1C2333;
+    --ink-3: #2D3748;
+    --muted: #64748B;
+    --border: #E2E8F0;
+    --border-2: #CBD5E1;
+    --surface: #FFFFFF;
+    --surface-2: #F8FAFC;
+    --surface-3: #F1F5F9;
+    --lime: #84CC16;
+    --lime-dark: #65A30D;
+    --lime-light: #F7FEE7;
+    --lime-glow: rgba(132,204,22,0.15);
+    --emerald: #10B981;
+    --red: #EF4444;
+    --r-sm: 10px;
+    --r-md: 16px;
+    --r-lg: 24px;
+    --r-xl: 32px;
+}
+
+body {
+    font-family: 'Satoshi', system-ui, sans-serif;
+    background: var(--surface-2);
+    color: var(--ink);
+    min-height: 100vh;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0 20px;
+}
+.topbar-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 60px;
+}
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: var(--r-sm);
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+}
+.back-btn:hover { color: var(--ink); border-color: var(--border-2); }
+.logo {
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-weight: 900;
+    font-size: 1.3rem;
+    text-decoration: none;
+    color: var(--ink);
+}
+.logo span { color: var(--lime-dark); }
+
+/* ── PAGE LAYOUT ── */
+.page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 20px 80px;
+}
+
+/* ── BREADCRUMB ── */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 20px;
+}
+.breadcrumb a { color: var(--lime-dark); text-decoration: none; font-weight: 600; }
+.breadcrumb a:hover { text-decoration: underline; }
+
+/* ── MAIN GRID ── */
+.item-grid {
+    display: grid;
+    grid-template-columns: 480px 1fr;
+    gap: 28px;
+    align-items: start;
+    margin-bottom: 40px;
+}
+
+/* ── IMAGE SECTION ── */
+.item-img-box {
+    background: white;
+    border-radius: var(--r-lg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    position: sticky;
+    top: 84px;
+}
+.item-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.item-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--muted);
+    background: var(--surface-3);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.item-img-placeholder span { font-size: 3.5rem; }
+
+/* ── DETAILS SECTION ── */
+.item-details {
+    background: white;
+    border-radius: var(--r-lg);
+    border: 1px solid var(--border);
+    padding: 28px;
+}
+
+.item-badges {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+.badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1.5px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.badge-avail { background: #D1FAE5; color: #065F46; border-color: #A7F3D0; }
+.badge-sold { background: #FEE2E2; color: #991B1B; border-color: #FECACA; }
+.badge-cat { background: var(--surface-3); color: var(--ink-3); border-color: var(--border); }
+.badge-cond-excellent { background: #D1FAE5; color: #065F46; border-color: #A7F3D0; }
+.badge-cond-good { background: #DBEAFE; color: #1E40AF; border-color: #BFDBFE; }
+.badge-cond-fair { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+.badge-cond-poor { background: #FEE2E2; color: #991B1B; border-color: #FECACA; }
+.badge-cond-like-new { background: #EDE9FE; color: #5B21B6; border-color: #DDD6FE; }
+
+.item-title {
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 1.9rem;
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 10px;
+}
+
+.item-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+.item-price {
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--lime-dark);
+}
+.item-og-price {
+    font-size: 1rem;
+    color: var(--muted);
+    text-decoration: line-through;
+}
+.item-discount {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--red);
+    background: #FEE2E2;
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+.item-desc {
+    font-size: 0.95rem;
+    color: var(--ink-3);
+    line-height: 1.65;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.item-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.meta-item {
+    background: var(--surface-2);
+    border-radius: var(--r-sm);
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+}
+.meta-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+}
+.meta-value {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+/* seller card */
+.seller-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--surface-2);
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+}
+.seller-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--lime-dark), var(--lime));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: white;
+    flex-shrink: 0;
+}
+.seller-info { flex: 1; }
+.seller-name { font-size: 0.9rem; font-weight: 700; color: var(--ink); }
+.seller-label { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
+.seller-rating { font-size: 0.82rem; font-weight: 700; color: #F59E0B; }
+
+/* action buttons */
+.action-area { display: flex; flex-direction: column; gap: 10px; }
+.btn-buy {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--lime-dark), var(--lime));
+    color: white;
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    border: none;
+    border-radius: var(--r-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.2s, transform 0.15s;
+}
+.btn-buy:hover { opacity: 0.92; transform: translateY(-1px); }
+.btn-buy:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-secondary {
+    width: 100%;
+    padding: 12px;
+    background: white;
+    color: var(--ink);
+    font-size: 0.88rem;
+    font-weight: 700;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+.btn-secondary:hover { border-color: var(--lime-dark); background: var(--lime-light); }
+
+.req-note {
+    padding: 12px 16px;
+    border-radius: var(--r-md);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+}
+.req-note.pending { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+.req-note.approved { background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
+.req-note.sold { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+
+/* buyer msg input */
+.msg-input-wrap { margin-bottom: 10px; }
+.msg-input-wrap textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-md);
+    font-family: 'Satoshi', sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink);
+    resize: none;
+    background: var(--surface-2);
+    transition: border-color 0.15s;
+}
+.msg-input-wrap textarea:focus { outline: none; border-color: var(--lime-dark); background: white; }
+.msg-input-wrap label { font-size: 0.75rem; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ── SIMILAR ITEMS ── */
+.section-title {
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.similar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+}
+.sim-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.15s;
+    text-decoration: none;
+    display: block;
+}
+.sim-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); border-color: var(--lime-dark); }
+.sim-card-img {
+    width: 100%;
+    height: 130px;
+    object-fit: cover;
+    display: block;
+    background: var(--surface-3);
+}
+.sim-card-img.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--muted);
+}
+.sim-card-body { padding: 12px; }
+.sim-card-title { font-size: 0.85rem; font-weight: 700; color: var(--ink); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sim-card-price { font-size: 0.95rem; font-weight: 800; color: var(--lime-dark); font-family: 'Cabinet Grotesk', sans-serif; }
+.sim-card-seller { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+
+/* ── SKELETON ── */
+.skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* ── TOAST ── */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 9999;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { background: #065F46; }
+.toast.error { background: #991B1B; }
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+    .item-grid { grid-template-columns: 1fr; gap: 16px; }
+    .item-img-box { position: static; aspect-ratio: 4/3; border-radius: var(--r-md); }
+    .item-title { font-size: 1.4rem; }
+    .item-price { font-size: 1.7rem; }
+    .item-details { padding: 18px; border-radius: var(--r-md); }
+    .item-meta { grid-template-columns: 1fr 1fr; }
+    .similar-grid { grid-template-columns: repeat(2, 1fr); }
+    .page { padding: 16px 14px 80px; }
+    .topbar-inner { height: 52px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+    <div class="topbar-inner">
+        <a class="back-btn" href="index.html">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Back
+        </a>
+        <a class="logo" href="index.html">Book<span>Loop</span></a>
+    </div>
+</nav>
+
+<div class="page" id="page">
+    <!-- skeleton while loading -->
+    <div id="skeleton" style="display:grid;grid-template-columns:480px 1fr;gap:28px">
+        <div class="skeleton" style="aspect-ratio:4/3;border-radius:24px"></div>
+        <div style="display:flex;flex-direction:column;gap:12px;padding:28px;background:white;border-radius:24px;border:1px solid #e2e8f0">
+            <div class="skeleton" style="height:20px;width:40%"></div>
+            <div class="skeleton" style="height:36px;width:70%"></div>
+            <div class="skeleton" style="height:44px;width:35%"></div>
+            <div class="skeleton" style="height:80px;width:100%"></div>
+            <div class="skeleton" style="height:50px;width:100%;margin-top:auto"></div>
+        </div>
+    </div>
+    <div id="content" style="display:none"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://geqvoshwilllvjuepbfg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlcXZvc2h3aWxsbHZqdWVwYmZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDc3MzUsImV4cCI6MjA4NTY4MzczNX0.AGYzSZYxViV8tuiPQCMmVU4LnfLRqlwY3eHoJ5lM4Ow';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let ME = null;
+let currentUser = null;
+let book = null;
+
+// Get item ID from URL
+const params = new URLSearchParams(location.search);
+const ITEM_ID = params.get('item');
+
+if (!ITEM_ID) { location.href = 'index.html'; }
+
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast show ${type}`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function condBadgeClass(c) {
+    if (!c) return 'badge-cat';
+    const m = { 'excellent': 'badge-cond-excellent', 'good': 'badge-cond-good', 'fair': 'badge-cond-fair', 'poor': 'badge-cond-poor', 'like new': 'badge-cond-like-new', 'like-new': 'badge-cond-like-new' };
+    return m[c.toLowerCase()] || 'badge-cat';
+}
+
+function timeAgo(ts) {
+    if (!ts) return '';
+    const diff = Date.now() - new Date(ts).getTime();
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return 'just now';
+    if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h ago`;
+    return `${Math.floor(h / 24)}d ago`;
+}
+
+async function init() {
+    // Auth
+    const { data: { session } } = await db.auth.getSession();
+    if (session) {
+        currentUser = session.user;
+        ME = session.user.id;
+    }
+
+    // Fetch book
+    const { data, error } = await db.from('books').select('*').eq('id', ITEM_ID).single();
+    if (error || !data) {
+        document.getElementById('skeleton').innerHTML = `<div style="text-align:center;padding:60px;color:var(--muted)"><div style="font-size:3rem;margin-bottom:12px">😕</div><div style="font-weight:700;font-size:1.1rem">Item not found</div><a href="index.html" style="color:var(--lime-dark);font-weight:600;text-decoration:none;display:inline-block;margin-top:12px">← Back to marketplace</a></div>`;
+        return;
+    }
+    book = data;
+    document.title = `${book.title} — BookLoop`;
+
+    // Fetch existing request if logged in
+    let existingReq = null;
+    if (ME) {
+        const { data: req } = await db.from('requests').select('*').eq('book_id', book.id).eq('buyer_id', ME).maybeSingle();
+        existingReq = req;
+    }
+
+    // Fetch seller rating
+    const { data: sellerRating } = await db.from('seller_ratings').select('*').eq('seller_id', book.seller_id).maybeSingle();
+
+    const isSold = book.deal_completed === true || book.status === 'sold';
+    const isMine = ME === book.seller_id;
+    const initials = (book.seller || 'S').charAt(0).toUpperCase();
+    const discount = book.original_price && book.price ? Math.round((1 - book.price / book.original_price) * 100) : null;
+
+    // Build action area
+    let actionHtml = '';
+    if (isSold) {
+        actionHtml = `<div class="req-note sold">❌ This item has been sold</div>`;
+    } else if (isMine) {
+        actionHtml = `<div class="req-note approved">✅ This is your listing</div><a href="index.html" class="btn-secondary" style="text-align:center;display:block;margin-top:8px;text-decoration:none;padding:12px;border-radius:16px;border:1.5px solid var(--border);font-weight:700;font-size:0.88rem">← Go to My Activity</a>`;
+    } else if (!ME) {
+        actionHtml = `<button class="btn-buy" onclick="location.href='index.html'">🔑 Login to Request</button>`;
+    } else if (existingReq?.status === 'approved') {
+        actionHtml = `<div class="req-note approved">🎉 Approved! Open the app to chat with seller.</div><a href="index.html" class="btn-secondary" style="text-align:center;display:block;margin-top:8px;text-decoration:none;padding:12px;border-radius:16px;border:1.5px solid var(--border);font-weight:700;font-size:0.88rem">Open Chat →</a>`;
+    } else if (existingReq?.status === 'pending' || existingReq?.status === 'waiting') {
+        actionHtml = `<div class="req-note pending">${existingReq.status === 'waiting' ? '🕐 You\'re in the waiting list' : '⏳ Request sent — waiting for seller'}</div><button class="btn-secondary" onclick="unsendReq(${existingReq.id})">✕ Unsend Request</button>`;
+    } else {
+        actionHtml = `
+            <div class="msg-input-wrap">
+                <label>Message to seller (optional)</label>
+                <textarea id="buyerMsg" rows="2" placeholder="e.g. Is it still available? Can we meet at the library?"></textarea>
+            </div>
+            <button class="btn-buy" id="reqBtn" onclick="sendReq(${book.id})">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                Request to Buy
+            </button>`;
+    }
+
+    const html = `
+        <div class="breadcrumb">
+            <a href="index.html">Marketplace</a>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            <span>${book.category || 'Item'}</span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            <span>${book.title}</span>
+        </div>
+
+        <div class="item-grid">
+            <!-- IMAGE -->
+            <div class="item-img-box">
+                ${book.image
+                    ? `<img src="${book.image}" alt="${book.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+                    : ''}
+                <div class="item-img-placeholder" style="${book.image ? 'display:none' : 'display:flex'}">
+                    <span>📷</span>No image uploaded
+                </div>
+            </div>
+
+            <!-- DETAILS -->
+            <div class="item-details">
+                <div class="item-badges">
+                    <span class="badge ${isSold ? 'badge-sold' : 'badge-avail'}">${isSold ? '● Sold' : '● Available'}</span>
+                    ${book.category ? `<span class="badge badge-cat">${book.category}</span>` : ''}
+                    ${book.condition ? `<span class="badge ${condBadgeClass(book.condition)}">${book.condition}</span>` : ''}
+                    ${book.semester ? `<span class="badge badge-cat">Sem ${book.semester}</span>` : ''}
+                </div>
+
+                <h1 class="item-title">${book.title}</h1>
+
+                <div class="item-price-row">
+                    <div class="item-price">₹${book.price}</div>
+                    ${book.original_price ? `<div class="item-og-price">₹${book.original_price}</div>` : ''}
+                    ${discount ? `<div class="item-discount">${discount}% off</div>` : ''}
+                </div>
+
+                ${book.description ? `<div class="item-desc">${book.description}</div>` : ''}
+
+                <div class="item-meta">
+                    ${book.category ? `<div class="meta-item"><div class="meta-label">Category</div><div class="meta-value">${book.category}</div></div>` : ''}
+                    ${book.condition ? `<div class="meta-item"><div class="meta-label">Condition</div><div class="meta-value">${book.condition}</div></div>` : ''}
+                    ${book.semester ? `<div class="meta-item"><div class="meta-label">Semester</div><div class="meta-value">Semester ${book.semester}</div></div>` : ''}
+                    ${book.created_at ? `<div class="meta-item"><div class="meta-label">Listed</div><div class="meta-value">${timeAgo(book.created_at)}</div></div>` : ''}
+                    ${book.meeting_venue ? `<div class="meta-item" style="grid-column:1/-1"><div class="meta-label">📍 Meeting Venue</div><div class="meta-value">${book.meeting_venue}</div></div>` : ''}
+                </div>
+
+                <!-- SELLER -->
+                <div class="seller-card">
+                    <div class="seller-avatar">${initials}</div>
+                    <div class="seller-info">
+                        <div class="seller-name">${book.seller || 'Student'}</div>
+                        <div class="seller-label">Seller</div>
+                        ${sellerRating ? `<div class="seller-rating">★ ${Number(sellerRating.avg_rating || 0).toFixed(1)} (${sellerRating.total_ratings || 0} ratings)</div>` : ''}
+                    </div>
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="action-area" id="actionArea">${actionHtml}</div>
+            </div>
+        </div>
+
+        <!-- SIMILAR ITEMS -->
+        <div id="similarSection">
+            <div class="section-title">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                Similar Items
+            </div>
+            <div class="similar-grid" id="similarGrid">
+                ${[1,2,3,4].map(() => `<div class="skeleton" style="height:220px;border-radius:16px"></div>`).join('')}
+            </div>
+        </div>
+    `;
+
+    document.getElementById('skeleton').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+    document.getElementById('content').innerHTML = html;
+
+    // Load similar items
+    loadSimilar();
+}
+
+async function loadSimilar() {
+    let query = db.from('books')
+        .select('*')
+        .neq('id', ITEM_ID)
+        .neq('status', 'sold')
+        .or('deal_completed.is.null,deal_completed.eq.false')
+        .limit(8);
+
+    if (book.category) query = query.eq('category', book.category);
+
+    const { data: similar } = await query;
+
+    const grid = document.getElementById('similarGrid');
+    if (!grid) return;
+
+    if (!similar?.length) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted);font-size:0.9rem">No similar items found right now</div>`;
+        return;
+    }
+
+    grid.innerHTML = similar.map(s => `
+        <a class="sim-card" href="item.html?item=${s.id}">
+            ${s.image
+                ? `<img class="sim-card-img" src="${s.image}" alt="${s.title}" onerror="this.style.display='none'">`
+                : `<div class="sim-card-img placeholder">📦</div>`}
+            <div class="sim-card-body">
+                <div class="sim-card-title">${s.title}</div>
+                <div class="sim-card-price">₹${s.price}</div>
+                <div class="sim-card-seller">by ${s.seller || 'Student'}</div>
+            </div>
+        </a>
+    `).join('');
+}
+
+async function sendReq(bookId) {
+    if (!ME) { showToast('Please login first', 'error'); return; }
+    const btn = document.getElementById('reqBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
+    const buyerName = currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Student';
+    const buyerMsg = document.getElementById('buyerMsg')?.value.trim() || null;
+
+    try {
+        await db.from('requests').delete().eq('book_id', bookId).eq('buyer_id', ME).eq('status', 'declined');
+
+        const { error } = await db.from('requests').insert([{
+            book_id:       bookId,
+            buyer_id:      ME,
+            buyer_name:    buyerName,
+            buyer_email:   currentUser.email,
+            seller_id:     book.seller_id,
+            status:        'pending',
+            buyer_message: buyerMsg
+        }]);
+        if (error) throw error;
+
+        document.getElementById('actionArea').innerHTML = `<div class="req-note pending">⏳ Request sent — waiting for seller approval</div>`;
+        showToast('Request sent!', 'success');
+
+        // Trigger email notification
+        fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+            body: JSON.stringify({ type: 'INSERT', record: { book_id: bookId, buyer_name: buyerName, buyer_email: currentUser.email, buyer_message: buyerMsg } })
+        }).catch(() => {});
+    } catch(e) {
+        showToast(e.message?.includes('duplicate') ? 'Already requested' : 'Failed: ' + e.message, 'error');
+        if (btn) { btn.disabled = false; btn.textContent = 'Request to Buy'; }
+    }
+}
+
+async function unsendReq(reqId) {
+    await db.from('requests').delete().eq('id', reqId).eq('buyer_id', ME);
+    showToast('Request unsent', 'success');
+    setTimeout(() => location.reload(), 800);
+}
+
+init();
+</script>
+</body>
+</html>
